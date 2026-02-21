@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR 码生成器 - 免费在线工具</title>
+    <meta name="description" content="免费在线 QR 码生成器，支持文本、URL、联系方式、WiFi 等多种类型，支持自定义颜色和大小，一键下载">
+    <meta name="keywords" content="QR码生成器,二维码生成,在线二维码,免费二维码,QR码制作">
+    <meta property="og:title" content="QR 码生成器 - 免费在线工具">
+    <meta property="og:description" content="免费在线 QR 码生成器，支持多种类型，一键下载">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="./qrcode.html">
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 {
+            color: #fff;
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        @media (max-width: 700px) {
+            .main-content { grid-template-columns: 1fr; }
+        }
+        .input-panel {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .output-panel {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid rgba(255,255,255,0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.8);
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #11998e;
+            color: #fff;
+        }
+        .tab-btn:hover:not(.active) {
+            background: rgba(255,255,255,0.2);
+        }
+        .form-group {
+            margin-bottom: 16px;
+        }
+        .form-group label {
+            display: block;
+            color: rgba(255,255,255,0.8);
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 8px;
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 1rem;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: #11998e;
+        }
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        .color-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .color-input {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-input input[type="color"] {
+            width: 40px;
+            height: 40px;
+            padding: 2px;
+            cursor: pointer;
+        }
+        .color-input span {
+            color: rgba(255,255,255,0.7);
+            font-size: 0.85rem;
+        }
+        #qrcode-canvas {
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        #qrcode-canvas canvas {
+            max-width: 100%;
+            height: auto;
+        }
+        .download-btns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .download-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+        }
+        .png-btn { background: #11998e; color: #fff; }
+        .svg-btn { background: #667eea; color: #fff; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .back-link:hover { color: #fff; }
+        .hidden { display: none; }
+        .placeholder-text {
+            color: rgba(255,255,255,0.5);
+            text-align: center;
+            padding: 40px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="./" class="back-link">← 返回产品中心</a>
+        <h1>📱 QR 码生成器</h1>
+        <p class="subtitle">免费在线生成二维码，支持多种类型</p>
+
+        <div class="main-content">
+            <div class="input-panel">
+                <div class="tab-buttons">
+                    <button class="tab-btn active" data-type="text">文本</button>
+                    <button class="tab-btn" data-type="url">网址</button>
+                    <button class="tab-btn" data-type="wifi">WiFi</button>
+                    <button class="tab-btn" data-type="contact">联系人</button>
+                    <button class="tab-btn" data-type="email">邮箱</button>
+                    <button class="tab-btn" data-type="phone">电话</button>
+                </div>
+
+                <!-- Text/URL Form -->
+                <div id="text-form" class="qr-form">
+                    <div class="form-group">
+                        <label>内容</label>
+                        <textarea id="qr-content" placeholder="输入要生成二维码的内容..."></textarea>
+                    </div>
+                </div>
+
+                <!-- WiFi Form -->
+                <div id="wifi-form" class="qr-form hidden">
+                    <div class="form-group">
+                        <label>WiFi 名称 (SSID)</label>
+                        <input type="text" id="wifi-ssid" placeholder="输入 WiFi 名称">
+                    </div>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="text" id="wifi-password" placeholder="输入 WiFi 密码">
+                    </div>
+                    <div class="form-group">
+                        <label>加密类型</label>
+                        <select id="wifi-type">
+                            <option value="WPA">WPA/WPA2</option>
+                            <option value="WEP">WEP</option>
+                            <option value="nopass">无密码</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Contact Form -->
+                <div id="contact-form" class="qr-form hidden">
+                    <div class="form-group">
+                        <label>姓名</label>
+                        <input type="text" id="contact-name" placeholder="输入姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>电话</label>
+                        <input type="tel" id="contact-phone" placeholder="输入电话号码">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="contact-email" placeholder="输入邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <label>公司</label>
+                        <input type="text" id="contact-org" placeholder="输入公司名称">
+                    </div>
+                </div>
+
+                <!-- Email Form -->
+                <div id="email-form" class="qr-form hidden">
+                    <div class="form-group">
+                        <label>邮箱地址</label>
+                        <input type="email" id="email-address" placeholder="输入邮箱地址">
+                    </div>
+                    <div class="form-group">
+                        <label>主题 (可选)</label>
+                        <input type="text" id="email-subject" placeholder="输入邮件主题">
+                    </div>
+                    <div class="form-group">
+                        <label>内容 (可选)</label>
+                        <textarea id="email-body" placeholder="输入邮件内容"></textarea>
+                    </div>
+                </div>
+
+                <!-- Phone Form -->
+                <div id="phone-form" class="qr-form hidden">
+                    <div class="form-group">
+                        <label>电话号码</label>
+                        <input type="tel" id="phone-number" placeholder="输入电话号码">
+                    </div>
+                </div>
+
+                <!-- Options -->
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1);">
+                    <div class="form-group">
+                        <label>尺寸 (像素)</label>
+                        <select id="qr-size">
+                            <option value="128">128 x 128</option>
+                            <option value="200">200 x 200</option>
+                            <option value="256" selected>256 x 256</option>
+                            <option value="300">300 x 300</option>
+                            <option value="400">400 x 400</option>
+                        </select>
+                    </div>
+                    <div class="color-group">
+                        <div class="color-input">
+                            <input type="color" id="qr-color" value="#000000">
+                            <span>前景色</span>
+                        </div>
+                        <div class="color-input">
+                            <input type="color" id="qr-bg" value="#ffffff">
+                            <span>背景色</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="download-btn png-btn" style="width: 100%; margin-top: 20px;" onclick="generateQR()">
+                    🔄 生成二维码
+                </button>
+            </div>
+
+            <div class="output-panel">
+                <div id="qrcode-canvas">
+                    <p class="placeholder-text">输入内容后点击生成</p>
+                </div>
+                <div class="download-btns hidden" id="download-btns">
+                    <a href="#" class="download-btn png-btn" id="download-png" download="qrcode.png">⬇️ 下载 PNG</a>
+                    <a href="#" class="download-btn svg-btn" id="download-svg" download="qrcode.svg">⬇️ 下载 SVG</a>
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
+            <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 12px;">有建议或问题？</p>
+            <a href="mailto:feedback@autocompany.dev?subject=QR码生成器反馈" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 20px; color: #fff; text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);">💬 发送反馈</a>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'text';
+        let qrDataUrl = null;
+        let qrSvgString = null;
+
+        // Tab switching
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentType = btn.dataset.type;
+
+                document.querySelectorAll('.qr-form').forEach(f => f.classList.add('hidden'));
+                document.getElementById(currentType + '-form').classList.remove('hidden');
+            });
+        });
+
+        function getQRContent() {
+            switch(currentType) {
+                case 'text':
+                    return document.getElementById('qr-content').value;
+                case 'url':
+                    return document.getElementById('qr-content').value;
+                case 'wifi':
+                    const ssid = document.getElementById('wifi-ssid').value;
+                    const password = document.getElementById('wifi-password').value;
+                    const type = document.getElementById('wifi-type').value;
+                    if (!ssid) return '';
+                    return `WIFI:T:${type};S:${ssid};P:${password};;`;
+                case 'contact':
+                    const name = document.getElementById('contact-name').value;
+                    const phone = document.getElementById('contact-phone').value;
+                    const email = document.getElementById('contact-email').value;
+                    const org = document.getElementById('contact-org').value;
+                    if (!name && !phone && !email) return '';
+                    return `BEGIN:VCARD\nVERSION:3.0\nN:${name}\nTEL:${phone}\nEMAIL:${email}\nORG:${org}\nEND:VCARD`;
+                case 'email':
+                    const emailAddr = document.getElementById('email-address').value;
+                    const subject = document.getElementById('email-subject').value;
+                    const body = document.getElementById('email-body').value;
+                    if (!emailAddr) return '';
+                    return `mailto:${emailAddr}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+                case 'phone':
+                    const phoneNum = document.getElementById('phone-number').value;
+                    if (!phoneNum) return '';
+                    return `tel:${phoneNum}`;
+                default:
+                    return '';
+            }
+        }
+
+        async function generateQR() {
+            const content = getQRContent();
+            if (!content) {
+                alert('请输入内容');
+                return;
+            }
+
+            const size = parseInt(document.getElementById('qr-size').value);
+            const color = document.getElementById('qr-color').value;
+            const bg = document.getElementById('qr-bg').value;
+
+            const canvas = document.createElement('canvas');
+            try {
+                await QRCode.toCanvas(canvas, content, {
+                    width: size,
+                    margin: 2,
+                    color: {
+                        dark: color,
+                        light: bg
+                    },
+                    errorCorrectionLevel: 'M'
+                });
+
+                document.getElementById('qrcode-canvas').innerHTML = '';
+                document.getElementById('qrcode-canvas').appendChild(canvas);
+
+                qrDataUrl = canvas.toDataURL('image/png');
+                document.getElementById('download-png').href = qrDataUrl;
+                document.getElementById('download-btns').classList.remove('hidden');
+
+                // Generate SVG
+                qrSvgString = await QRCode.toString(content, {
+                    type: 'svg',
+                    width: size,
+                    margin: 2,
+                    color: {
+                        dark: color,
+                        light: bg
+                    },
+                    errorCorrectionLevel: 'M'
+                });
+                const svgBlob = new Blob([qrSvgString], { type: 'image/svg+xml' });
+                const svgUrl = URL.createObjectURL(svgBlob);
+                document.getElementById('download-svg').href = svgUrl;
+
+            } catch (err) {
+                console.error(err);
+                alert('生成失败，请检查输入内容');
+            }
+        }
+
+        // Auto-generate on input change
+        document.querySelectorAll('input, textarea, select').forEach(el => {
+            el.addEventListener('change', () => {
+                if (getQRContent()) generateQR();
+            });
+        });
+    </script>
+</body>
+</html>

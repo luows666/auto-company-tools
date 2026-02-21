@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "surge": "^0.25.0"
+  },
+  "devDependencies": {
+    "vercel": "^32.7.2",
+    "wrangler": "^3.114.17"
+  }
+}
