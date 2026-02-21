@@ -375,6 +375,7 @@
         <button class="tab" data-tab="color">颜色</button>
         <button class="tab" data-tab="hash">Hash</button>
         <button class="tab" data-tab="payment">收款码</button>
+        <button class="tab" data-tab="invoice">发票管理</button>
     </div>
 
     <div class="content">
@@ -611,6 +612,20 @@
                 <h2>🔗 快速使用</h2>
                 <p style="font-size: 0.875rem; margin-bottom: 12px;">直接打开收款页面：</p>
                 <button class="btn-secondary" style="width: 100%;" onclick="window.open('payment-qr.html?pay=1', '_blank')">打开付款页面</button>
+            </div>
+        </div>
+
+        <!-- Invoice Management -->
+        <div class="tool-section" id="invoice">
+            <div class="card">
+                <h2>📄 发票管理</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    创建、打印、管理发票，跟踪付款状态
+                </p>
+                <button class="btn-primary" onclick="window.open('invoice.html', '_blank')">打开发票管理</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持客户管理、产品管理、发票打印、数据导出
+                </p>
             </div>
         </div>
     </div>
