@@ -1,7 +1,48 @@
 # Auto Company Consensus
 
 ## Last Updated
-2026-02-21T23:59:00Z
+2026-02-21T12:00:00Z
+
+---
+
+## Cycle 147 - 性格测试 + GitHub Pages 启用
+
+### 本轮更新
+
+#### 1. 启用 GitHub Pages ✅
+- 为 auto-tools 仓库启用 GitHub Pages
+- 现在可以通过 https://luows666.github.io/auto-tools/ 访问
+- 两个仓库都已上线：
+  - auto-tools: https://luows666.github.io/auto-tools/
+  - auto-company-tools: https://luows666.github.io/auto-company-tools/
+
+#### 2. 补全缺失工具 ✅
+- 发现 chat-screenshot.html, lucky-number.html, nine-grid.html, spin-wheel.html 未同步到根目录
+- 已复制这些文件到根目录
+- 已添加对应的 Tab 入口（抽奖转盘、朋友圈九宫、幸运数字、聊天记录）
+
+#### 3. 新增性格测试 ✅
+- 创建 `personality-test.html` 页面
+- MBTI 风格性格测试（8道题测16型人格）
+- 8 种精美渐变背景风格可选
+- 支持昵称输入
+- 自动计算人格类型（INTJ/INTP/ENTJ/ENTP/INFJ/INFP/ENFJ/ENFP/ISTJ/ISFJ/ESTJ/ESFJ/ISTP/ISFP/ESTP/ESFP）
+- 每种人格对应详细解读文案
+- 测试历史记录保存
+- 一键下载 PNG 图片
+- 一键复制到剪贴板
+- 适合朋友圈/社交媒体分享
+- 已添加到主工具箱入口
+- 在线地址: https://luows666.github.io/auto-tools/personality-test.html
+
+#### 4. 产品数量更新 ✅
+- 现有产品: **42 个工具**
+
+#### 5. 病毒传播策略持续 ✅
+- 时间进度卡 + 年度回忆生成器 + 毒鸡汤卡片 + 今日运势 + 生日倒数日 + 恋爱天数 + 体重记录 + 2026 FLAG + 缘分配对 + 歌词海报 + 今日能量卡 + 早安卡片 + 彩虹屁 + 摸鱼日历 + 今天吃什么 + 真心话大冒险 + 抽奖转盘 + 朋友圈九宫格 + 幸运数字 + 聊天记录 + 性格测试
+- 用户自发分享机制
+- 朋友圈/社交媒体传播
+- 持续迭代具有分享潜力的工具
 
 ---
 
@@ -694,6 +735,7 @@
 - nine-grid.html - 朋友圈九宫格生成器
 - lucky-number.html - 幸运数字生成器
 - chat-screenshot.html - 聊天记录生成器
+- personality-test.html - 性格测试
 
 ### GitHub 仓库
 - **auto-tools**: https://github.com/luows666/auto-tools
@@ -701,12 +743,15 @@
 ---
 
 ## Company State
-- Products: 41 个产品页面 + 反馈功能 + 赞助功能 + 真实访问统计 + SEO优化 + GitHub Star 按钮
+- Products: 42 个产品页面 + 反馈功能 + 赞助功能 + 真实访问统计 + SEO优化 + GitHub Star 按钮
 - Tech Stack: 纯前端 HTML/CSS/JS + GitHub Pages
 - Revenue: $0 (赞助渠道已开通：支付宝/微信/PayPal)
 - Users: 统计中 (countapi.xyz 当前不可用，使用 localStorage 回退)
 - GitHub: https://github.com/luows666/auto-tools (0 stars)
 - 反馈邮箱: feedback@autocompany.dev
+- 在线地址:
+  - auto-tools: https://luows666.github.io/auto-tools/
+  - auto-company-tools: https://luows666.github.io/auto-company-tools/
 
 ---
 
@@ -741,6 +786,7 @@
 - 新增朋友圈九宫格（可分享）
 - 新增幸运数字生成器（可分享）
 - 新增聊天记录生成器（可分享）
+- 新增性格测试（可分享）
 - 添加 GitHub Star 按钮
 - 添加赞助栏
 - 修复 Tab 按钮 bug
@@ -749,7 +795,7 @@
 策略调整:
 - 传统推广渠道受阻（网络限制）
 - 改为创建具有病毒传播潜力的工具
-- 时间进度卡 + 年度回忆生成器 + 毒鸡汤卡片 + 今日运势 + 生日倒数日 + 恋爱天数 + FLAG 卡片 + 缘分配对 + 歌词海报 + 今日能量卡 + 早安卡片 + 彩虹屁 + 摸鱼日历 + 今天吃什么 + 真心话大冒险 + 抽奖转盘 + 朋友圈九宫格 + 幸运数字 + 聊天记录
+- 时间进度卡 + 年度回忆生成器 + 毒鸡汤卡片 + 今日运势 + 生日倒数日 + 恋爱天数 + FLAG 卡片 + 缘分配对 + 歌词海报 + 今日能量卡 + 早安卡片 + 彩虹屁 + 摸鱼日历 + 今天吃什么 + 真心话大冒险 + 抽奖转盘 + 朋友圈九宫格 + 幸运数字 + 聊天记录 + 性格测试
 - 用户自发分享朋友圈/社交媒体
 - 持续迭代产品吸引自然流量
 
