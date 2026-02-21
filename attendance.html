@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>员工考勤系统 - Auto Tools</title>
+    <meta name="description" content="简单的员工考勤打卡系统，支持打卡、请假、统计功能，数据本地存储">
+    <meta name="keywords" content="考勤,打卡,员工管理,请假,考勤统计">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            background: var(--card);
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .content {
+            display: none;
+        }
+
+        .content.active {
+            display: block;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        /* Employee List */
+        .employee-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .employee-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .employee-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .employee-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+        }
+
+        .employee-name {
+            font-weight: 500;
+        }
+
+        .employee-id {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        /* Clock In */
+        .clock-display {
+            text-align: center;
+            padding: 30px 0;
+        }
+
+        .current-time {
+            font-size: 3rem;
+            font-weight: 700;
+            font-family: 'Courier New', monospace;
+            color: var(--primary);
+        }
+
+        .current-date {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-top: 8px;
+        }
+
+        .clock-status {
+            margin-top: 20px;
+            padding: 12px 24px;
+            border-radius: 24px;
+            display: inline-block;
+            font-weight: 500;
+        }
+
+        .clock-status.in {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .clock-status.out {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-clock {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            font-size: 1.25rem;
+            margin: 30px auto;
+            display: block;
+            border: 4px solid var(--primary);
+            background: white;
+            color: var(--primary);
+            transition: all 0.3s;
+        }
+
+        .btn-clock:hover {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .btn-clock.clocked-in {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        /* Attendance Records */
+        .record-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .record-date {
+            font-weight: 500;
+        }
+
+        .record-time {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .record-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .record-status.normal {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .record-status.late {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .record-status.absent {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .record-status.leave {
+            background: #e0e7ff;
+            color: #3730a3;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .stat-item.present {
+            background: #dcfce7;
+        }
+
+        .stat-item.late {
+            background: #fef3c7;
+        }
+
+        .stat-item.absent {
+            background: #fee2e2;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        /* Leave Request */
+        .leave-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .leave-item {
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .leave-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .leave-type {
+            font-weight: 500;
+        }
+
+        .leave-status {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+
+        .leave-status.pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .leave-status.approved {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .leave-status.rejected {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .leave-dates {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .leave-reason {
+            font-size: 0.875rem;
+            margin-top: 8px;
+            color: var(--text-light);
+        }
+
+        .employee-select {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .employee-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .employee-btn.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+        }
+
+        .employee-btn .avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            margin: 0 auto 4px;
+        }
+
+        .employee-btn .name {
+            font-size: 0.75rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .action-btns button {
+            flex: 1;
+            padding: 8px;
+            font-size: 0.875rem;
+        }
+
+        .weekday-select {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .weekday-btn {
+            width: 40px;
+            height: 40px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.75rem;
+        }
+
+        .weekday-btn.selected {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* Feedback link */
+        .feedback-link {
+            text-align: center;
+            padding: 16px;
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .feedback-link a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📋 员工考勤系统</h1>
+        <p>打卡 · 请假 · 统计</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab active" data-tab="clock">打卡</button>
+        <button class="tab" data-tab="employees">员工</button>
+        <button class="tab" data-tab="records">记录</button>
+        <button class="tab" data-tab="leave">请假</button>
+        <button class="tab" data-tab="stats">统计</button>
+    </div>
+
+    <div class="container">
+        <!-- Clock Tab -->
+        <div class="content active" id="clock">
+            <div class="card">
+                <div class="clock-display">
+                    <div class="current-time" id="currentTime">00:00:00</div>
+                    <div class="current-date" id="currentDate">加载中...</div>
+                </div>
+
+                <div class="employee-select" id="employeeSelect">
+                    <!-- Employee buttons will be rendered here -->
+                </div>
+
+                <button class="btn-clock" id="clockBtn" onclick="clockInOut()">
+                    上班打卡
+                </button>
+
+                <div class="clock-status in" id="clockStatus" style="display: none;">
+                    已打卡，等待下班
+                </div>
+            </div>
+        </div>
+
+        <!-- Employees Tab -->
+        <div class="content" id="employees">
+            <div class="card">
+                <h2>👥 员工管理</h2>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="newEmployeeName" placeholder="员工姓名">
+                    <input type="text" id="newEmployeeId" placeholder="工号 (可选)" style="width: 120px;">
+                </div>
+                <button class="btn-primary" onclick="addEmployee()">添加员工</button>
+            </div>
+
+            <div class="card">
+                <h2>员工列表</h2>
+                <div class="employee-list" id="employeeList">
+                    <div class="empty-state">暂无员工，请添加</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>⚙️ 考勤设置</h2>
+                <label style="font-size: 0.875rem;">上班时间</label>
+                <input type="time" id="workStartTime" value="09:00">
+                <label style="font-size: 0.875rem;">下班时间</label>
+                <input type="time" id="workEndTime" value="18:00">
+                <button class="btn-primary" onclick="saveSettings()">保存设置</button>
+            </div>
+        </div>
+
+        <!-- Records Tab -->
+        <div class="content" id="records">
+            <div class="card">
+                <h2>📝 考勤记录</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <select id="recordMonth">
+                        <option value="">全部月份</option>
+                    </select>
+                    <select id="recordEmployee">
+                        <option value="">全部员工</option>
+                    </select>
+                </div>
+                <div class="record-list" id="recordList">
+                    <div class="empty-state">暂无记录</div>
+                </div>
+                <div class="btn-group" style="margin-top: 16px;">
+                    <button class="btn-secondary" onclick="exportData()">导出数据</button>
+                    <button class="btn-secondary" onclick="importData()">导入数据</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="handleImport(event)">
+            </div>
+        </div>
+
+        <!-- Leave Tab -->
+        <div class="content" id="leave">
+            <div class="card">
+                <h2>📋 请假申请</h2>
+                <select id="leaveEmployee">
+                    <option value="">选择员工</option>
+                </select>
+                <select id="leaveType">
+                    <option value="年假">年假</option>
+                    <option value="病假">病假</option>
+                    <option value="事假">事假</option>
+                    <option value="其他">其他</option>
+                </select>
+                <div style="display: flex; gap: 8px;">
+                    <input type="date" id="leaveStart" placeholder="开始日期">
+                    <input type="date" id="leaveEnd" placeholder="结束日期">
+                </div>
+                <textarea id="leaveReason" rows="2" placeholder="请假原因 (可选)"></textarea>
+                <button class="btn-primary" onclick="submitLeave()">提交请假</button>
+            </div>
+
+            <div class="card">
+                <h2>请假记录</h2>
+                <div class="leave-list" id="leaveList">
+                    <div class="empty-state">暂无请假记录</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Tab -->
+        <div class="content" id="stats">
+            <div class="card">
+                <h2>📊 考勤统计</h2>
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <select id="statsMonth">
+                        <option value="">本月</option>
+                    </select>
+                    <select id="statsEmployee">
+                        <option value="">全部员工</option>
+                    </select>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item present">
+                        <div class="stat-value" id="presentCount">0</div>
+                        <div class="stat-label">出勤</div>
+                    </div>
+                    <div class="stat-item late">
+                        <div class="stat-value" id="lateCount">0</div>
+                        <div class="stat-label">迟到</div>
+                    </div>
+                    <div class="stat-item absent">
+                        <div class="stat-value" id="absentCount">0</div>
+                        <div class="stat-label">缺勤</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 16px;">
+                    <h3 style="font-size: 1rem; margin-bottom: 12px;">员工出勤率</h3>
+                    <div id="employeeStats"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="feedback-link">
+        反馈: <a href="mailto:feedback@autocompany.dev">feedback@autocompany.dev</a>
+    </div>
+
+    <script>
+        // Data Storage
+        let employees = JSON.parse(localStorage.getItem('attendance-employees') || '[]');
+        let records = JSON.parse(localStorage.getItem('attendance-records') || '[]');
+        let leaves = JSON.parse(localStorage.getItem('attendance-leaves') || '[]');
+        let settings = JSON.parse(localStorage.getItem('attendance-settings') || '{"workStart": "09:00", "workEnd": "18:00"}');
+
+        let selectedEmployee = null;
+        let currentClockState = null; // 'in' or 'out'
+
+        // Initialize
+        function init() {
+            updateTime();
+            setInterval(updateTime, 1000);
+
+            document.getElementById('workStartTime').value = settings.workStart;
+            document.getElementById('workEndTime').value = settings.workEnd;
+
+            renderEmployees();
+            renderRecords();
+            renderLeaves();
+            renderStats();
+            populateSelects();
+
+            // Tab navigation
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+                    tab.classList.add('active');
+                    document.getElementById(tab.dataset.tab).classList.add('active');
+                });
+            });
+        }
+
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = now.toLocaleTimeString('zh-CN', { hour12: false });
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+        }
+
+        // Employee Management
+        function addEmployee() {
+            const name = document.getElementById('newEmployeeName').value.trim();
+            const id = document.getElementById('newEmployeeId').value.trim() || 'EMP' + (employees.length + 1).toString().padStart(3, '0');
+
+            if (!name) {
+                alert('请输入员工姓名');
+                return;
+            }
+
+            const employee = {
+                id,
+                name,
+                createdAt: Date.now()
+            };
+
+            employees.push(employee);
+            saveData();
+            renderEmployees();
+            populateSelects();
+
+            document.getElementById('newEmployeeName').value = '';
+            document.getElementById('newEmployeeId').value = '';
+        }
+
+        function removeEmployee(id) {
+            if (!confirm('确定删除该员工？')) return;
+            employees = employees.filter(e => e.id !== id);
+            records = records.filter(r => r.employeeId !== id);
+            leaves = leaves.filter(l => l.employeeId !== id);
+            saveData();
+            renderEmployees();
+            populateSelects();
+        }
+
+        function renderEmployees() {
+            const list = document.getElementById('employeeList');
+            const select = document.getElementById('employeeSelect');
+
+            if (employees.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无员工，请添加</div>';
+                select.innerHTML = '<div class="empty-state">请先添加员工</div>';
+                return;
+            }
+
+            list.innerHTML = employees.map(emp => `
+                <div class="employee-item">
+                    <div class="employee-info">
+                        <div class="employee-avatar">${emp.name.charAt(0)}</div>
+                        <div>
+                            <div class="employee-name">${emp.name}</div>
+                            <div class="employee-id">${emp.id}</div>
+                        </div>
+                    </div>
+                    <button class="btn-secondary" style="padding: 8px 12px; width: auto;" onclick="removeEmployee('${emp.id}')">删除</button>
+                </div>
+            `).join('');
+
+            select.innerHTML = employees.map(emp => `
+                <div class="employee-btn ${selectedEmployee === emp.id ? 'selected' : ''}" onclick="selectEmployee('${emp.id}')">
+                    <div class="avatar">${emp.name.charAt(0)}</div>
+                    <div class="name">${emp.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function selectEmployee(id) {
+            selectedEmployee = id;
+            renderEmployees();
+            updateClockButton();
+        }
+
+        function saveSettings() {
+            settings.workStart = document.getElementById('workStartTime').value;
+            settings.workEnd = document.getElementById('workEndTime').value;
+            localStorage.setItem('attendance-settings', JSON.stringify(settings));
+            alert('设置已保存');
+        }
+
+        // Clock In/Out
+        function updateClockButton() {
+            const btn = document.getElementById('clockBtn');
+            const status = document.getElementById('clockStatus');
+
+            if (!selectedEmployee) {
+                btn.textContent = '请选择员工';
+                btn.disabled = true;
+                btn.classList.remove('clocked-in');
+                status.style.display = 'none';
+                return;
+            }
+
+            btn.disabled = false;
+
+            // Check if already clocked in today
+            const today = new Date().toDateString();
+            const todayRecords = records.filter(r =>
+                r.employeeId === selectedEmployee &&
+                new Date(r.date).toDateString() === today
+            );
+
+            const hasClockIn = todayRecords.some(r => r.type === 'clock-in');
+            const hasClockOut = todayRecords.some(r => r.type === 'clock-out');
+
+            if (!hasClockIn) {
+                btn.textContent = '上班打卡';
+                btn.classList.remove('clocked-in');
+                status.style.display = 'none';
+                currentClockState = 'in';
+            } else if (!hasClockOut) {
+                btn.textContent = '下班打卡';
+                btn.classList.add('clocked-in');
+                status.style.display = 'block';
+                status.textContent = '已打卡，等待下班';
+                status.className = 'clock-status in';
+                currentClockState = 'out';
+            } else {
+                btn.textContent = '今日已打卡';
+                btn.disabled = true;
+                btn.classList.add('clocked-in');
+                status.style.display = 'block';
+                status.textContent = '今日考勤完成';
+                status.className = 'clock-status in';
+                currentClockState = null;
+            }
+        }
+
+        function clockInOut() {
+            if (!selectedEmployee) {
+                alert('请先选择员工');
+                return;
+            }
+
+            const now = new Date();
+            const type = currentClockState;
+
+            // Check if late
+            let status = 'normal';
+            if (type === 'in') {
+                const workStart = settings.workStart;
+                const clockTime = now.toTimeString().slice(0, 5);
+                if (clockTime > workStart) {
+                    status = 'late';
+                }
+            }
+
+            records.push({
+                id: Date.now().toString(),
+                employeeId: selectedEmployee,
+                type,
+                time: now.toTimeString().slice(0, 5),
+                date: now.toISOString(),
+                status
+            });
+
+            saveData();
+            updateClockButton();
+            renderRecords();
+            renderStats();
+
+            alert(type === 'clock-in' ? '上班打卡成功！' : '下班打卡成功！');
+        }
+
+        // Records
+        function renderRecords() {
+            const list = document.getElementById('recordList');
+            const month = document.getElementById('recordMonth').value;
+            const empFilter = document.getElementById('recordEmployee').value;
+
+            let filtered = [...records];
+
+            if (month) {
+                filtered = filtered.filter(r => {
+                    const recordMonth = new Date(r.date).toISOString().slice(0, 7);
+                    return recordMonth === month;
+                });
+            }
+
+            if (empFilter) {
+                filtered = filtered.filter(r => r.employeeId === empFilter);
+            }
+
+            filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无记录</div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(r => {
+                const emp = employees.find(e => e.id === r.employeeId);
+                const empName = emp ? emp.name : '未知';
+                const date = new Date(r.date);
+                const dateStr = date.toLocaleDateString('zh-CN');
+                const statusText = r.type === 'clock-in' ? '上班' : '下班';
+                const statusClass = r.status === 'late' ? 'late' : 'normal';
+
+                return `
+                    <div class="record-item">
+                        <div>
+                            <div class="record-date">${empName}</div>
+                            <div class="record-time">${dateStr} ${r.time} · ${statusText}</div>
+                        </div>
+                        <span class="record-status ${statusClass}">${r.status === 'late' ? '迟到' : '正常'}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Leave
+        function submitLeave() {
+            const employeeId = document.getElementById('leaveEmployee').value;
+            const type = document.getElementById('leaveType').value;
+            const start = document.getElementById('leaveStart').value;
+            const end = document.getElementById('leaveEnd').value;
+            const reason = document.getElementById('leaveReason').value;
+
+            if (!employeeId || !start || !end) {
+                alert('请填写完整信息');
+                return;
+            }
+
+            if (new Date(start) > new Date(end)) {
+                alert('开始日期不能晚于结束日期');
+                return;
+            }
+
+            leaves.push({
+                id: Date.now().toString(),
+                employeeId,
+                type,
+                start,
+                end,
+                reason,
+                status: 'pending',
+                createdAt: Date.now()
+            });
+
+            saveData();
+            renderLeaves();
+
+            document.getElementById('leaveStart').value = '';
+            document.getElementById('leaveEnd').value = '';
+            document.getElementById('leaveReason').value = '';
+
+            alert('请假申请已提交');
+        }
+
+        function renderLeaves() {
+            const list = document.getElementById('leaveList');
+
+            if (leaves.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无请假记录</div>';
+                return;
+            }
+
+            leaves.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+            list.innerHTML = leaves.map(leave => {
+                const emp = employees.find(e => e.id === leave.employeeId);
+                const empName = emp ? emp.name : '未知';
+
+                return `
+                    <div class="leave-item">
+                        <div class="leave-header">
+                            <span class="leave-type">${empName} - ${leave.type}</span>
+                            <span class="leave-status ${leave.status}">${leave.status === 'pending' ? '待审批' : leave.status === 'approved' ? '已批准' : '已拒绝'}</span>
+                        </div>
+                        <div class="leave-dates">${leave.start} 至 ${leave.end}</div>
+                        ${leave.reason ? `<div class="leave-reason">${leave.reason}</div>` : ''}
+                        ${leave.status === 'pending' ? `
+                            <div class="action-btns">
+                                <button class="btn-success" onclick="approveLeave('${leave.id}')">批准</button>
+                                <button class="btn-secondary" onclick="rejectLeave('${leave.id}')">拒绝</button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function approveLeave(id) {
+            const leave = leaves.find(l => l.id === id);
+            if (leave) {
+                leave.status = 'approved';
+                saveData();
+                renderLeaves();
+            }
+        }
+
+        function rejectLeave(id) {
+            const leave = leaves.find(l => l.id === id);
+            if (leave) {
+                leave.status = 'rejected';
+                saveData();
+                renderLeaves();
+            }
+        }
+
+        // Stats
+        function renderStats() {
+            const month = document.getElementById('statsMonth').value;
+            const empFilter = document.getElementById('statsEmployee').value;
+
+            let filtered = records.filter(r => r.type === 'clock-in');
+
+            if (month) {
+                filtered = filtered.filter(r => {
+                    const recordMonth = new Date(r.date).toISOString().slice(0, 7);
+                    return recordMonth === month;
+                });
+            }
+
+            if (empFilter) {
+                filtered = filtered.filter(r => r.employeeId === empFilter);
+            }
+
+            const lateCount = filtered.filter(r => r.status === 'late').length;
+            const presentCount = filtered.length - lateCount;
+
+            // Calculate working days in month
+            const targetMonth = month || new Date().toISOString().slice(0, 7);
+            const [year, mon] = targetMonth.split('-').map(Number);
+            const daysInMonth = new Date(year, mon, 0).getDate();
+            const workDays = empFilter ? daysInMonth : daysInMonth * Math.max(employees.length, 1);
+
+            const absentCount = Math.max(0, workDays - filtered.length);
+
+            document.getElementById('presentCount').textContent = presentCount;
+            document.getElementById('lateCount').textContent = lateCount;
+            document.getElementById('absentCount').textContent = absentCount;
+
+            // Employee stats
+            const empStatsDiv = document.getElementById('employeeStats');
+            if (employees.length === 0) {
+                empStatsDiv.innerHTML = '<div class="empty-state">暂无员工数据</div>';
+                return;
+            }
+
+            let statsHtml = '';
+            employees.forEach(emp => {
+                const empRecords = records.filter(r => r.employeeId === emp.id && r.type === 'clock-in');
+                const empLate = empRecords.filter(r => r.status === 'late').length;
+                const total = empRecords.length;
+                const rate = total > 0 ? Math.round((total - empLate) / total * 100) : 0;
+
+                statsHtml += `
+                    <div style="margin-bottom: 12px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span>${emp.name}</span>
+                            <span>${rate}%</span>
+                        </div>
+                        <div style="height: 8px; background: #e2e8f0; border-radius: 4px; overflow: hidden;">
+                            <div style="height: 100%; width: ${rate}%; background: ${rate >= 90 ? '#10b981' : rate >= 70 ? '#f59e0b' : '#ef4444'};"></div>
+                        </div>
+                    </div>
+                `;
+            });
+            empStatsDiv.innerHTML = statsHtml;
+        }
+
+        // Utility
+        function populateSelects() {
+            const months = [];
+            const now = new Date();
+            for (let i = 0; i < 12; i++) {
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const value = d.toISOString().slice(0, 7);
+                const text = d.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+                months.push(`<option value="${value}">${text}</option>`);
+            }
+
+            document.getElementById('recordMonth').innerHTML = '<option value="">全部月份</option>' + months.join('');
+            document.getElementById('statsMonth').innerHTML = months.join('');
+
+            const empOptions = '<option value="">全部员工</option>' +
+                employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+
+            document.getElementById('recordEmployee').innerHTML = empOptions;
+            document.getElementById('statsEmployee').innerHTML = empOptions;
+            document.getElementById('leaveEmployee').innerHTML = '<option value="">选择员工</option>' +
+                employees.map(e => `<option value="${e.id}">${e.name}</option>`).join('');
+        }
+
+        function saveData() {
+            localStorage.setItem('attendance-employees', JSON.stringify(employees));
+            localStorage.setItem('attendance-records', JSON.stringify(records));
+            localStorage.setItem('attendance-leaves', JSON.stringify(leaves));
+        }
+
+        function exportData() {
+            const data = {
+                employees,
+                records,
+                leaves,
+                settings,
+                exportedAt: new Date().toISOString()
+            };
+
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `考勤数据_${new Date().toISOString().slice(0, 10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.employees) employees = data.employees;
+                    if (data.records) records = data.records;
+                    if (data.leaves) leaves = data.leaves;
+                    if (data.settings) settings = data.settings;
+
+                    saveData();
+                    init();
+
+                    alert('数据导入成功！');
+                } catch (err) {
+                    alert('导入失败：无效的文件格式');
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Add event listeners for filters
+        document.getElementById('recordMonth').addEventListener('change', renderRecords);
+        document.getElementById('recordEmployee').addEventListener('change', renderRecords);
+        document.getElementById('statsMonth').addEventListener('change', renderStats);
+        document.getElementById('statsEmployee').addEventListener('change', renderStats);
+
+        init();
+    </script>
+</body>
+</html>
