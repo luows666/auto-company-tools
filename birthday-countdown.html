@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日倒数日 - 专属卡片</title>
+    <meta name="description" content="生成你的生日倒数日卡片，一键保存图片分享到朋友圈">
+    <meta name="keywords" content="生日,倒计时,生日卡片,分享,朋友圈">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --bg: #fdf2f8;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .color-btn {
+            padding: 16px 8px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .color-btn.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px var(--primary);
+        }
+
+        .color-btn .color-preview {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            margin: 0 auto 4px;
+        }
+
+        button.generate-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button.generate-btn:hover {
+            transform: scale(1.02);
+        }
+
+        .preview-section {
+            display: none;
+        }
+
+        .preview-section.show {
+            display: block;
+        }
+
+        .preview-section canvas {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            margin-bottom: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .download-btn {
+            background: var(--primary);
+            color: white;
+        }
+
+        .copy-btn {
+            background: white;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+            transform: scale(1.02);
+        }
+
+        .back-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            margin-bottom: 16px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .back-btn:hover {
+            color: var(--primary);
+        }
+
+        @media (max-width: 480px) {
+            body { padding: 12px; }
+            .card { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="back-btn">← 返回工具箱</a>
+
+    <h1>🎂 生日倒数日</h1>
+    <p class="subtitle">生成你的专属生日卡片，分享到朋友圈</p>
+
+    <div class="container">
+        <div class="card">
+            <label>你的昵称</label>
+            <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20">
+
+            <label>出生日期</label>
+            <input type="date" id="birthday">
+
+            <label>选择卡片风格</label>
+            <div class="color-grid">
+                <div class="color-btn active" data-style="0" onclick="selectStyle(0)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ec4899, #f472b6);"></div>
+                    粉红浪漫
+                </div>
+                <div class="color-btn" data-style="1" onclick="selectStyle(1)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);"></div>
+                    紫色梦幻
+                </div>
+                <div class="color-btn" data-style="2" onclick="selectStyle(2)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);"></div>
+                    蓝色清新
+                </div>
+                <div class="color-btn" data-style="3" onclick="selectStyle(3)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #10b981, #34d399);"></div>
+                    绿色自然
+                </div>
+                <div class="color-btn" data-style="4" onclick="selectStyle(4)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #f59e0b, #fbbf24);"></div>
+                    金色阳光
+                </div>
+                <div class="color-btn" data-style="5" onclick="selectStyle(5)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #ef4444, #f87171);"></div>
+                    红色热情
+                </div>
+                <div class="color-btn" data-style="6" onclick="selectStyle(6)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #6366f1, #818cf8);"></div>
+                    靛蓝时尚
+                </div>
+                <div class="color-btn" data-style="7" onclick="selectStyle(7)">
+                    <div class="color-preview" style="background: linear-gradient(135deg, #14b8a6, #2dd4bf);"></div>
+                    青色活力
+                </div>
+            </div>
+
+            <button class="generate-btn" onclick="generateCard()">生成生日卡片</button>
+        </div>
+
+        <div class="preview-section" id="previewSection">
+            <canvas id="birthdayCanvas" width="600" height="800"></canvas>
+            <div class="action-buttons">
+                <button class="action-btn download-btn" onclick="downloadCard()">下载图片</button>
+                <button class="action-btn copy-btn" onclick="copyToClipboard()">复制图片</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const colorStyles = [
+            { gradient: ['#ec4899', '#f472b6'], accent: '#fce7f3', text: '#831843' },
+            { gradient: ['#8b5cf6', '#a78bfa'], accent: '#f3e8ff', text: '#5b21b6' },
+            { gradient: ['#0ea5e9', '#38bdf8'], accent: '#e0f2fe', text: '#075985' },
+            { gradient: ['#10b981', '#34d399'], accent: '#d1fae5', text: '#065f46' },
+            { gradient: ['#f59e0b', '#fbbf24'], accent: '#fef3c7', text: '#92400e' },
+            { gradient: ['#ef4444', '#f87171'], accent: '#fee2e2', text: '#991b1b' },
+            { gradient: ['#6366f1', '#818cf8'], accent: '#e0e7ff', text: '#3730a3' },
+            { gradient: ['#14b8a6', '#2dd4bf'], accent: '#ccfbf1', text: '#115e59' }
+        ];
+
+        let currentStyle = 0;
+        let currentData = null;
+
+        function selectStyle(style) {
+            currentStyle = style;
+            document.querySelectorAll('.color-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i === style);
+            });
+        }
+
+        function calculateDaysUntilBirthday(birthday) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const birthDate = new Date(birthday);
+            const thisYearBirthday = new Date(today.getFullYear(), birthDate.getMonth(), birthDate.getDate());
+
+            let nextBirthday = thisYearBirthday;
+
+            if (thisYearBirthday < today) {
+                nextBirthday = new Date(today.getFullYear() + 1, birthDate.getMonth(), birthDate.getDate());
+            } else if (thisYearBirthday.getTime() === today.getTime()) {
+                return { days: 0, isBirthday: true };
+            }
+
+            const diffTime = nextBirthday - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            return { days: diffDays, isBirthday: false };
+        }
+
+        function getAge(birthday) {
+            const today = new Date();
+            const birthDate = new Date(birthday);
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const m = today.getMonth() - birthDate.getMonth();
+            if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+            return age;
+        }
+
+        function generateCard() {
+            const nickname = document.getElementById('nickname').value.trim() || '小伙伴';
+            const birthday = document.getElementById('birthday').value;
+
+            if (!birthday) {
+                alert('请选择你的出生日期');
+                return;
+            }
+
+            const { days, isBirthday } = calculateDaysUntilBirthday(birthday);
+            const age = getAge(birthday);
+
+            currentData = { nickname, birthday, days, isBirthday, age };
+
+            const canvas = document.getElementById('birthdayCanvas');
+            const ctx = canvas.getContext('2d');
+            const style = colorStyles[currentStyle];
+
+            // Background gradient
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, style.gradient[0]);
+            gradient.addColorStop(1, style.gradient[1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = '#ffffff';
+            ctx.beginPath();
+            ctx.arc(100, 100, 150, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(550, 700, 180, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(500, 150, 100, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Main content area
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            roundRect(ctx, 50, 180, 500, 440, 20);
+            ctx.fill();
+
+            // Title
+            ctx.fillStyle = style.text;
+            ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('🎂 生日倒计时 🎂', 300, 240);
+
+            // Days number
+            ctx.font = 'bold 120px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = style.gradient[0];
+
+            if (isBirthday) {
+                ctx.fillText('🎉', 300, 380);
+            } else {
+                ctx.fillText(days, 300, 380);
+            }
+
+            // Days label
+            ctx.font = '28px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#6b7280';
+            if (isBirthday) {
+                ctx.fillText('今天是你的生日！', 300, 430);
+            } else {
+                ctx.fillText('天后', 300, 430);
+            }
+
+            // Nickname
+            ctx.font = 'bold 32px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = style.text;
+            ctx.fillText(nickname, 300, 500);
+
+            // Age and birthday info
+            ctx.font = '20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = '#9ca3af';
+            ctx.fillText(`年龄: ${age} 岁`, 300, 540);
+
+            // Birthday date formatted
+            const bd = new Date(birthday);
+            const monthDay = `${bd.getMonth() + 1}月${bd.getDate()}日`;
+            ctx.fillText(`生日: ${monthDay}`, 300, 570);
+
+            // Bottom decoration
+            ctx.fillStyle = style.accent;
+            roundRect(ctx, 50, 680, 500, 80, 12);
+            ctx.fill();
+
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = style.text;
+            ctx.fillText('Auto Tools · 生日倒数日', 300, 725);
+
+            document.getElementById('previewSection').classList.add('show');
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function downloadCard() {
+            if (!currentData) return;
+            const canvas = document.getElementById('birthdayCanvas');
+            const link = document.createElement('a');
+            link.download = `生日倒计时_${currentData.nickname}_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyToClipboard() {
+            if (!currentData) return;
+            const canvas = document.getElementById('birthdayCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('已复制到剪贴板！');
+            } catch (err) {
+                console.error('复制失败:', err);
+                alert('复制失败，请尝试下载图片');
+            }
+        }
+
+        // Set default date to 2000-01-01
+        document.getElementById('birthday').value = '2000-01-01';
+    </script>
+</body>
+</html>
