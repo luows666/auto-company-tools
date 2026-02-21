@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>年度回忆生成器 | 2024年度总结卡片</title>
+    <meta name="description" content="生成你的年度回忆卡片，统计过去一年的成就，支持多种风格，免费下载分享到朋友圈">
+    <meta name="keywords" content="年度回忆,年度总结,年度回顾,回忆卡片,2024总结,2025计划,新年愿望">
+    <meta property="og:title" content="我的年度回忆卡片">
+    <meta property="og:description" content="生成你的年度回忆卡片，分享到朋友圈">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="./year-review.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #333333;
+            --text-secondary: #666666;
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --border: #e5e5e5;
+            --success: #22c55e;
+            --error: #ef4444;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .dark {
+            --bg: #1a1a1a;
+            --card-bg: #2a2a2a;
+            --text: #e5e5e5;
+            --text-secondary: #a3a3a3;
+            --border: #404040;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .main {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .input-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+
+        .preview-section {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-secondary {
+            background: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            background: #d4d4d4;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .preview-card {
+            aspect-ratio: 4/5;
+            max-width: 360px;
+            margin: 0 auto;
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        .template-list {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .template-item {
+            aspect-ratio: 1;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .template-item.selected {
+            border-color: var(--primary);
+        }
+
+        .template-item:hover {
+            transform: scale(1.05);
+        }
+
+        .template-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .template-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .template-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .template-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .template-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .template-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); }
+        .template-7 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .template-8 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); }
+
+        .template-label {
+            text-align: center;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .stats-preview {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .back-link {
+            position: fixed;
+            top: 1rem;
+            left: 1rem;
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            background: rgba(0,0,0,0.2);
+            border-radius: 6px;
+            font-size: 0.875rem;
+        }
+
+        .year-selector {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .year-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg);
+            color: var(--text);
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .year-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <a href="./" class="back-link">← 返回工具箱</a>
+
+    <div class="header">
+        <h1>🎉 年度回忆生成器</h1>
+        <p>生成你的专属年度总结卡片，分享到朋友圈</p>
+    </div>
+
+    <div class="main">
+        <div class="input-section">
+            <h2 style="margin-bottom: 1.5rem;">📝 输入你的年度数据</h2>
+
+            <div class="form-group">
+                <label>选择年份</label>
+                <div class="year-selector">
+                    <button class="year-btn" onclick="selectYear(2024)">2024</button>
+                    <button class="year-btn active" onclick="selectYear(2025)">2025</button>
+                    <button class="year-btn" onclick="selectYear(2026)">2026</button>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>你的昵称</label>
+                <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20" value="我">
+            </div>
+
+            <div class="stats-grid">
+                <div class="form-group">
+                    <label>读书 📚 本</label>
+                    <input type="number" id="books" placeholder="0" min="0" value="12">
+                </div>
+                <div class="form-group">
+                    <label>电影 🎬 部</label>
+                    <input type="number" id="movies" placeholder="0" min="0" value="24">
+                </div>
+                <div class="form-group">
+                    <label>旅行 🌍 次</label>
+                    <input type="number" id="travel" placeholder="0" min="0" value="5">
+                </div>
+                <div class="form-group">
+                    <label>运动 🏃 次</label>
+                    <input type="number" id="exercise" placeholder="0" min="0" value="100">
+                </div>
+                <div class="form-group">
+                    <label>新技能 ✨ 个</label>
+                    <input type="number" id="skills" placeholder="0" min="0" value="3">
+                </div>
+                <div class="form-group">
+                    <label>收入 💰 元</label>
+                    <input type="number" id="income" placeholder="0" min="0" value="50000">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>年度关键词</label>
+                <input type="text" id="keyword" placeholder="如：成长、突破、感恩..." maxlength="30" value="成长">
+            </div>
+
+            <div class="form-group">
+                <label>一句话总结今年</label>
+                <input type="text" id="summary" placeholder="用一句话总结你的这一年..." maxlength="50" value="遇见更好的自己">
+            </div>
+
+            <div class="form-group">
+                <label>新的一年愿望</label>
+                <input type="text" id="wish" placeholder="新的一年你想..." maxlength="50" value="继续前行">
+            </div>
+        </div>
+
+        <div class="preview-section">
+            <h2 style="margin-bottom: 1rem;">🎨 选择风格</h2>
+            <div class="template-list">
+                <div class="template-item template-1 selected" data-template="1" onclick="selectTemplate(1)"></div>
+                <div class="template-item template-2" data-template="2" onclick="selectTemplate(2)"></div>
+                <div class="template-item template-3" data-template="3" onclick="selectTemplate(3)"></div>
+                <div class="template-item template-4" data-template="4" onclick="selectTemplate(4)"></div>
+                <div class="template-item template-5" data-template="5" onclick="selectTemplate(5)"></div>
+                <div class="template-item template-6" data-template="6" onclick="selectTemplate(6)"></div>
+                <div class="template-item template-7" data-template="7" onclick="selectTemplate(7)"></div>
+                <div class="template-item template-8" data-template="8" onclick="selectTemplate(8)"></div>
+            </div>
+
+            <div class="template-label">点击选择你喜欢的风格</div>
+
+            <div class="preview-card">
+                <canvas id="previewCanvas" class="preview-canvas" width="360" height="450"></canvas>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" style="flex:1" onclick="downloadCard()">📥 下载图片</button>
+                <button class="btn btn-secondary" style="flex:1" onclick="copyCard()">📋 复制到剪贴板</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">操作成功！</div>
+
+    <script>
+        const templateGradients = {
+            1: ['#667eea', '#764ba2'],
+            2: ['#f093fb', '#f5576c'],
+            3: ['#4facfe', '#00f2fe'],
+            4: ['#43e97b', '#38f9d7'],
+            5: ['#fa709a', '#fee140'],
+            6: ['#a8edea', '#fed6e3'],
+            7: ['#ff9a9e', '#fecfef'],
+            8: ['#ffecd2', '#fcb69f']
+        };
+
+        let currentYear = 2025;
+        let currentTemplate = 1;
+
+        function selectYear(year) {
+            currentYear = year;
+            document.querySelectorAll('.year-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.textContent == year) btn.classList.add('active');
+            });
+            renderCard();
+        }
+
+        function selectTemplate(template) {
+            currentTemplate = template;
+            document.querySelectorAll('.template-item').forEach(item => {
+                item.classList.remove('selected');
+                if (item.dataset.template == template) item.classList.add('selected');
+            });
+            renderCard();
+        }
+
+        function getData() {
+            return {
+                year: currentYear,
+                nickname: document.getElementById('nickname').value || '我',
+                books: document.getElementById('books').value || '0',
+                movies: document.getElementById('movies').value || '0',
+                travel: document.getElementById('travel').value || '0',
+                exercise: document.getElementById('exercise').value || '0',
+                skills: document.getElementById('skills').value || '0',
+                income: document.getElementById('income').value || '0',
+                keyword: document.getElementById('keyword').value || '成长',
+                summary: document.getElementById('summary').value || '遇见更好的自己',
+                wish: document.getElementById('wish').value || '继续前行'
+            };
+        }
+
+        function renderCard() {
+            const canvas = document.getElementById('previewCanvas');
+            const ctx = canvas.getContext('2d');
+            const data = getData();
+            const gradient = templateGradients[currentTemplate];
+
+            // Background gradient
+            const bgGradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            bgGradient.addColorStop(0, gradient[0]);
+            bgGradient.addColorStop(1, gradient[1]);
+            ctx.fillStyle = bgGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.arc(320, 50, 80, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(50, 400, 60, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.globalAlpha = 1;
+
+            // Year
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${data.year}年度回忆`, canvas.width / 2, 50);
+
+            // Nickname
+            ctx.font = 'bold 36px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(data.nickname, canvas.width / 2, 100);
+
+            // Keyword
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`年度关键词：${data.keyword}`, canvas.width / 2, 135);
+
+            // Divider
+            ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(40, 160);
+            ctx.lineTo(320, 160);
+            ctx.stroke();
+
+            // Stats
+            const stats = [
+                { icon: '📚', value: data.books, label: '读书' },
+                { icon: '🎬', value: data.movies, label: '电影' },
+                { icon: '🌍', value: data.travel, label: '旅行' },
+                { icon: '🏃', value: data.exercise, label: '运动' }
+            ];
+
+            const stats2 = [
+                { icon: '✨', value: data.skills, label: '新技能' },
+                { icon: '💰', value: formatIncome(data.income), label: '收入' }
+            ];
+
+            ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+            stats.forEach((stat, i) => {
+                const x = 60 + i * 75;
+                ctx.fillText(stat.icon, x, 200);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(stat.value, x, 230);
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(stat.label, x, 250);
+                ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+            });
+
+            ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+            stats2.forEach((stat, i) => {
+                const x = 100 + i * 160;
+                ctx.fillText(stat.icon, x, 300);
+                ctx.fillStyle = '#ffffff';
+                ctx.fillText(stat.value, x, 325);
+                ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(stat.label, x, 345);
+                ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, sans-serif';
+            });
+
+            // Summary
+            ctx.font = 'italic 16px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`"${data.summary}"`, canvas.width / 2, 380);
+
+            // Wish
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`🎯 ${data.wish}`, canvas.width / 2, 410);
+
+            // Watermark
+            ctx.font = '10px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.globalAlpha = 0.6;
+            ctx.fillText('由 Auto Tools 生成', canvas.width / 2, 435);
+            ctx.globalAlpha = 1;
+        }
+
+        function formatIncome(value) {
+            const num = parseInt(value) || 0;
+            if (num >= 10000) {
+                return (num / 10000).toFixed(1) + '万';
+            }
+            return num.toString();
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('previewCanvas');
+            const link = document.createElement('a');
+            link.download = `年度回忆_${currentYear}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('图片已下载！');
+        }
+
+        async function copyCard() {
+            const canvas = document.getElementById('previewCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('已复制到剪贴板！');
+            } catch (err) {
+                showToast('复制失败，请手动保存图片');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        // Event listeners
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('input', renderCard);
+        });
+
+        // Initial render
+        renderCard();
+    </script>
+</body>
+</html>
