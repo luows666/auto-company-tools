@@ -36,7 +36,10 @@
             "发票管理",
             "员工考勤",
             "合同生成",
-            "任务清单"
+            "任务清单",
+            "文字转语音",
+            "优惠计算器",
+            "日期倒数日"
         ],
         "browserRequirements": "Requires JavaScript"
     }
@@ -411,6 +414,8 @@
         <button class="tab" data-tab="contracts">合同</button>
         <button class="tab" data-tab="todo">任务清单</button>
         <button class="tab" data-tab="tts">语音合成</button>
+        <button class="tab" data-tab="discount">优惠计算</button>
+        <button class="tab" data-tab="countdown">倒数日</button>
     </div>
 
     <div class="content">
@@ -716,6 +721,34 @@
                 <button class="btn-primary" onclick="window.open('tts.html', '_blank')">打开语音合成</button>
                 <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
                     支持多种语音选择、语速调节、音调控制
+                </p>
+            </div>
+        </div>
+
+        <!-- Discount -->
+        <div class="tool-section" id="discount">
+            <div class="card">
+                <h2>🏷️ 限时优惠计算</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    计算折扣、满减、买赠等优惠
+                </p>
+                <button class="btn-primary" onclick="window.open('discount.html', '_blank')">打开优惠计算器</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持折扣计算、满减计算、买赠计算、原价计算
+                </p>
+            </div>
+        </div>
+
+        <!-- Countdown -->
+        <div class="tool-section" id="countdown">
+            <div class="card">
+                <h2>📅 日期倒数日</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    记录重要日期，计算距离今天还有多少天
+                </p>
+                <button class="btn-primary" onclick="window.open('countdown.html', '_blank')">打开倒数日</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持高考倒计时、纪念日、生日等，数据本地保存
                 </p>
             </div>
         </div>

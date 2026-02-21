@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>日期倒数日 - 纪念日计算器 | Auto Tools</title>
+    <meta name="description" content="实用的日期倒数日和纪念日计算器。支持设置目标日期，自动计算距离今天还有多少天。适合高考倒计时、还款日、生日、纪念日等场景。">
+    <meta name="keywords" content="日期倒计时,纪念日计算器,高考倒计时,天数计算器,距离,还有几天">
+    <meta property="og:title" content="日期倒数日 - 纪念日计算器">
+    <meta property="og:description" content="实用的日期倒数日和纪念日计算器">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        /* Countdown Display */
+        .countdown-result {
+            text-align: center;
+            padding: 32px 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 16px;
+            color: white;
+            margin-bottom: 16px;
+        }
+
+        .countdown-result.past {
+            background: linear-gradient(135deg, #64748b 0%, #475569 100%);
+        }
+
+        .countdown-days {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 8px;
+        }
+
+        .countdown-label {
+            font-size: 1rem;
+            opacity: 0.9;
+        }
+
+        .countdown-date {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        /* Event List */
+        .event-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .event-item:hover {
+            background: #f1f5f9;
+        }
+
+        .event-item.active {
+            border: 2px solid var(--primary);
+            background: #eef2ff;
+        }
+
+        .event-info {
+            flex: 1;
+        }
+
+        .event-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .event-date {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .event-days {
+            text-align: right;
+        }
+
+        .event-days-num {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .event-days-num.passed {
+            color: var(--text-light);
+        }
+
+        .event-days-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .event-delete {
+            margin-left: 12px;
+            color: var(--danger);
+            cursor: pointer;
+            padding: 8px;
+        }
+
+        /* Preset Events */
+        .preset-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .preset-btn {
+            padding: 10px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .preset-btn:hover {
+            background: #e2e8f0;
+        }
+
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        .footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📅 日期倒数日</h1>
+        <p class="subtitle">记录重要的日子， countdown 到来的每一天</p>
+
+        <!-- Add New Event -->
+        <div class="card">
+            <h2>➕ 添加新日期</h2>
+            <input type="text" id="eventName" placeholder="事件名称（如：高考、还款日、生日）">
+            <input type="date" id="eventDate">
+            <button class="btn-primary" onclick="addEvent()">添加倒数日</button>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="card">
+            <h2>📌 快速添加</h2>
+            <div class="preset-list">
+                <button class="preset-btn" onclick="addPreset('高考', '2026-06-07')">2026高考</button>
+                <button class="preset-btn" onclick="addPreset('春节', '2026-01-29')">2026春节</button>
+                <button class="preset-btn" onclick="addPreset('中秋节', '2026-10-06')">2026中秋</button>
+                <button class="preset-btn" onclick="addPreset('国庆节', '2026-10-01')">2026国庆</button>
+                <button class="preset-btn" onclick="addPreset('元旦', '2027-01-01')">2027元旦</button>
+                <button class="preset-btn" onclick="addPreset('月底', getMonthEnd())">本月月底</button>
+            </div>
+        </div>
+
+        <!-- Countdown Display -->
+        <div class="card" id="countdownCard" style="display: none;">
+            <div class="countdown-result" id="countdownResult">
+                <div class="countdown-days" id="countdownDays">0</div>
+                <div class="countdown-label" id="countdownLabel">天</div>
+                <div class="countdown-date" id="countdownDateText"></div>
+            </div>
+            <div class="btn-group">
+                <button class="btn-secondary" onclick="editCurrentEvent()">编辑</button>
+                <button class="btn-danger" onclick="deleteCurrentEvent()">删除</button>
+            </div>
+        </div>
+
+        <!-- Event List -->
+        <div class="card">
+            <h2>📋 我的倒数日</h2>
+            <div id="eventList">
+                <p style="color: var(--text-light); text-align: center;">暂无倒数日，点击上方添加</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>Auto Tools - 离线工具套件</p>
+            <p><a href="index.html">返回首页</a></p>
+        </div>
+    </div>
+
+    <script>
+        // Events storage
+        let events = JSON.parse(localStorage.getItem('countdownEvents') || '[]');
+        let currentEventIndex = -1;
+
+        function getMonthEnd() {
+            const now = new Date();
+            const end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            return end.toISOString().split('T')[0];
+        }
+
+        function addPreset(name, date) {
+            document.getElementById('eventName').value = name;
+            document.getElementById('eventDate').value = date;
+            addEvent();
+        }
+
+        function addEvent() {
+            const name = document.getElementById('eventName').value.trim();
+            const date = document.getElementById('eventDate').value;
+
+            if (!name) {
+                alert('请输入事件名称');
+                return;
+            }
+            if (!date) {
+                alert('请选择日期');
+                return;
+            }
+
+            events.push({ name, date });
+            events.sort((a, b) => new Date(a.date) - new Date(b.date));
+            localStorage.setItem('countdownEvents', JSON.stringify(events));
+
+            document.getElementById('eventName').value = '';
+            document.getElementById('eventDate').value = '';
+
+            renderEvents();
+        }
+
+        function deleteEvent(index, e) {
+            e.stopPropagation();
+            if (confirm('确定删除这个倒数日？')) {
+                events.splice(index, 1);
+                localStorage.setItem('countdownEvents', JSON.stringify(events));
+                if (currentEventIndex === index) {
+                    currentEventIndex = -1;
+                    document.getElementById('countdownCard').style.display = 'none';
+                } else if (currentEventIndex > index) {
+                    currentEventIndex--;
+                }
+                renderEvents();
+            }
+        }
+
+        function selectEvent(index) {
+            currentEventIndex = index;
+            renderEvents();
+            showCountdown(index);
+        }
+
+        function showCountdown(index) {
+            const event = events[index];
+            const targetDate = new Date(event.date);
+            targetDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            const resultCard = document.getElementById('countdownCard');
+            const resultDiv = document.getElementById('countdownResult');
+            const daysEl = document.getElementById('countdownDays');
+            const labelEl = document.getElementById('countdownLabel');
+            const dateTextEl = document.getElementById('countdownDateText');
+
+            resultCard.style.display = 'block';
+
+            if (diffDays > 0) {
+                resultDiv.classList.remove('past');
+                daysEl.textContent = diffDays;
+                labelEl.textContent = '天后';
+            } else if (diffDays === 0) {
+                resultDiv.classList.remove('past');
+                daysEl.textContent = '今天';
+                labelEl.textContent = '就是这一天！';
+            } else {
+                resultDiv.classList.add('past');
+                daysEl.textContent = Math.abs(diffDays);
+                labelEl.textContent = '天前';
+            }
+
+            dateTextEl.textContent = event.date + ' ' + event.name;
+        }
+
+        function editCurrentEvent() {
+            if (currentEventIndex < 0) return;
+            const event = events[currentEventIndex];
+            document.getElementById('eventName').value = event.name;
+            document.getElementById('eventDate').value = event.date;
+        }
+
+        function deleteCurrentEvent() {
+            if (currentEventIndex < 0) return;
+            deleteEvent(currentEventIndex, { stopPropagation: () => {} });
+            document.getElementById('countdownCard').style.display = 'none';
+        }
+
+        function calculateDays(dateStr) {
+            const targetDate = new Date(dateStr);
+            targetDate.setHours(0, 0, 0, 0);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const diffTime = targetDate - today;
+            return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        }
+
+        function renderEvents() {
+            const list = document.getElementById('eventList');
+
+            if (events.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-light); text-align: center;">暂无倒数日，点击上方添加</p>';
+                return;
+            }
+
+            list.innerHTML = events.map((event, index) => {
+                const days = calculateDays(event.date);
+                const isPassed = days < 0;
+                const isActive = index === currentEventIndex;
+
+                return `
+                    <div class="event-item ${isActive ? 'active' : ''}" onclick="selectEvent(${index})">
+                        <div class="event-info">
+                            <div class="event-name">${event.name}</div>
+                            <div class="event-date">${event.date}</div>
+                        </div>
+                        <div class="event-days">
+                            <div class="event-days-num ${isPassed ? 'passed' : ''}">${Math.abs(days)}</div>
+                            <div class="event-days-label">${isPassed ? '天前' : '天后'}</div>
+                        </div>
+                        <div class="event-delete" onclick="deleteEvent(${index}, event)">✕</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Initial render
+        renderEvents();
+
+        // Show first event if exists
+        if (events.length > 0) {
+            selectEvent(0);
+        }
+    </script>
+</body>
+</html>
