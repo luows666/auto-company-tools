@@ -39,7 +39,8 @@
             "任务清单",
             "文字转语音",
             "优惠计算器",
-            "日期倒数日"
+            "日期倒数日",
+            "字数统计"
         ],
         "browserRequirements": "Requires JavaScript"
     }
@@ -416,6 +417,7 @@
         <button class="tab" data-tab="tts">语音合成</button>
         <button class="tab" data-tab="discount">优惠计算</button>
         <button class="tab" data-tab="countdown">倒数日</button>
+        <button class="tab" data-tab="wordcount">字数统计</button>
     </div>
 
     <div class="content">
@@ -749,6 +751,20 @@
                 <button class="btn-primary" onclick="window.open('countdown.html', '_blank')">打开倒数日</button>
                 <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
                     支持高考倒计时、纪念日、生日等，数据本地保存
+                </p>
+            </div>
+        </div>
+
+        <!-- Word Count -->
+        <div class="tool-section" id="wordcount">
+            <div class="card">
+                <h2>📝 字数统计</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    统计字符数、单词数、行数、中文字数等
+                </p>
+                <button class="btn-primary" onclick="window.open('word-count.html', '_blank')">打开字数统计</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持总字符、中文、英文、单词、行数等统计
                 </p>
             </div>
         </div>
