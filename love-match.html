@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>缘分配对测试 - Auto Tools</title>
+    <meta name="description" content="输入两个名字，测试你们的缘分配对指数！适合朋友圈分享">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary);
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .style-select {
+            margin-bottom: 20px;
+        }
+
+        .style-select label {
+            display: block;
+            margin-bottom: 8px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+
+        .style-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .style-option.selected {
+            border-color: var(--primary);
+            transform: scale(1.05);
+        }
+
+        .style-1 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); }
+        .style-2 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
+        .style-3 { background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%); }
+        .style-4 { background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%); }
+        .style-5 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .style-6 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .style-7 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .style-8 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        /* Preview Card */
+        .preview {
+            margin-top: 24px;
+            display: none;
+        }
+
+        .preview.show {
+            display: block;
+        }
+
+        .preview-card {
+            border-radius: 20px;
+            padding: 32px 24px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-card::before {
+            content: '💕';
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .preview-card::after {
+            content: '💕';
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 2rem;
+            opacity: 0.3;
+        }
+
+        .match-score {
+            font-size: 4rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            margin: 16px 0;
+        }
+
+        .match-label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .match-names {
+            font-size: 1rem;
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .match-result {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.85);
+            margin-top: 12px;
+            line-height: 1.5;
+        }
+
+        .watermark {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.6);
+        }
+
+        /* History */
+        .history {
+            margin-top: 20px;
+        }
+
+        .history-title {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .history-item {
+            background: #f9fafb;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .history-item:hover {
+            background: #f3f4f6;
+        }
+
+        .history-score {
+            color: var(--primary);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>💕 缘分配对测试</h1>
+            <p class="subtitle">输入两个名字，测试你们的缘分配对指数</p>
+
+            <div class="input-group">
+                <label>你的名字</label>
+                <input type="text" id="name1" placeholder="请输入你的名字" maxlength="10">
+            </div>
+
+            <div class="input-group">
+                <label>TA 的名字</label>
+                <input type="text" id="name2" placeholder="请输入TA的名字" maxlength="10">
+            </div>
+
+            <div class="style-select">
+                <label>选择卡片风格</label>
+                <div class="style-grid">
+                    <div class="style-option style-1 selected" data-style="1"></div>
+                    <div class="style-option style-2" data-style="2"></div>
+                    <div class="style-option style-3" data-style="3"></div>
+                    <div class="style-option style-4" data-style="4"></div>
+                    <div class="style-option style-5" data-style="5"></div>
+                    <div class="style-option style-6" data-style="6"></div>
+                    <div class="style-option style-7" data-style="7"></div>
+                    <div class="style-option style-8" data-style="8"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateMatch()">生成配对卡片</button>
+
+            <div class="preview" id="preview">
+                <div class="preview-card" id="previewCard">
+                    <div class="match-label" id="matchLabel">天作之合</div>
+                    <div class="match-score" id="matchScore">98%</div>
+                    <div class="match-names"><span id="previewName1"></span> ❤️ <span id="previewName2"></span></div>
+                    <div class="match-result" id="matchResult"></div>
+                    <div class="watermark">Auto Tools</div>
+                </div>
+
+                <div class="btn-group">
+                    <button class="btn-secondary" onclick="downloadCard()">📥 下载图片</button>
+                    <button class="btn-secondary" onclick="copyCard()">📋 复制卡片</button>
+                </div>
+            </div>
+
+            <div class="history" id="history"></div>
+        </div>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        let selectedStyle = 1;
+        const styles = {
+            1: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            2: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+            3: 'linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%)',
+            4: 'linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%)',
+            5: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            6: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            7: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            8: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)'
+        };
+
+        const labels = [
+            '素未谋面', '有待发展', '普通朋友', '有点意思', '心有灵犀',
+            '天作之合', '命中注定', '灵魂伴侣', '前世注定', '满分缘分'
+        ];
+
+        const results = [
+            '你们还需要更多的了解和相处，给彼此一些时间吧~',
+            '有发展的可能哦，多多了解对方的心意吧~',
+            '作为朋友还是很不错的，或许可以更进一步？',
+            '哇，TA可能对你也有好感呢！大胆一点~',
+            '你们真的很有默契，是不是经常同时想到对方？',
+            '你们是天造地设的一对！珍惜这份缘分~',
+            '这是命中注定的相遇，你们注定要在一起！',
+            '你们是灵魂的契合，遇到彼此是最大的幸运！',
+            '前世修来的缘分，好好珍惜这一世相遇！',
+            '完美无缺的缘分，你们就是彼此的唯一！'
+        ];
+
+        // Style selection
+        document.querySelectorAll('.style-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelector('.style-option.selected').classList.remove('selected');
+                opt.classList.add('selected');
+                selectedStyle = parseInt(opt.dataset.style);
+                if (document.getElementById('preview').classList.contains('show')) {
+                    generateMatch();
+                }
+            });
+        });
+
+        function calculateMatch(name1, name2) {
+            const combined = (name1 + name2).toLowerCase();
+            let hash = 0;
+            for (let i = 0; i < combined.length; i++) {
+                hash = ((hash << 5) - hash) + combined.charCodeAt(i);
+                hash = hash & hash;
+            }
+            const score = Math.abs(hash) % 101;
+            return { score, labelIndex: Math.floor(score / 10), resultIndex: Math.floor(score / 10) };
+        }
+
+        function generateMatch() {
+            const name1 = document.getElementById('name1').value.trim() || '我';
+            const name2 = document.getElementById('name2').value.trim() || 'TA';
+
+            const { score, labelIndex, resultIndex } = calculateMatch(name1, name2);
+
+            const previewCard = document.getElementById('previewCard');
+            previewCard.style.background = styles[selectedStyle];
+
+            document.getElementById('matchScore').textContent = score + '%';
+            document.getElementById('matchLabel').textContent = labels[labelIndex];
+            document.getElementById('previewName1').textContent = name1;
+            document.getElementById('previewName2').textContent = name2;
+            document.getElementById('matchResult').textContent = results[resultIndex];
+
+            document.getElementById('preview').classList.add('show');
+
+            saveToHistory(name1, name2, score);
+        }
+
+        function saveToHistory(name1, name2, score) {
+            const history = JSON.parse(localStorage.getItem('loveMatchHistory') || '[]');
+            const newEntry = { name1, name2, score, time: Date.now() };
+            history.unshift(newEntry);
+            if (history.length > 10) history.pop();
+            localStorage.setItem('loveMatchHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('loveMatchHistory') || '[]');
+            const container = document.getElementById('history');
+            if (history.length === 0) {
+                container.innerHTML = '';
+                return;
+            }
+            container.innerHTML = `
+                <div class="history-title">最近测试记录</div>
+                ${history.map(h => `
+                    <div class="history-item" onclick="loadHistory('${h.name1}', '${h.name2}', ${h.score})">
+                        <span class="history-score">${h.score}%</span> ${h.name1} ❤️ ${h.name2}
+                    </div>
+                `).join('')}
+            `;
+        }
+
+        function loadHistory(name1, name2, score) {
+            document.getElementById('name1').value = name1;
+            document.getElementById('name2').value = name2;
+            generateMatch();
+        }
+
+        function downloadCard() {
+            const card = document.getElementById('previewCard');
+            html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = '缘分配对.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+
+        function copyCard() {
+            const card = document.getElementById('previewCard');
+            html2canvas(card, { scale: 2, backgroundColor: null }).then(canvas => {
+                canvas.toBlob(blob => {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    navigator.clipboard.write([item]).then(() => {
+                        alert('✅ 卡片已复制到剪贴板！');
+                    }).catch(() => {
+                        alert('复制失败，请手动截图~');
+                    });
+                });
+            });
+        }
+
+        // Load history on page load
+        renderHistory();
+    </script>
+</body>
+</html>

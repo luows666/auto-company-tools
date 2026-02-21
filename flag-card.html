@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2026 FLAG 卡片生成器 - Auto Tools</title>
+    <meta name="description" content="生成你的2026新年目标卡片，一键下载分享到朋友圈">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            padding: 30px 0;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ffd700, #ff6b6b, #c71585);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #a0a0a0;
+            font-size: 1rem;
+        }
+        .card-preview {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin: 20px 0;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        #flagCard {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            border-radius: 16px;
+            padding: 40px 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-inner {
+            position: relative;
+            z-index: 1;
+        }
+        .card-year {
+            font-size: 4rem;
+            font-weight: 900;
+            text-align: center;
+            margin-bottom: 20px;
+            opacity: 0.9;
+        }
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .flag-list {
+            list-style: none;
+            margin: 20px 0;
+        }
+        .flag-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 0;
+            font-size: 1.1rem;
+            font-weight: 500;
+            border-bottom: 1px dashed rgba(255,255,255,0.3);
+        }
+        .flag-item:last-child {
+            border-bottom: none;
+        }
+        .flag-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        .card-footer {
+            text-align: center;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid rgba(255,255,255,0.2);
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .form-section {
+            background: rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .form-section h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        .input-group label {
+            display: block;
+            color: #ccc;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+        .input-group input, .input-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        .input-group input:focus, .input-group textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255,255,255,0.15);
+        }
+        .input-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .style-btn {
+            padding: 10px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-align: center;
+            transition: all 0.3s;
+            color: #fff;
+        }
+        .style-btn.active {
+            border-color: #ffd700;
+            transform: scale(1.05);
+        }
+        .style-1 { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+        .style-2 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+        .style-3 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+        .style-4 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
+        .style-5 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
+        .style-6 { background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); color: #333 !important; }
+        .style-7 { background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%); color: #333 !important; }
+        .style-8 { background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); color: #333 !important; }
+
+        .btn-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn {
+            flex: 1;
+            min-width: 150px;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #1a1a2e;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(255,215,0,0.4);
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.25);
+        }
+        .tips {
+            color: #888;
+            font-size: 0.85rem;
+            margin-top: 15px;
+            text-align: center;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.8rem; }
+            .style-options { grid-template-columns: repeat(2, 1fr); }
+            .btn-group { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚩 2026 FLAG 卡片生成器</h1>
+            <p>生成你的新年目标卡片，一键分享到朋友圈</p>
+        </div>
+
+        <div class="card-preview">
+            <div id="flagCard" class="style-1">
+                <div class="card-inner">
+                    <div class="card-year">2026</div>
+                    <div class="card-title">我的新年 FLAG</div>
+                    <ul class="flag-list" id="flagList">
+                        <li class="flag-item">
+                            <span class="flag-icon">📚</span>
+                            <span>读 20 本书</span>
+                        </li>
+                        <li class="flag-item">
+                            <span class="flag-icon">💪</span>
+                            <span>健身 100 次</span>
+                        </li>
+                        <li class="flag-item">
+                            <span class="flag-icon">✈️</span>
+                            <span>旅行 3 个城市</span>
+                        </li>
+                        <li class="flag-item">
+                            <span class="flag-icon">💰</span>
+                            <span>存款 10 万元</span>
+                        </li>
+                    </ul>
+                    <div class="card-footer">
+                        🚀 2026 加油！
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>🎯 设置你的 FLAG</h3>
+            <div class="input-group">
+                <label>你的昵称（可选）</label>
+                <input type="text" id="nickname" placeholder="小明" maxlength="20">
+            </div>
+            <div class="input-group">
+                <label>输入你的 FLAG（每行一个）</label>
+                <textarea id="flags" placeholder="读 20 本书&#10;健身 100 次&#10;旅行 3 个城市&#10;存款 10 万元">读 20 本书
+健身 100 次
+旅行 3 个城市
+存款 10 万元</textarea>
+            </div>
+            <div class="input-group">
+                <label>结束语（可选）</label>
+                <input type="text" id="footerText" placeholder="2026 加油！" maxlength="30">
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>🎨 选择卡片风格</h3>
+            <div class="style-options">
+                <div class="style-btn style-1 active" data-style="style-1" onclick="selectStyle(this)">梦幻紫</div>
+                <div class="style-btn style-2" data-style="style-2" onclick="selectStyle(this)">浪漫粉</div>
+                <div class="style-btn style-3" data-style="style-3" onclick="selectStyle(this)">清新蓝</div>
+                <div class="style-btn style-4" data-style="style-4" onclick="selectStyle(this)">森林绿</div>
+                <div class="style-btn style-5" data-style="style-5" onclick="selectStyle(this)">夕阳橙</div>
+                <div class="style-btn style-6" data-style="style-6" onclick="selectStyle(this)">薄荷绿</div>
+                <div class="style-btn style-7" data-style="style-7" onclick="selectStyle(this)">樱花雨</div>
+                <div class="style-btn style-8" data-style="style-8" onclick="selectStyle(this)">暖阳黄</div>
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="downloadCard()">
+                <span>📥</span> 下载图片
+            </button>
+            <button class="btn btn-secondary" onclick="copyCard()">
+                <span>📋</span> 复制到剪贴板
+            </button>
+        </div>
+
+        <p class="tips">💡 提示：生成的图片适合分享到朋友圈、微博、小红书</p>
+    </div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        const icons = ['📚', '💪', '✈️', '💰', '🎯', '🏃', '🎸', '📱', '🍳', '💤', '🎨', '💡', '🚀', '⭐', '🔥', '💎'];
+        let currentStyle = 'style-1';
+
+        // Update card in real-time
+        document.getElementById('nickname').addEventListener('input', updateCard);
+        document.getElementById('flags').addEventListener('input', updateCard);
+        document.getElementById('footerText').addEventListener('input', updateCard);
+
+        function selectStyle(btn) {
+            document.querySelectorAll('.style-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentStyle = btn.dataset.style;
+
+            const card = document.getElementById('flagCard');
+            card.className = currentStyle;
+        }
+
+        function updateCard() {
+            const nickname = document.getElementById('nickname').value;
+            const flagsText = document.getElementById('flags').value.trim();
+            const footerText = document.getElementById('footerText').value.trim() || '🚀 2026 加油！';
+
+            const title = nickname ? `${nickname}的 2026 FLAG` : '我的新年 FLAG';
+            document.querySelector('.card-title').textContent = title;
+
+            const flags = flagsText ? flagsText.split('\n').filter(f => f.trim()) : ['读 20 本书', '健身 100 次', '旅行 3 个城市', '存款 10 万元'];
+            const listHtml = flags.slice(0, 6).map((flag, i) => `
+                <li class="flag-item">
+                    <span class="flag-icon">${icons[i % icons.length]}</span>
+                    <span>${flag.trim()}</span>
+                </li>
+            `).join('');
+            document.getElementById('flagList').innerHTML = listHtml;
+
+            document.querySelector('.card-footer').textContent = footerText;
+        }
+
+        async function downloadCard() {
+            const card = document.getElementById('flagCard');
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    backgroundColor: null,
+                    useCORS: true
+                });
+                const link = document.createElement('a');
+                link.download = '2026-flag-card.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            } catch (e) {
+                alert('生成图片失败，请重试');
+            }
+        }
+
+        async function copyCard() {
+            const card = document.getElementById('flagCard');
+            try {
+                const canvas = await html2canvas(card, {
+                    scale: 2,
+                    backgroundColor: null,
+                    useCORS: true
+                });
+                canvas.toBlob(async (blob) => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        alert('✅ 已复制到剪贴板！');
+                    } catch (e) {
+                        // Fallback: download
+                        const link = document.createElement('a');
+                        link.download = '2026-flag-card.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        alert('复制失败，已自动下载');
+                    }
+                });
+            } catch (e) {
+                alert('生成图片失败，请重试');
+            }
+        }
+
+        // Initialize
+        updateCard();
+    </script>
+</body>
+</html>
