@@ -676,13 +676,25 @@
     </div>
 
     <script>
-        // Visitor Counter
-        (function() {
+        // Visitor Counter with global analytics
+        (async function() {
+            const namespace = 'auto-tools';
             const key = 'auto-tools-visits';
-            let count = parseInt(localStorage.getItem(key) || '0');
-            count++;
-            localStorage.setItem(key, count.toString());
-            document.getElementById('visitorCount').textContent = count.toLocaleString();
+
+            try {
+                const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('visitorCount').textContent = data.value.toLocaleString();
+                } else {
+                    throw new Error('CountAPI failed');
+                }
+            } catch (e) {
+                let count = parseInt(localStorage.getItem(key) || '0');
+                count++;
+                localStorage.setItem(key, count.toString());
+                document.getElementById('visitorCount').textContent = count.toLocaleString();
+            }
         })();
 
         // Tab Navigation
