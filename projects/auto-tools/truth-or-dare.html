@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>真心话大冒险 - 聚会游戏</title>
+    <meta name="description" content="聚会游戏利器！真心话大冒险随机抽取，趣味互动必备。一键分享到朋友圈。">
+    <meta property="og:title" content="真心话大冒险 - 聚会游戏">
+    <meta property="og:description" content="聚会游戏利器！随机抽取真心话或大冒险，趣味互动必备">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #ec4899;
+            --primary-dark: #db2777;
+            --bg: #fdf2f8;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 32px 24px;
+            box-shadow: 0 4px 20px rgba(236, 72, 153, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .player-input {
+            margin-bottom: 20px;
+        }
+
+        .player-input label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .player-input input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #fce7f3;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .player-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .mode-selector {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 16px;
+            border: 2px solid #fce7f3;
+            background: white;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .mode-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .mode-btn.active {
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border-color: transparent;
+        }
+
+        .mode-btn .icon {
+            font-size: 1.5rem;
+        }
+
+        .spin-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 14px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.4);
+        }
+
+        .spin-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.5);
+        }
+
+        .spin-btn:active {
+            transform: translateY(0);
+        }
+
+        .result-area {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 24px;
+            border-radius: 16px;
+            display: none;
+        }
+
+        .result-area.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .result-type {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            padding: 8px 20px;
+            border-radius: 20px;
+            display: inline-block;
+        }
+
+        .result-type.truth {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .result-type.dare {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .result-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .result-player {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .download-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .download-btn:hover {
+            background: #059669;
+        }
+
+        .copy-btn {
+            background: #6366f1;
+            color: white;
+        }
+
+        .copy-btn:hover {
+            background: #4f46e5;
+        }
+
+        .history-section {
+            background: var(--card);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .history-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-light);
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid #f3f4f6;
+            font-size: 0.875rem;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item .type {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            margin-right: 8px;
+        }
+
+        .history-item .type.truth {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .history-item .type.dare {
+            background: #fce7f3;
+            color: #be185d;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-light);
+            padding: 20px;
+            font-size: 0.875rem;
+        }
+
+        .backgrounds {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+
+        .bg-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: border-color 0.2s;
+        }
+
+        .bg-option:hover, .bg-option.active {
+            border-color: var(--text);
+        }
+
+        /* Canvas for download */
+        #downloadCanvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎭 真心话大冒险</h1>
+            <p class="subtitle">聚会游戏利器，一键抽取</p>
+        </header>
+
+        <div class="card">
+            <div class="player-input">
+                <label>玩家昵称（选填）</label>
+                <input type="text" id="playerName" placeholder="输入玩家昵称" maxlength="20">
+            </div>
+
+            <div class="mode-selector">
+                <button class="mode-btn active" data-mode="random" onclick="selectMode(this)">
+                    <span class="icon">🎲</span>
+                    <span>随机</span>
+                </button>
+                <button class="mode-btn" data-mode="truth" onclick="selectMode(this)">
+                    <span class="icon">💬</span>
+                    <span>真心话</span>
+                </button>
+                <button class="mode-btn" data-mode="dare" onclick="selectMode(this)">
+                    <span class="icon">🎯</span>
+                    <span>大冒险</span>
+                </button>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 500;">选择背景风格</label>
+                <div class="backgrounds" id="bgSelector"></div>
+            </div>
+
+            <button class="spin-btn" onclick="spin()">开始抽取</button>
+
+            <div class="result-area" id="resultArea">
+                <div class="result-type" id="resultType">真心话</div>
+                <div class="result-text" id="resultText">你的初吻是几岁？</div>
+                <div class="result-player" id="resultPlayer"></div>
+            </div>
+
+            <div class="action-btns" id="actionBtns" style="display: none;">
+                <button class="action-btn download-btn" onclick="downloadImage()">📥 下载图片</button>
+                <button class="action-btn copy-btn" onclick="copyResult()">📋 复制结果</button>
+            </div>
+        </div>
+
+        <div class="history-section">
+            <div class="history-title">📜 游戏记录</div>
+            <div class="history-list" id="historyList">
+                <div class="empty-history">暂无记录</div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="downloadCanvas" width="600" height="800"></canvas>
+
+    <script>
+        // Truth questions
+        const truthQuestions = [
+            "你的初吻是几岁？",
+            "你暗恋过老师吗？",
+            "做过最疯狂的事是什么？",
+            "撒过最大的谎是什么？",
+            "最尴尬的经历是什么？",
+            "喜欢过朋友的对象吗？",
+            "最后悔的事是什么？",
+            "偷偷喜欢过几个人？",
+            "最怕失去什么？",
+            "做过的亏心事？",
+            "最难启齿的秘密？",
+            "最自豪的事？",
+            "偷偷半夜哭过吗？",
+            "有没有脚踏两条船？",
+            "最想删除的记忆？",
+            "说过谁的坏话？",
+            "用过什么社交软件？",
+            "最无法接受的异性类型？",
+            "有没有网恋过？",
+            "偷看过父母隐私吗？",
+            "考试作过弊吗？",
+            "最想对前任说什么？",
+            "做过什么白日梦？",
+            "最脆弱的时刻？",
+            "偷偷存了多少私房钱？"
+        ];
+
+        // Dare challenges
+        const dareChallenges = [
+            "给最近联系人表白",
+            "用方言读绕口令",
+            "模仿下一个进门的人",
+            "单腿站立1分钟",
+            "给父母一个拥抱",
+            "大声唱一首歌",
+            "做一个搞笑表情",
+            "用左手写名字",
+            "和异性对视10秒",
+            "连续做10个俯卧撑",
+            "模仿指定动物",
+            "读一段绕口令",
+            "给通讯录第5个人打电话",
+            "即兴表演一个小品",
+            "COSPLAY一个角色",
+            "用屁股写字",
+            "做一个搞笑的自我介绍",
+            "学三种动物叫",
+            "深情朗诵诗歌",
+            "假装自己是外星人",
+            "表演一个魔术",
+            "用杯子敲一段节奏",
+            "学老板训话",
+            "假装在主持节目",
+            "做20个深蹲"
+        ];
+
+        // Background styles
+        const backgrounds = [
+            'linear-gradient(135deg, #ec4899, #8b5cf6)',
+            'linear-gradient(135deg, #3b82f6, #06b6d4)',
+            'linear-gradient(135deg, #10b981, #14b8a6)',
+            'linear-gradient(135deg, #f59e0b, #ef4444)',
+            'linear-gradient(135deg, #6366f1, #ec4899)',
+            'linear-gradient(135deg, #f97316, #db2777)',
+            'linear-gradient(135deg, #8b5cf6, #d946ef)',
+            'linear-gradient(135deg, #06b6d4, #0ea5e9)'
+        ];
+
+        let currentMode = 'random';
+        let selectedBg = backgrounds[0];
+        let currentResult = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            initBackgrounds();
+            loadHistory();
+        });
+
+        function initBackgrounds() {
+            const container = document.getElementById('bgSelector');
+            backgrounds.forEach((bg, i) => {
+                const btn = document.createElement('div');
+                btn.className = 'bg-option' + (i === 0 ? ' active' : '');
+                btn.style.background = bg;
+                btn.onclick = () => selectBg(i);
+                container.appendChild(btn);
+            });
+        }
+
+        function selectBg(index) {
+            document.querySelectorAll('.bg-option').forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+            selectedBg = backgrounds[index];
+        }
+
+        function selectMode(btn) {
+            document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentMode = btn.dataset.mode;
+        }
+
+        function spin() {
+            const playerName = document.getElementById('playerName').value.trim() || '神秘玩家';
+
+            // Determine type
+            let type;
+            if (currentMode === 'truth') type = 'truth';
+            else if (currentMode === 'dare') type = 'dare';
+            else type = Math.random() > 0.5 ? 'truth' : 'dare';
+
+            // Get random question/challenge
+            const list = type === 'truth' ? truthQuestions : dareChallenges;
+            const text = list[Math.floor(Math.random() * list.length)];
+
+            // Display result
+            const resultArea = document.getElementById('resultArea');
+            const resultType = document.getElementById('resultType');
+            const resultText = document.getElementById('resultText');
+            const resultPlayer = document.getElementById('resultPlayer');
+            const actionBtns = document.getElementById('actionBtns');
+
+            resultType.textContent = type === 'truth' ? '💬 真心话' : '🎯 大冒险';
+            resultType.className = 'result-type ' + type;
+            resultText.textContent = text;
+            resultPlayer.textContent = '👤 ' + playerName;
+
+            resultArea.style.background = selectedBg;
+            resultArea.classList.add('show');
+            actionBtns.style.display = 'flex';
+
+            currentResult = { type, text, player: playerName, bg: selectedBg };
+
+            // Save to history
+            saveHistory({ type, text, player: playerName });
+        }
+
+        function saveHistory(item) {
+            let history = JSON.parse(localStorage.getItem('truthDareHistory') || '[]');
+            history.unshift(item);
+            if (history.length > 20) history = history.slice(0, 20);
+            localStorage.setItem('truthDareHistory', JSON.stringify(history));
+            renderHistory(history);
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('truthDareHistory') || '[]');
+            renderHistory(history);
+        }
+
+        function renderHistory(history) {
+            const list = document.getElementById('historyList');
+            if (history.length === 0) {
+                list.innerHTML = '<div class="empty-history">暂无记录</div>';
+                return;
+            }
+            list.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span class="type ${item.type}">${item.type === 'truth' ? '真心话' : '大冒险'}</span>
+                    ${item.text}
+                </div>
+            `).join('');
+        }
+
+        function downloadImage() {
+            const canvas = document.getElementById('downloadCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            const colors = getGradientColors(currentResult.bg);
+            gradient.addColorStop(0, colors[0]);
+            gradient.addColorStop(1, colors[1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // Decorative circles
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath();
+            ctx.arc(100, 100, 150, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(500, 700, 200, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Type label
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            const typeText = currentResult.type === 'truth' ? '💬 真心话' : '🎯 大冒险';
+            ctx.fillText(typeText, 300, 120);
+
+            // Main text
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px -apple-system, BlinkMacSystemFont, sans-serif';
+            wrapText(ctx, currentResult.text, 300, 320, 500, 55);
+
+            // Player
+            ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText('👤 ' + currentResult.player, 300, 650);
+
+            // Footer
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('真心话大冒险', 300, 750);
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'truth-dare.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function getGradientColors(bgStr) {
+            const match = bgStr.match(/#([0-9a-fA-F]{6})/g);
+            if (match && match.length >= 2) {
+                return ['#' + match[0].slice(1), '#' + match[1].slice(1)];
+            }
+            return ['#ec4899', '#8b5cf6'];
+        }
+
+        function wrapText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split('');
+            let line = '';
+            let lines = [];
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = line + words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && i > 0) {
+                    lines.push(line);
+                    line = words[i];
+                } else {
+                    line = testLine;
+                }
+            }
+            lines.push(line);
+
+            const startY = y - (lines.length - 1) * lineHeight / 2;
+            lines.forEach((l, i) => {
+                ctx.fillText(l, x, startY + i * lineHeight);
+            });
+        }
+
+        function copyResult() {
+            const text = `${currentResult.type === 'truth' ? '💬 真心话' : '🎯 大冒险'}\n${currentResult.text}\n👤 ${currentResult.player}`;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板！');
+            });
+        }
+    </script>
+</body>
+</html>

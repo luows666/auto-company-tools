@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日能量卡 - 生成你的能量值</title>
+    <meta name="description" content="生成你的今日能量卡，记录并分享你的能量状态">
+    <meta property="og:title" content="今日能量卡">
+    <meta property="og:description" content="我的今日能量值是 X%，你也来测测吧！">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.875rem;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+
+        /* Energy Level Selector */
+        .energy-selector {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .energy-option {
+            width: 50px;
+            height: 50px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .energy-option:hover {
+            border-color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .energy-option.selected {
+            border-color: var(--primary);
+            background: #e0e7ff;
+            transform: scale(1.1);
+        }
+
+        /* Background Style */
+        .bg-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .bg-option {
+            height: 40px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .bg-option:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-option.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+        }
+
+        /* Preview */
+        #preview {
+            margin-top: 20px;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        #preview-canvas {
+            width: 100%;
+            display: block;
+        }
+
+        /* Message */
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 1000;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>⚡ 今日能量卡</h1>
+            <p>记录今日能量值，分享给朋友</p>
+        </header>
+
+        <div class="card">
+            <label>你的昵称</label>
+            <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20">
+
+            <label>今日能量值</label>
+            <div class="energy-selector" id="energySelector">
+                <div class="energy-option" data-value="1">🔴</div>
+                <div class="energy-option" data-value="2">🟠</div>
+                <div class="energy-option" data-value="3">🟡</div>
+                <div class="energy-option" data-value="4">🟢</div>
+                <div class="energy-option" data-value="5">💚</div>
+                <div class="energy-option" data-value="6">💙</div>
+                <div class="energy-option" data-value="7">💜</div>
+                <div class="energy-option" data-value="8">🧡</div>
+                <div class="energy-option" data-value="9">❤️</div>
+                <div class="energy-option selected" data-value="10">⭐</div>
+            </div>
+
+            <label>选择背景风格</label>
+            <div class="bg-selector" id="bgSelector">
+                <div class="bg-option selected" data-bg="sunset" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                <div class="bg-option" data-bg="ocean" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <div class="bg-option" data-bg="forest" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);"></div>
+                <div class="bg-option" data-bg="fire" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <div class="bg-option" data-bg="gold" style="background: linear-gradient(135deg, #f6d365 0%, #fda085 100%);"></div>
+                <div class="bg-option" data-bg="purple" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);"></div>
+                <div class="bg-option" data-bg="night" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></div>
+                <div class="bg-option" data-bg="rose" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+            </div>
+        </div>
+
+        <button class="btn-primary" onclick="generateCard()">生成能量卡</button>
+
+        <div id="preview" style="display: none;">
+            <canvas id="preview-canvas" width="400" height="600"></canvas>
+        </div>
+
+        <div class="btn-group" id="actionButtons" style="display: none;">
+            <button class="btn-success" onclick="downloadCard()">📥 下载图片</button>
+            <button class="btn-secondary" onclick="copyCard()">📋 复制到剪贴板</button>
+        </div>
+
+        <footer>
+            <p>powered by <a href="https://luows666.github.io/auto-tools/" target="_blank">Auto Tools</a></p>
+        </footer>
+    </div>
+
+    <div class="message" id="message">操作成功！</div>
+
+    <script>
+        const energyEmojis = ['🔴', '🟠', '🟡', '🟢', '💚', '💙', '💜', '🧡', '❤️', '⭐'];
+        const energyColors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#dc2626', '#fbbf24'];
+        const energyTexts = [
+            '能量耗尽，需要充电🔋',
+            '有些疲惫，注意休息😴',
+            '状态一般，保持节奏🚶',
+            '状态不错，继续加油💪',
+            '精力充沛，充满活力⚡',
+            '能量满满，效率超高🚀',
+            '火力全开，无人能挡🔥',
+            '超级状态巅峰✨',
+            '宇宙最强，无限可能🌟',
+            '满分能量，创造奇迹🌈'
+        ];
+        const backgrounds = {
+            sunset: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            ocean: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            forest: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            fire: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            gold: 'linear-gradient(135deg, #f6d365 0%, #fda085 100%)',
+            purple: 'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+            night: 'linear-gradient(135deg, #30cfd0 0%, #330867 100%)',
+            rose: 'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
+        };
+
+        let selectedEnergy = 10;
+        let selectedBg = 'sunset';
+
+        // Energy selector
+        document.querySelectorAll('.energy-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.energy-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedEnergy = parseInt(opt.dataset.value);
+            });
+        });
+
+        // Background selector
+        document.querySelectorAll('.bg-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.bg-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedBg = opt.dataset.bg;
+            });
+        });
+
+        function generateCard() {
+            const nickname = document.getElementById('nickname').value || '神秘人';
+            const canvas = document.getElementById('preview-canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Background
+            const gradient = ctx.createLinearGradient(0, 0, 400, 600);
+            const bgColors = backgrounds[selectedBg].match(/#[a-f0-9]{6}/gi);
+            if (bgColors && bgColors.length >= 2) {
+                gradient.addColorStop(0, bgColors[0]);
+                gradient.addColorStop(1, bgColors[1]);
+            } else {
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 400, 600);
+
+            // Decorative circles
+            ctx.globalAlpha = 0.2;
+            ctx.beginPath();
+            ctx.arc(50, 50, 100, 0, Math.PI * 2);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(350, 550, 120, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+
+            // Title
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('⚡ 今日能量卡', 200, 60);
+
+            // Date
+            const now = new Date();
+            const dateStr = `${now.getFullYear()}年${String(now.getMonth()+1).padStart(2,'0')}月${String(now.getDate()).padStart(2,'0')}日`;
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(dateStr, 200, 90);
+
+            // Energy circle
+            ctx.beginPath();
+            ctx.arc(200, 240, 100, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fill();
+
+            // Energy percentage
+            const percent = selectedEnergy * 10;
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(`${percent}%`, 200, 250);
+
+            // Energy emoji
+            ctx.font = '32px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(energyEmojis[selectedEnergy - 1], 200, 300);
+
+            // Energy text
+            ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(energyTexts[selectedEnergy - 1], 200, 350);
+
+            // Nickname
+            ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(nickname, 200, 420);
+
+            // Subtitle
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('今日能量值记录', 200, 450);
+
+            // Footer
+            ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.globalAlpha = 0.7;
+            ctx.fillText('Auto Tools', 200, 570);
+            ctx.globalAlpha = 1;
+
+            document.getElementById('preview').style.display = 'block';
+            document.getElementById('actionButtons').style.display = 'flex';
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('preview-canvas');
+            const link = document.createElement('a');
+            link.download = `energy-card-${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showMessage('图片已下载！');
+        }
+
+        async function copyCard() {
+            const canvas = document.getElementById('preview-canvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+                showMessage('已复制到剪贴板！');
+            } catch (err) {
+                showMessage('复制失败，请手动截图');
+            }
+        }
+
+        function showMessage(text) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 2000);
+        }
+
+        // Load saved data
+        const savedNickname = localStorage.getItem('energy-nickname');
+        if (savedNickname) {
+            document.getElementById('nickname').value = savedNickname;
+        }
+
+        // Save on input
+        document.getElementById('nickname').addEventListener('input', (e) => {
+            localStorage.setItem('energy-nickname', e.target.value);
+        });
+    </script>
+</body>
+</html>

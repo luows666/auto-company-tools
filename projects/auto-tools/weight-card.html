@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体重记录卡片 - Auto Tools</title>
+    <meta name="description" content="记录体重变化，生成精美打卡卡片，支持一键分享到朋友圈">
+    <meta property="og:title" content="体重记录卡片">
+    <meta property="og:description" content="记录体重变化，生成精美打卡卡片">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
+        }
+
+        header h1 {
+            font-size:rem;
+            margin-bottom: 4 1.5px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            padding: 20px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .color-option {
+            height: 50px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .color-option.selected {
+            border-color: var(--text);
+            transform: scale(1.05);
+        }
+
+        /* Preview Card */
+        .preview-card {
+            width: 100%;
+            aspect-ratio: 1;
+            border-radius: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+        }
+
+        .preview-card .nickname {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        .preview-card .weight {
+            font-size: 3.5rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+            position: relative;
+        }
+
+        .preview-card .unit {
+            font-size: 1rem;
+            opacity: 0.8;
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .preview-card .date {
+            font-size: 0.875rem;
+            opacity: 0.8;
+            position: relative;
+        }
+
+        .preview-card .bmi {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.25);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .preview-card .streak {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(255,255,255,0.25);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            backdrop-filter: blur(4px);
+        }
+
+        .actions {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 16px;
+            display: flex;
+            gap: 8px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+        }
+
+        .actions button {
+            flex: 1;
+        }
+
+        .message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 16px 32px;
+            border-radius: 12px;
+            font-size: 1rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .message.show {
+            opacity: 1;
+        }
+
+        .bmi-info {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .bmi-info input {
+            margin-bottom: 0;
+        }
+
+        .tips {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.875rem;
+            color: #166534;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <button class="back-btn" onclick="window.history.back()">← 返回</button>
+        <h1>⚖️ 体重记录卡片</h1>
+        <p>记录体重变化，生成精美打卡卡片</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <h2>📝 记录信息</h2>
+            <label>昵称</label>
+            <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20">
+
+            <div class="bmi-info">
+                <div style="flex:1">
+                    <label>当前体重 (kg)</label>
+                    <input type="number" id="weight" placeholder="65" step="0.1" min="20" max="300">
+                </div>
+                <div style="flex:1">
+                    <label>身高 (cm)</label>
+                    <input type="number" id="height" placeholder="170" min="100" max="250">
+                </div>
+            </div>
+
+            <label>记录日期</label>
+            <input type="date" id="date">
+
+            <div class="tips" id="bmiTips"></div>
+        </div>
+
+        <div class="card">
+            <h2>🎨 选择风格</h2>
+            <div class="color-options" id="colorOptions">
+                <div class="color-option selected" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" data-colors="['#667eea','#764ba2']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" data-colors="['#f093fb','#f5576c']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" data-colors="['#4facfe','#00f2fe']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" data-colors="['#43e97b','#38f9d7']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" data-colors="['#fa709a','#fee140']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);" data-colors="['#a8edea','#fed6e3']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);" data-colors="['#ff9a9e','#fecfef']"></div>
+                <div class="color-option" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);" data-colors="['#ffecd2','#fcb69f']"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>👀 预览效果</h2>
+            <div class="preview-card" id="previewCard">
+                <span class="nickname" id="previewNickname">我的昵称</span>
+                <span class="weight" id="previewWeight">--</span>
+                <span class="unit">kg</span>
+                <span class="date" id="previewDate">2026-01-01</span>
+                <span class="bmi" id="previewBMI">BMI: --</span>
+                <span class="streak">🏃 坚持打卡中</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="actions">
+        <button class="btn-primary" onclick="downloadImage()">📥 下载图片</button>
+        <button class="btn-secondary" onclick="copyImage()">📋 复制</button>
+    </div>
+
+    <div class="message" id="message">已复制到剪贴板</div>
+
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script>
+        // Initialize
+        document.getElementById('date').valueAsDate = new Date();
+
+        // Color options
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                updatePreview();
+            });
+        });
+
+        // Input events
+        ['nickname', 'weight', 'height', 'date'].forEach(id => {
+            document.getElementById(id).addEventListener('input', updatePreview);
+        });
+
+        function calculateBMI(weight, height) {
+            if (!weight || !height) return null;
+            const h = height / 100;
+            return (weight / (h * h)).toFixed(1);
+        }
+
+        function getBMITip(bmi) {
+            if (!bmi) return '';
+            bmi = parseFloat(bmi);
+            if (bmi < 18.5) return '📉 偏瘦：该增重了';
+            if (bmi < 24) return '✅ 正常：继续保持';
+            if (bmi < 28) return '⚠️ 超重：该控制了';
+            return '🚨 肥胖：建议锻炼';
+        }
+
+        function updatePreview() {
+            const nickname = document.getElementById('nickname').value || '我的昵称';
+            const weight = document.getElementById('weight').value || '--';
+            const height = document.getElementById('height').value;
+            const date = document.getElementById('date').value || new Date().toISOString().split('T')[0];
+            const selectedColor = document.querySelector('.color-option.selected');
+
+            document.getElementById('previewNickname').textContent = nickname;
+            document.getElementById('previewWeight').textContent = weight;
+            document.getElementById('previewDate').textContent = formatDate(date);
+
+            if (selectedColor) {
+                const colors = JSON.parse(selectedColor.dataset.colors);
+                document.getElementById('previewCard').style.background = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[1]} 100%)`;
+            }
+
+            // BMI
+            const bmi = calculateBMI(weight, height);
+            const bmiEl = document.getElementById('previewBMI');
+            if (bmi) {
+                bmiEl.textContent = `BMI: ${bmi}`;
+                bmiEl.style.display = 'block';
+                document.getElementById('bmiTips').textContent = getBMITip(bmi);
+            } else {
+                bmiEl.style.display = 'none';
+                document.getElementById('bmiTips').textContent = '';
+            }
+
+            // Text color for light backgrounds
+            const lightColors = ['#a8edea', '#fed6e3', '#ffecd2', '#fcb69f', '#fecfef'];
+            const colors = selectedColor ? JSON.parse(selectedColor.dataset.colors) : ['#667eea', '#764ba2'];
+            const isLight = lightColors.some(c => colors.includes(c));
+            const textColor = isLight ? '#1e293b' : 'white';
+            document.getElementById('previewCard').style.color = textColor;
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+            return `${date.getFullYear()}年${months[date.getMonth()]}${date.getDate()}日`;
+        }
+
+        function showMessage(text) {
+            const msg = document.getElementById('message');
+            msg.textContent = text;
+            msg.classList.add('show');
+            setTimeout(() => msg.classList.remove('show'), 2000);
+        }
+
+        async function downloadImage() {
+            const card = document.getElementById('previewCard');
+            try {
+                const canvas = await html2canvas(card, { scale: 2, useCORS: true });
+                const link = document.createElement('a');
+                link.download = `体重记录_${document.getElementById('date').value}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                showMessage('图片已下载');
+            } catch (e) {
+                showMessage('生成失败，请重试');
+                console.error(e);
+            }
+        }
+
+        async function copyImage() {
+            const card = document.getElementById('previewCard');
+            try {
+                const canvas = await html2canvas(card, { scale: 2, useCORS: true });
+                canvas.toBlob(async blob => {
+                    try {
+                        await navigator.clipboard.write([
+                            new ClipboardItem({ 'image/png': blob })
+                        ]);
+                        showMessage('已复制到剪贴板');
+                    } catch (e) {
+                        // Fallback: download
+                        const link = document.createElement('a');
+                        link.download = 'weight_card.png';
+                        link.href = canvas.toDataURL('image/png');
+                        link.click();
+                        showMessage('已下载图片');
+                    }
+                });
+            } catch (e) {
+                showMessage('复制失败，请重试');
+                console.error(e);
+            }
+        }
+
+        updatePreview();
+    </script>
+</body>
+</html>

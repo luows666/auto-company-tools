@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>早安卡片生成器 - 每日问候</title>
+    <meta name="description" content="生成精美的早安问候卡片，一键保存图片分享到朋友圈">
+    <meta name="keywords" content="早安,问候卡片,早上好,朋友圈,分享">
+    <style>
+        :root {
+            --primary: #f97316;
+            --primary-dark: #ea580c;
+            --bg: #fff7ed;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .template-btn {
+            padding: 10px 8px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .template-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .template-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .bg-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .bg-btn {
+            height: 40px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .bg-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .bg-btn.active {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(249, 115, 22, 0.3);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .generate-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .morning-display {
+            display: none;
+            text-align: center;
+        }
+
+        .morning-display.show {
+            display: block;
+        }
+
+        #morningCanvas {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .download-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tips {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+
+        .tips strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>早安卡片生成器</h1>
+        <p class="subtitle">生成精美的早安问候卡片，分享到朋友圈</p>
+
+        <div class="card">
+            <label for="nickname">你的昵称</label>
+            <input type="text" id="nickname" placeholder="显示在卡片上" maxlength="15">
+
+            <label>选择问候语</label>
+            <div class="template-grid" id="templateGrid">
+                <div class="template-btn active" data-template="0">早安正能量</div>
+                <div class="template-btn" data-template="1">简单问候</div>
+                <div class="template-btn" data-template="2">励志前行</div>
+                <div class="template-btn" data-template="3">温暖关怀</div>
+                <div class="template-btn" data-template="4">阳光心情</div>
+                <div class="template-btn" data-template="5">努力奋斗</div>
+                <div class="template-btn" data-template="6">美好祝福</div>
+                <div class="template-btn" data-template="7">新的一天</div>
+            </div>
+
+            <label>选择背景风格</label>
+            <div class="bg-grid" id="bgGrid">
+                <div class="bg-btn active" data-bg="0" style="background: linear-gradient(135deg, #ff9a56 0%, #ff6b6b 100%);"></div>
+                <div class="bg-btn" data-bg="1" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                <div class="bg-btn" data-bg="2" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                <div class="bg-btn" data-bg="3" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <div class="bg-btn" data-bg="4" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <div class="bg-btn" data-bg="5" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                <div class="bg-btn" data-bg="6" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                <div class="bg-btn" data-bg="7" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);"></div>
+            </div>
+
+            <button class="generate-btn" onclick="generateMorningCard()">生成早安卡片</button>
+        </div>
+
+        <div class="card morning-display" id="morningDisplay">
+            <canvas id="morningCanvas" width="600" height="800"></canvas>
+            <div class="action-btns">
+                <button class="action-btn download-btn" onclick="downloadCard()">下载图片</button>
+                <button class="action-btn copy-btn" onclick="copyToClipboard()">复制图片</button>
+            </div>
+        </div>
+
+        <div class="tips">
+            <strong>小贴士</strong>
+            每天早上发送一条早安问候，让朋友圈的朋友们感受到你的温暖和正能量！
+        </div>
+
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+    </div>
+
+    <script>
+        const templates = [
+            { title: '早安正能量', text: '新的一天，新的开始\n保持微笑，积极面对\n愿你今天收获满满幸福' },
+            { title: '早上好', text: '清晨的第一缕阳光\n照亮你美好的今天\n早安，朋友！' },
+            { title: '励志前行', text: '每一次早起都是进步\n每一次努力都有收获\n加油！新的一天' },
+            { title: '温暖关怀', text: '早上好呀\n记得吃早餐\n照顾好自己' },
+            { title: '阳光心情', text: '阳光正好，微风不燥\n美好的一天开始了\n保持好心情~' },
+            { title: '努力奋斗', text: '早起的鸟儿有虫吃\n新的一天加油干\n向梦想出发！' },
+            { title: '美好祝福', text: '愿你今天一切顺利\n愿你保持好心情\n早安吉祥！' },
+            { title: '新的一天', text: '又是崭新的一天\n忘记昨天的烦恼\n今天也要开心哦' }
+        ];
+
+        const backgrounds = [
+            ['#ff9a56', '#ff6b6b'],
+            ['#a8edea', '#fed6e3'],
+            ['#667eea', '#764ba2'],
+            ['#f093fb', '#f5576c'],
+            ['#4facfe', '#00f2fe'],
+            ['#43e97b', '#38f9d7'],
+            ['#fa709a', '#fee140'],
+            ['#30cfd0', '#330867']
+        ];
+
+        let currentData = null;
+        let selectedTemplate = 0;
+        let selectedBg = 0;
+
+        // 选择问候语模板
+        document.querySelectorAll('.template-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.template-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedTemplate = parseInt(btn.dataset.template);
+            });
+        });
+
+        // 选择背景
+        document.querySelectorAll('.bg-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bg-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedBg = parseInt(btn.dataset.bg);
+            });
+        });
+
+        function generateMorningCard() {
+            const nickname = document.getElementById('nickname').value || '小伙伴';
+            const template = templates[selectedTemplate];
+            const bg = backgrounds[selectedBg];
+
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+
+            currentData = {
+                nickname,
+                template,
+                bg,
+                date: dateStr,
+                time: `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+            };
+
+            drawMorningCard();
+            document.getElementById('morningDisplay').classList.add('show');
+        }
+
+        function drawMorningCard() {
+            const canvas = document.getElementById('morningCanvas');
+            const ctx = canvas.getContext('2d');
+            const bg = currentData.bg;
+
+            // 渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, bg[0]);
+            gradient.addColorStop(1, bg[1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // 装饰元素 - 太阳
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            ctx.beginPath();
+            ctx.arc(500, 80, 60, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 装饰 - 光芒
+            for (let i = 0; i < 8; i++) {
+                ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(500, 80);
+                const angle = (i * 45) * Math.PI / 180;
+                ctx.lineTo(500 + Math.cos(angle) * 100, 80 + Math.sin(angle) * 100);
+                ctx.stroke();
+            }
+
+            // 装饰 - 云朵
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            drawCloud(ctx, 80, 150, 1);
+            drawCloud(ctx, 450, 250, 0.8);
+
+            // 标题 - 早安
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 72px "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 10;
+            ctx.fillText('早安', 300, 120);
+            ctx.shadowBlur = 0;
+
+            // 副标题
+            ctx.font = '28px "Microsoft YaHei", sans-serif';
+            ctx.fillText(currentData.template.title, 300, 170);
+
+            // 昵称
+            ctx.font = '24px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(currentData.nickname, 300, 220);
+
+            // 问候语背景框
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            roundRect(ctx, 50, 260, 500, 200, 20);
+            ctx.fill();
+
+            // 问候语文字
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '24px "Microsoft YaHei", sans-serif';
+            const lines = currentData.template.text.split('\n');
+            let y = 310;
+            lines.forEach(line => {
+                ctx.fillText(line, 300, y);
+                y += 40;
+            });
+
+            // 底部装饰 - 太阳
+            ctx.fillStyle = 'rgba(255,255,255,0.15)';
+            ctx.beginPath();
+            ctx.arc(300, 700, 120, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 日期
+            ctx.font = '20px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(currentData.date, 300, 580);
+
+            // 时间
+            ctx.font = '18px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText(`发布于 ${currentData.time}`, 300, 610);
+
+            // 水印
+            ctx.font = '16px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillText('早安问候卡片', 300, 770);
+        }
+
+        function drawCloud(ctx, x, y, scale) {
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.scale(scale, scale);
+            ctx.beginPath();
+            ctx.arc(0, 0, 30, 0, Math.PI * 2);
+            ctx.arc(35, -5, 25, 0, Math.PI * 2);
+            ctx.arc(60, 0, 30, 0, Math.PI * 2);
+            ctx.arc(35, 15, 20, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('morningCanvas');
+            const link = document.createElement('a');
+            link.download = `早安卡片_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyToClipboard() {
+            const canvas = document.getElementById('morningCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('已复制到剪贴板！');
+            } catch (err) {
+                alert('复制失败，请长按图片保存');
+            }
+        }
+    </script>
+</body>
+</html>

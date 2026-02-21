@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>彩虹屁生成器 - 夸夸卡</title>
+    <style>
+        :root {
+            --primary: #f472b6;
+            --primary-dark: #ec4899;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #fdf4ff 0%, #fce7f3 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            color: #9ca3af;
+            font-size: 0.9rem;
+        }
+
+        .card-preview {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(236, 72, 153, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .preview-title {
+            text-align: center;
+            color: #ec4899;
+            font-size: 0.85rem;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        #cardCanvas {
+            width: 100%;
+            border-radius: 16px;
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #fce7f3;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            background: white;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #f472b6;
+        }
+
+        .style-select {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .style-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .style-option:hover {
+            transform: scale(1.05);
+        }
+
+        .style-option.active {
+            border-color: #ec4899;
+            box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            color: white;
+            box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #ec4899;
+            border: 2px solid #fce7f3;
+        }
+
+        .btn-secondary:hover {
+            background: #fdf2f8;
+            border-color: #f472b6;
+        }
+
+        .praise-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #fdf2f8, #fce7f3);
+            border: 2px dashed #f472b6;
+            border-radius: 12px;
+            color: #ec4899;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-bottom: 20px;
+            transition: all 0.3s;
+        }
+
+        .praise-btn:hover {
+            background: linear-gradient(135deg, #fce7f3, #fbcfe8);
+            transform: scale(1.02);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #374151;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            color: #9ca3af;
+            font-size: 0.8rem;
+        }
+
+        .footer a {
+            color: #ec4899;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>✨ 彩虹屁生成器 ✨</h1>
+            <p>生成专属夸夸卡，让每一天都充满正能量</p>
+        </header>
+
+        <button class="praise-btn" onclick="generateRandomPraise()">
+            🎲 随机生成彩虹屁
+        </button>
+
+        <div class="card-preview">
+            <div class="preview-title">预览</div>
+            <canvas id="cardCanvas" width="400" height="500"></canvas>
+        </div>
+
+        <div class="form-group">
+            <label>你的昵称</label>
+            <input type="text" id="nickname" placeholder="输入你的昵称" maxlength="20" oninput="updateCard()">
+        </div>
+
+        <div class="form-group">
+            <label>彩虹屁内容</label>
+            <input type="text" id="praiseText" placeholder="输入想对自己说的话" maxlength="50" oninput="updateCard()">
+        </div>
+
+        <div class="form-group">
+            <label>选择背景风格</label>
+            <div class="style-select" id="styleSelect"></div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn btn-primary" onclick="downloadCard()">📥 下载图片</button>
+            <button class="btn btn-secondary" onclick="copyCard()">📋 复制到剪贴板</button>
+        </div>
+
+        <div class="footer">
+            <a href="index.html">← 返回工具箱</a>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        const backgrounds = [
+            'linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%)',
+            'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+            'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+            'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+            'linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%)',
+            'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)',
+            'linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%)',
+            'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)'
+        ];
+
+        const backgroundNames = [
+            '粉色浪漫',
+            '金色阳光',
+            '蓝天白云',
+            '清新绿意',
+            '樱花绽放',
+            '梦幻紫罗兰',
+            '优雅紫色',
+            '温暖橙色'
+        ];
+
+        const praiseTexts = [
+            "今天也是超棒的一天！",
+            "你真的很优秀！",
+            "坚持就是胜利！",
+            "每一天都值得期待！",
+            "你比昨天更进步了！",
+            "相信自己，你可以的！",
+            "努力的人最可爱！",
+            "今天也要加油呀！",
+            "你是最棒的！",
+            "保持热爱，奔赴山海！",
+            "今天也要闪闪发光！",
+            "你是独一无二的！",
+            "今天的你也很厉害！",
+            "坚持下去会有惊喜！",
+            "你值得一切美好！",
+            "每一步都算数！",
+            "今天也要开开心心！",
+            "你的努力不会白费！",
+            "今天也要元气满满！",
+            "你是最厉害的人！"
+        ];
+
+        let selectedStyle = 0;
+
+        // 初始化背景选择器
+        const styleSelect = document.getElementById('styleSelect');
+        backgrounds.forEach((bg, index) => {
+            const div = document.createElement('div');
+            div.className = 'style-option' + (index === 0 ? ' active' : '');
+            div.style.background = bg;
+            div.onclick = () => selectStyle(index);
+            styleSelect.appendChild(div);
+        });
+
+        function selectStyle(index) {
+            document.querySelectorAll('.style-option').forEach((el, i) => {
+                el.classList.toggle('active', i === index);
+            });
+            selectedStyle = index;
+            updateCard();
+        }
+
+        function generateRandomPraise() {
+            const randomText = praiseTexts[Math.floor(Math.random() * praiseTexts.length)];
+            document.getElementById('praiseText').value = randomText;
+            updateCard();
+        }
+
+        function drawHeart(ctx, x, y, size, color) {
+            ctx.save();
+            ctx.fillStyle = color;
+            ctx.beginPath();
+            ctx.moveTo(x, y + size * 0.3);
+            ctx.bezierCurveTo(x, y, x - size * 0.5, y, x - size * 0.5, y + size * 0.3);
+            ctx.bezierCurveTo(x - size * 0.5, y + size * 0.6, x, y + size * 0.9, x, y + size);
+            ctx.bezierCurveTo(x, y + size * 0.9, x + size * 0.5, y + size * 0.6, x + size * 0.5, y + size * 0.3);
+            ctx.bezierCurveTo(x + size * 0.5, y, x, y, x, y + size * 0.3);
+            ctx.fill();
+            ctx.restore();
+        }
+
+        function updateCard() {
+            const canvas = document.getElementById('cardCanvas');
+            const ctx = canvas.getContext('2d');
+            const nickname = document.getElementById('nickname').value || '小伙伴';
+            const praiseText = document.getElementById('praiseText').value || '今天也是超棒的一天！';
+
+            // 绘制背景
+            ctx.fillStyle = backgrounds[selectedStyle];
+            ctx.fillRect(0, 0, 400, 500);
+
+            // 添加装饰心形
+            const heartColors = ['rgba(236, 72, 153, 0.3)', 'rgba(244, 114, 182, 0.3)', 'rgba(251, 207, 232, 0.5)'];
+            for (let i = 0; i < 8; i++) {
+                const x = 30 + Math.random() * 340;
+                const y = 30 + Math.random() * 440;
+                const size = 15 + Math.random() * 25;
+                drawHeart(ctx, x, y, size, heartColors[i % heartColors.length]);
+            }
+
+            // 顶部标题
+            ctx.fillStyle = '#ec4899';
+            ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('✨ 今日夸夸 ✨', 200, 50);
+
+            // 绘制主卡片区域
+            const cardX = 40;
+            const cardY = 80;
+            const cardW = 320;
+            const cardH = 340;
+
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            roundRect(ctx, cardX, cardY, cardW, cardH, 20);
+            ctx.fill();
+
+            // 昵称
+            ctx.fillStyle = '#ec4899';
+            ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(nickname, 200, 140);
+
+            // 分隔线
+            ctx.strokeStyle = '#fce7f3';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(80, 165);
+            ctx.lineTo(320, 165);
+            ctx.stroke();
+
+            // 彩虹屁内容
+            ctx.fillStyle = '#374151';
+            ctx.font = '24px -apple-system, BlinkMacSystemFont, sans-serif';
+
+            // 处理长文本换行
+            const maxWidth = 280;
+            const lines = wrapText(ctx, praiseText, maxWidth);
+            const startY = 220 - (lines.length - 1) * 15;
+            lines.forEach((line, i) => {
+                ctx.fillText(line, 200, startY + i * 35);
+            });
+
+            // 底部日期
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText(dateStr, 200, 400);
+
+            // 底部装饰
+            ctx.fillStyle = '#ec4899';
+            ctx.font = '12px -apple-system, BlinkMacSystemFont, sans-serif';
+            ctx.fillText('✨ 每天都要夸夸自己 ✨', 200, 430);
+        }
+
+        function roundRect(ctx, x, y, w, h, r) {
+            ctx.beginPath();
+            ctx.moveTo(x + r, y);
+            ctx.lineTo(x + w - r, y);
+            ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+            ctx.lineTo(x + w, y + h - r);
+            ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+            ctx.lineTo(x + r, y + h);
+            ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+            ctx.lineTo(x, y + r);
+            ctx.quadraticCurveTo(x, y, x + r, y);
+            ctx.closePath();
+        }
+
+        function wrapText(ctx, text, maxWidth) {
+            const words = text.split('');
+            const lines = [];
+            let currentLine = '';
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = currentLine + words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && currentLine !== '') {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            lines.push(currentLine);
+
+            // 限制最多3行
+            if (lines.length > 3) {
+                return [lines[0], lines[1], lines[2].substring(0, lines[2].length - 1) + '...'];
+            }
+            return lines;
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('cardCanvas');
+            const link = document.createElement('a');
+            link.download = 'praise-card.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            showToast('图片已下载！');
+        }
+
+        async function copyCard() {
+            const canvas = document.getElementById('cardCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                showToast('已复制到剪贴板！');
+            } catch (err) {
+                showToast('复制失败，请长按图片保存');
+            }
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2500);
+        }
+
+        // 初始化
+        document.getElementById('nickname').value = '';
+        document.getElementById('praiseText').value = '今天也是超棒的一天！';
+        updateCard();
+    </script>
+</body>
+</html>

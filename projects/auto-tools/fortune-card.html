@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今日运势生成器 - 幸运卡片</title>
+    <meta name="description" content="生成你的今日运势卡片，一键保存图片分享到朋友圈">
+    <meta name="keywords" content="今日运势,幸运卡片,星座,占卜,分享">
+    <style>
+        :root {
+            --primary: #f59e0b;
+            --primary-dark: #d97706;
+            --bg: #fffbeb;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .zodiac-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .zodiac-btn {
+            padding: 10px 4px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .zodiac-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .zodiac-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .generate-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-bottom: 16px;
+        }
+
+        .generate-btn:hover {
+            background: var(--primary-dark);
+        }
+
+        .fortune-display {
+            display: none;
+            text-align: center;
+        }
+
+        .fortune-display.show {
+            display: block;
+        }
+
+        #fortuneCanvas {
+            width: 100%;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .action-btns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        .download-btn {
+            background: #10b981;
+            color: white;
+        }
+
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tips {
+            background: #fef3c7;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 16px;
+            font-size: 0.875rem;
+            color: #92400e;
+        }
+
+        .tips strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 0.875rem;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+
+        .lucky-numbers {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+
+        .lucky-num {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>今日运势生成器</h1>
+        <p class="subtitle">生成你的专属运势卡片，分享到朋友圈</p>
+
+        <div class="card">
+            <label>选择你的星座</label>
+            <div class="zodiac-grid" id="zodiacGrid">
+                <div class="zodiac-btn" data-zodiac="白羊座">白羊♈</div>
+                <div class="zodiac-btn" data-zodiac="金牛座">金牛♉</div>
+                <div class="zodiac-btn" data-zodiac="双子座">双子♊</div>
+                <div class="zodiac-btn" data-zodiac="巨蟹座">巨蟹♋</div>
+                <div class="zodiac-btn" data-zodiac="狮子座">狮子♌</div>
+                <div class="zodiac-btn" data-zodiac="处女座">处女♍</div>
+                <div class="zodiac-btn" data-zodiac="天秤座">天秤♎</div>
+                <div class="zodiac-btn" data-zodiac="天蝎座">天蝎♏</div>
+                <div class="zodiac-btn" data-zodiac="射手座">射手♐</div>
+                <div class="zodiac-btn" data-zodiac="摩羯座">摩羯♑</div>
+                <div class="zodiac-btn" data-zodiac="水瓶座">水瓶♒</div>
+                <div class="zodiac-btn" data-zodiac="双鱼座">双鱼♓</div>
+            </div>
+
+            <label for="nickname">你的昵称（可选）</label>
+            <input type="text" id="nickname" placeholder="显示在卡片上" maxlength="20">
+
+            <button class="generate-btn" onclick="generateFortune()">生成今日运势</button>
+        </div>
+
+        <div class="card fortune-display" id="fortuneDisplay">
+            <canvas id="fortuneCanvas" width="600" height="800"></canvas>
+            <div class="action-btns">
+                <button class="action-btn download-btn" onclick="downloadCard()">下载图片</button>
+                <button class="action-btn copy-btn" onclick="copyToClipboard()">复制图片</button>
+            </div>
+        </div>
+
+        <div class="tips">
+            <strong>小贴士</strong>
+            点击「生成今日运势」获取你的专属运势，包含幸运数字、运势解读等内容生成后可以下载或复制分享到朋友圈
+        </div>
+
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+    </div>
+
+    <script>
+        const zodiacEmojis = {
+            '白羊座': '♈', '金牛座': '♉', '双子座': '♊', '巨蟹座': '♋',
+            '狮子座': '♌', '处女座': '♍', '天秤座': '♎', '天蝎座': '♏',
+            '射手座': '♐', '摩羯座': '♑', '水瓶座': '♒', '双鱼座': '♓'
+        };
+
+        const fortunes = [
+            { emoji: '🌟', text: '今天会有意想不到的好运降临在你身边！保持开放的心态，接受这份惊喜吧。', rating: 95 },
+            { emoji: '💪', text: '你的努力即将得到回报，今天是收获的一天！坚持下去，胜利就在前方。', rating: 90 },
+            { emoji: '💡', text: '灵感和创意今天会特别丰富，抓住机会，你的想法可能会改变一切！', rating: 88 },
+            { emoji: '❤️', text: '爱情运势旺盛，单身的你可能会有意外邂逅，已有伴侣的感情升温。', rating: 85 },
+            { emoji: '💰', text: '财运不错，适合进行理财规划或投资决策。但要谨慎，不要冲动行事。', rating: 82 },
+            { emoji: '🎯', text: '目标明确，效率超高的一天！完成重要任务的好时机。', rating: 80 },
+            { emoji: '🤝', text: '人际关系和谐，适合团队合作。与他人建立联系会有意想不到的收获。', rating: 78 },
+            { emoji: '📚', text: '学习运不错，今天学到的知识可能会在将来派上用场。', rating: 75 },
+            { emoji: '🏃', text: '行动力十足，但要注意节奏。劳逸结合才能保持最佳状态。', rating: 72 },
+            { emoji: '🌈', text: '虽然今天有点小波折，但这都是成长的必经之路。保持乐观，雨后彩虹会更美。', rating: 70 }
+        ];
+
+        const luckyColors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD', '#98D8C8', '#F7DC6F'];
+        const luckyDirections = ['东', '南', '西', '北', '东南', '东北', '西南', '西北'];
+        const luckyFoods = ['火锅', '烧烤', '日料', '川菜', '粤菜', '泰国菜', '披萨', '汉堡', '沙拉', '饺子'];
+
+        let currentFortune = null;
+        let selectedZodiac = null;
+
+        // 选择星座
+        document.querySelectorAll('.zodiac-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.zodiac-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedZodiac = btn.dataset.zodiac;
+            });
+        });
+
+        function getRandomItem(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateLuckyNumbers() {
+            const nums = [];
+            while(nums.length < 6) {
+                const num = Math.floor(Math.random() * 49) + 1;
+                if(!nums.includes(num)) nums.push(num);
+            }
+            return nums.sort((a, b) => a - b);
+        }
+
+        function generateFortune() {
+            if (!selectedZodiac) {
+                alert('请先选择一个星座！');
+                return;
+            }
+
+            const nickname = document.getElementById('nickname').value || '小伙伴';
+            const fortune = getRandomItem(fortunes);
+            const luckyNum = generateLuckyNumbers();
+            const color = getRandomItem(luckyColors);
+            const direction = getRandomItem(luckyDirections);
+            const food = getRandomItem(luckyFoods);
+
+            currentFortune = {
+                zodiac: selectedZodiac,
+                emoji: zodiacEmojis[selectedZodiac],
+                nickname,
+                fortune,
+                luckyNum,
+                color,
+                direction,
+                food,
+                date: new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' })
+            };
+
+            drawFortuneCard();
+            document.getElementById('fortuneDisplay').classList.add('show');
+        }
+
+        function drawFortuneCard() {
+            const canvas = document.getElementById('fortuneCanvas');
+            const ctx = canvas.getContext('2d');
+
+            // 渐变背景
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, currentFortune.color);
+            gradient.addColorStop(1, shadeColor(currentFortune.color, -30));
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // 装饰圆圈
+            ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            ctx.beginPath();
+            ctx.arc(100, 100, 150, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(500, 700, 200, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 标题
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 42px "Microsoft YaHei", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('今日运势', 300, 80);
+
+            // 星座
+            ctx.font = 'bold 56px "Microsoft YaHei", sans-serif';
+            ctx.fillText(`${currentFortune.emoji} ${currentFortune.zodiac}`, 300, 160);
+
+            // 昵称
+            ctx.font = '24px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.9)';
+            ctx.fillText(currentFortune.nickname, 300, 200);
+
+            // 运势 emoji 和评分
+            ctx.font = '80px sans-serif';
+            ctx.fillText(currentFortune.fortune.emoji, 300, 300);
+
+            // 运势文字背景
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            roundRect(ctx, 50, 330, 500, 120, 20);
+            ctx.fill();
+
+            // 运势解读
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '22px "Microsoft YaHei", sans-serif';
+            const text = currentFortune.fortune.text;
+            const lines = wrapText(ctx, text, 460);
+            let y = 360;
+            lines.forEach(line => {
+                ctx.fillText(line, 300, y);
+                y += 32;
+            });
+
+            // 幸运信息区域
+            const infoY = 490;
+
+            // 幸运数字
+            ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
+            ctx.fillText('幸运数字', 150, infoY);
+            ctx.font = 'bold 28px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = '#ffffff';
+            ctx.fillText(currentFortune.luckyNum.join('  '), 150, infoY + 40);
+
+            // 幸运方向
+            ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
+            ctx.fillText('幸运方向', 450, infoY);
+            ctx.font = 'bold 28px "Microsoft YaHei", sans-serif';
+            ctx.fillText(currentFortune.direction, 450, infoY + 40);
+
+            // 幸运美食
+            ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
+            ctx.fillText('幸运美食', 150, infoY + 90);
+            ctx.font = 'bold 28px "Microsoft YaHei", sans-serif';
+            ctx.fillText(currentFortune.food, 150, infoY + 130);
+
+            // 幸运颜色
+            ctx.font = 'bold 20px "Microsoft YaHei", sans-serif';
+            ctx.fillText('幸运颜色', 450, infoY + 90);
+            ctx.fillStyle = currentFortune.color;
+            ctx.fillRect(430, infoY + 105, 40, 30);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 18px "Microsoft YaHei", sans-serif';
+            ctx.fillText(currentFortune.color, 450, infoY + 130);
+
+            // 评分
+            ctx.fillStyle = 'rgba(255,255,255,0.3)';
+            roundRect(ctx, 150, 680, 300, 60, 30);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 24px "Microsoft YaHei", sans-serif';
+            ctx.fillText(`运势评分: {currentFortune.fortune.rating}分`, 300, 720);
+
+            // 日期
+            ctx.font = '16px "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.7)';
+            ctx.fillText(currentFortune.date, 300, 770);
+
+            // 水印
+            ctx.font = '14px "Microsoft YaHei", sans-serif';
+            ctx.fillText('auto-tools', 300, 790);
+        }
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+
+        function wrapText(ctx, text, maxWidth) {
+            const lines = [];
+            let currentLine = '';
+
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const testLine = currentLine + char;
+                const metrics = ctx.measureText(testLine);
+
+                if (metrics.width > maxWidth && currentLine !== '') {
+                    lines.push(currentLine);
+                    currentLine = char;
+                } else {
+                    currentLine = testLine;
+                }
+            }
+
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        function shadeColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            return '#' + (0x1000000 + (R < 255 ? R < 1 ? 0 : R : 255) * 0x10000 +
+                (G < 255 ? G < 1 ? 0 : G : 255) * 0x100 +
+                (B < 255 ? B < 1 ? 0 : B : 255)).toString(16).slice(1);
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('fortuneCanvas');
+            const link = document.createElement('a');
+            link.download = `今日运势_${currentFortune.zodiac}_${Date.now()}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyToClipboard() {
+            const canvas = document.getElementById('fortuneCanvas');
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('已复制到剪贴板！');
+            } catch (err) {
+                alert('复制失败，请长按图片保存');
+            }
+        }
+    </script>
+</body>
+</html>

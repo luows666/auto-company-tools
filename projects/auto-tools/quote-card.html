@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>毒鸡汤生成器 - 朋友圈语录卡片</title>
+    <meta name="description" content="生成精美的毒鸡汤/语录卡片，一键保存图片分享到朋友圈">
+    <meta name="keywords" content="毒鸡汤,语录卡片,朋友圈,生成器,分享">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        textarea, input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        textarea:focus, input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .option-btn {
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 12px;
+            cursor: pointer;
+            text-align: center;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .option-btn.selected {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .color-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .color-btn {
+            height: 40px;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .color-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .color-btn.selected {
+            border-color: var(--text);
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+            width: 100%;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        /* Preview Canvas */
+        #preview {
+            width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            margin-bottom: 16px;
+        }
+
+        .quote-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+        }
+
+        .quote-item {
+            padding: 10px 12px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+
+        .quote-item:hover {
+            background: #e2e8f0;
+        }
+
+        .tips {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>毒鸡汤生成器</h1>
+        <p class="subtitle">生成精美语录卡片，一键保存分享朋友圈</p>
+
+        <div class="card">
+            <label>选择毒鸡汤类型</label>
+            <div class="options">
+                <div class="option-btn selected" data-type="dujitang" onclick="selectType(this)">毒鸡汤</div>
+                <div class="option-btn" data-type="lizhi" onclick="selectType(this)">励志</div>
+                <div class="option-btn" data-type="aiqing" onclick="selectType(this)">爱情</div>
+            </div>
+
+            <label>或者自定义内容</label>
+            <textarea id="customText" placeholder="在这里输入你想说的话..."></textarea>
+
+            <label>选择背景颜色</label>
+            <div class="color-options">
+                <div class="color-btn selected" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" onclick="selectColor(this, 'gradient1')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);" onclick="selectColor(this, 'gradient2')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);" onclick="selectColor(this, 'gradient3')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);" onclick="selectColor(this, 'gradient4')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);" onclick="selectColor(this, 'gradient5')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);" onclick="selectColor(this, 'gradient6')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #d299c2 0%, #fef9d7 100%);" onclick="selectColor(this, 'gradient7')"></div>
+                <div class="color-btn" style="background: linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%);" onclick="selectColor(this, 'gradient8')"></div>
+            </div>
+
+            <label>添加作者（可选）</label>
+            <input type="text" id="author" placeholder="—— 作者">
+
+            <button class="btn-primary" onclick="generateCard()">生成卡片</button>
+        </div>
+
+        <div class="card" id="resultCard" style="display: none;">
+            <canvas id="canvas" width="400" height="500"></canvas>
+            <div class="btn-group">
+                <button class="btn-primary" onclick="downloadCard()">下载图片</button>
+                <button class="btn-secondary" onclick="copyCard()">复制到剪贴板</button>
+            </div>
+        </div>
+
+        <p class="tips">点击下载保存图片，或复制到剪贴板分享到朋友圈</p>
+    </div>
+
+    <script>
+        const quotes = {
+            dujitang: [
+                "努力不一定成功，但不努力真的很轻松",
+                "只要肯努力，没有什么是做不到的，除了脱贫",
+                "人生就是这样，起起落落落落落落",
+                "每天早上起床困难的不是睁开眼睛，而是起来",
+                "咸鱼总有翻身的一天，但翻身后还是咸鱼",
+                "梦想还是要有的，万一实现了呢",
+                "你全力以赴做到最好，可能还不如别人随便搞搞",
+                "失败是成功之母，但成功六亲不认",
+                "生活不止眼前的苟且，还有读不懂的诗和到不了的远方",
+                "不要总觉得人生无望，你的苦日子还在后头",
+                "上帝是公平的，给了你丑的外表，还会给你低的智商",
+                "你全力做到的最好，可能还不如别人的随便搞搞",
+                "为什么自古红颜多薄命？因为没人会在意丑的人活多久",
+                "有些事不是我不在意，而是我在意了又能怎样",
+                "今天解决不了的事，不必着急，因为明天还是解决不了"
+            ],
+            lizhi: [
+                "你要悄悄努力，然后惊艳所有人",
+                "星光不问赶路人，时光不负有心人",
+                "纵有疾风起，人生不言弃",
+                "乾坤未定，你我皆是黑马",
+                "所有的坚持，都会发光",
+                "未来的你，一定会感谢现在拼命的自己",
+                "梦想不会缺席，只是迟到",
+                "与其仰望星空，不如脚踏实地",
+                "没有伞的孩子，必须努力奔跑",
+                "生活明朗，万物可爱，人间值得，未来可期"
+            ],
+            aiqing: [
+                "从前车马很慢，书信很远，一生只够爱一个人",
+                "陪伴是最长情的告白",
+                "最好的爱情，是相互成就",
+                "遇见你，是我这辈子最美丽的意外",
+                "不是因为合适才在一起，而是因为喜欢才磨合",
+                "真正的爱情，经得起平淡，也经得起风雨",
+                "愿得一人心，白首不分离",
+                "love is not about how many times you say it, but how much you mean it",
+                "和你在一起，所有的风景都变成了你",
+                "斯人若彩虹，遇上方知有"
+            ]
+        };
+
+        let currentType = 'dujitang';
+        let currentColor = 'gradient1';
+        let generatedBlob = null;
+
+        const gradients = {
+            gradient1: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            gradient2: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            gradient3: 'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            gradient4: 'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            gradient5: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            gradient6: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            gradient7: 'linear-gradient(135deg, #d299c2 0%, #fef9d7 100%)',
+            gradient8: 'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)'
+        };
+
+        function selectType(btn) {
+            document.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            currentType = btn.dataset.type;
+        }
+
+        function selectColor(btn, color) {
+            document.querySelectorAll('.color-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            currentColor = color;
+        }
+
+        function getRandomQuote() {
+            const list = quotes[currentType];
+            return list[Math.floor(Math.random() * list.length)];
+        }
+
+        function generateCard() {
+            let text = document.getElementById('customText').value.trim();
+            if (!text) {
+                text = getRandomQuote();
+            }
+
+            const author = document.getElementById('author').value.trim();
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+            const colorStops = gradients[currentColor].match(/#[a-fA-F0-9]{6}/g);
+            if (colorStops && colorStops.length >= 2) {
+                gradient.addColorStop(0, colorStops[0]);
+                gradient.addColorStop(1, colorStops[1]);
+            } else {
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Add decorative elements
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+            ctx.beginPath();
+            ctx.arc(50, 80, 80, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(350, 420, 100, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw quote marks
+            ctx.font = '100px Georgia';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+            ctx.fillText('"', 30, 120);
+            ctx.fillText('"', 340, 450);
+
+            // Draw text
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            // Auto-wrap text
+            const maxWidth = 320;
+            const lineHeight = 36;
+            let fontSize = 28;
+            let lines = [];
+
+            do {
+                ctx.font = `${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`;
+                lines = wrapText(ctx, text, maxWidth);
+                if (lines.length > 6 && fontSize > 18) {
+                    fontSize -= 2;
+                } else {
+                    break;
+                }
+            } while (lines.length > 6);
+
+            const startY = 180 - (lines.length - 1) * lineHeight / 2;
+            lines.forEach((line, i) => {
+                ctx.fillText(line, canvas.width / 2, startY + i * lineHeight);
+            });
+
+            // Draw author
+            if (author) {
+                ctx.font = '16px "PingFang SC", "Microsoft YaHei", sans-serif';
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.fillText(author, canvas.width / 2, 400);
+            }
+
+            // Draw watermark
+            ctx.font = '12px "PingFang SC", "Microsoft YaHei", sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            ctx.fillText('毒鸡汤生成器', canvas.width / 2, 470);
+
+            // Show result
+            document.getElementById('resultCard').style.display = 'block';
+
+            // Generate blob for copying
+            canvas.toBlob(blob => {
+                generatedBlob = blob;
+            });
+        }
+
+        function wrapText(ctx, text, maxWidth) {
+            const words = text.split('');
+            const lines = [];
+            let currentLine = '';
+
+            for (let i = 0; i < words.length; i++) {
+                const testLine = currentLine + words[i];
+                const metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && currentLine !== '') {
+                    lines.push(currentLine);
+                    currentLine = words[i];
+                } else {
+                    currentLine = testLine;
+                }
+            }
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('canvas');
+            const link = document.createElement('a');
+            link.download = '毒鸡汤卡片.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        function copyCard() {
+            const canvas = document.getElementById('canvas');
+            canvas.toBlob(blob => {
+                try {
+                    const item = new ClipboardItem({ 'image/png': blob });
+                    navigator.clipboard.write([item]).then(() => {
+                        alert('已复制到剪贴板！去朋友圈粘贴图片吧');
+                    }).catch(() => {
+                        alert('复制失败，请长按图片保存');
+                    });
+                } catch (e) {
+                    alert('浏览器不支持复制图片，请点击下载保存');
+                }
+            });
+        }
+
+        // Auto-generate on load
+        window.onload = () => {
+            generateCard();
+        };
+    </script>
+</body>
+</html>

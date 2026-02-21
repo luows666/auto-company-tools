@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>今天吃什么 - 随机美食选择器</title>
+    <meta name="description" content="纠结今天吃什么？让随机美食选择器帮你做决定！支持多种美食分类，一键生成今日食谱。">
+    <meta property="og:title" content="今天吃什么 - 随机美食选择器">
+    <meta property="og:description" content="纠结今天吃什么？让随机美食选择器帮你做决定！">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            font-family: 'Noto Sans SC', sans-serif;
+        }
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+        }
+        .food-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.5s ease;
+            box-shadow: 0 10px 40px rgba(245, 87, 108, 0.3);
+        }
+        .food-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(245, 87, 108, 0.4);
+        }
+        .spin-btn {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            border: none;
+            padding: 16px 48px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 30px rgba(250, 112, 154, 0.4);
+        }
+        .spin-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(250, 112, 154, 0.5);
+        }
+        .spin-btn:active {
+            transform: translateY(0);
+        }
+        .category-btn {
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .category-btn.active {
+            border-color: currentColor;
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .category-btn.chinese { background: #ff6b6b; color: white; }
+        .category-btn.western { background: #4ecdc4; color: white; }
+        .category-btn.japanese { background: #ffe66d; color: #333; }
+        .category-btn.fastfood { background: #95e1d3; color: #333; }
+        .category-btn.snacks { background: #dda0dd; color: white; }
+        .category-btn.dessert { background: #ffb6c1; color: #333; }
+        .category-btn.all { background: #667eea; color: white; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-5deg); }
+            75% { transform: rotate(5deg); }
+        }
+        .shaking {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+        .emoji-food {
+            font-size: 80px;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .background-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+        .background-option:hover {
+            transform: scale(1.1);
+        }
+        .background-option.selected {
+            border-color: #333;
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center p-4">
+    <div class="glass w-full max-w-lg p-8">
+        <h1 class="text-3xl font-bold text-center mb-2 text-gray-800">🍽️ 今天吃什么？</h1>
+        <p class="text-center text-gray-500 mb-6">选择困难症福音，一键帮你做决定！</p>
+
+        <!-- 昵称输入 -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-2">你的昵称（可选）</label>
+            <input type="text" id="nickname" placeholder="输入昵称"
+                class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:border-purple-500 focus:ring-2 focus:ring-purple-200 outline-none transition">
+        </div>
+
+        <!-- 美食分类 -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">选择美食分类</label>
+            <div class="flex flex-wrap gap-2">
+                <button class="category-btn all active" data-category="all">全部</button>
+                <button class="category-btn chinese" data-category="chinese">中餐</button>
+                <button class="category-btn western" data-category="western">西餐</button>
+                <button class="category-btn japanese" data-category="japanese">日料</button>
+                <button class="category-btn fastfood" data-category="fastfood">快餐</button>
+                <button class="category-btn snacks" data-category="snacks">小吃</button>
+                <button class="category-btn dessert" data-category="dessert">甜品</button>
+            </div>
+        </div>
+
+        <!-- 背景风格 -->
+        <div class="mb-6">
+            <label class="block text-sm font-medium text-gray-700 mb-3">选择卡片风格</label>
+            <div class="flex flex-wrap gap-2" id="bgOptions">
+                <div class="background-option selected" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%)" data-bg="0"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%)" data-bg="1"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%)" data-bg="2"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)" data-bg="3"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)" data-bg="4"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #fa709a 0%, #f5576c 100%)" data-bg="5"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)" data-bg="6"></div>
+                <div class="background-option" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)" data-bg="7"></div>
+            </div>
+        </div>
+
+        <!-- 抽取按钮 -->
+        <button class="spin-btn w-full mb-6" onclick="spinFood()">
+            🎲 帮我选一个！
+        </button>
+
+        <!-- 结果展示 -->
+        <div id="result" class="food-card hidden mb-6">
+            <span class="emoji-food" id="foodEmoji">🍜</span>
+            <h2 class="text-3xl font-bold text-white mb-2" id="foodName">牛肉面</h2>
+            <p class="text-white/80 text-lg" id="foodCategory">中餐</p>
+            <p class="text-white/60 text-sm mt-2" id="recommendation">今天就吃这个，不会错的！</p>
+        </div>
+
+        <!-- 操作按钮 -->
+        <div id="actions" class="hidden flex gap-3 mb-6">
+            <button onclick="downloadCard()" class="flex-1 bg-white border-2 border-purple-500 text-purple-500 py-3 rounded-xl font-semibold hover:bg-purple-50 transition">
+                📥 下载图片
+            </button>
+            <button onclick="copyToClipboard()" class="flex-1 bg-white border-2 border-purple-500 text-purple-500 py-3 rounded-xl font-semibold hover:bg-purple-50 transition">
+                📋 复制分享
+            </button>
+        </div>
+
+        <!-- 返回主页 -->
+        <div class="text-center">
+            <a href="index.html" class="text-gray-500 hover:text-purple-500 transition">← 返回工具箱</a>
+        </div>
+    </div>
+
+    <!-- 隐藏的 canvas 用于生成图片 -->
+    <canvas id="canvas" style="display:none"></canvas>
+
+    <script>
+        // 美食数据
+        const foodData = {
+            chinese: [
+                { name: '牛肉面', emoji: '🍜', recommendation: '热气腾腾的牛肉面，暖胃又暖心！' },
+                { name: '宫保鸡丁', emoji: '🍗', recommendation: '经典川菜，麻辣鲜香！' },
+                { name: '红烧肉', emoji: '🥩', recommendation: '肥而不腻，入口即化！' },
+                { name: '鱼香肉丝', emoji: '🥢', recommendation: '酸甜可口，下饭神器！' },
+                { name: '蛋炒饭', emoji: '🍳', recommendation: '简单却不简单！' },
+                { name: '麻辣烫', emoji: '🥘', recommendation: '万物皆可烫，超级满足！' },
+                { name: '火锅', emoji: '🍲', recommendation: '没有什么是一顿火锅解决不了的！' },
+                { name: '烤鸭', emoji: '🦆', recommendation: '皮脆肉嫩，京味经典！' },
+                { name: '小笼包', emoji: '🥟', recommendation: '皮薄馅大，汤汁浓郁！' },
+                { name: '炒河粉', emoji: '🍝', recommendation: '锅气十足，粤式风味！' },
+                { name: '酸菜鱼', emoji: '🐟', recommendation: '酸辣开胃，超好吃！' },
+                { name: '葱油拌面', emoji: '🍜', recommendation: '简单美味，童年味道！' },
+            ],
+            western: [
+                { name: '汉堡', emoji: '🍔', recommendation: '经典美式风味！' },
+                { name: '披萨', emoji: '🍕', recommendation: '拉丝的诱惑！' },
+                { name: '牛排', emoji: '🥩', recommendation: '七分熟刚刚好！' },
+                { name: '意面', emoji: '🍝', recommendation: '番茄肉酱yyds！' },
+                { name: '沙拉', emoji: '🥗', recommendation: '健康又清爽！' },
+                { name: '三明治', emoji: '🥪', recommendation: '简单却丰富！' },
+                { name: '炸鸡', emoji: '🍗', recommendation: '外酥里嫩，太香了！' },
+                { name: '薯条', emoji: '🍟', recommendation: '快乐肥宅标配！' },
+            ],
+            japanese: [
+                { name: '寿司', emoji: '🍣', recommendation: '新鲜美味！' },
+                { name: '拉面', emoji: '🍜', recommendation: '浓郁汤底，超满足！' },
+                { name: '刺身', emoji: '🍥', recommendation: '极致新鲜！' },
+                { name: '天妇罗', emoji: '🍤', recommendation: '酥脆可口！' },
+                { name: '照烧饭', emoji: '🍚', recommendation: '甜咸适中！' },
+                { name: '寿喜烧', emoji: '🥘', recommendation: '关西风味！' },
+                { name: '咖喱饭', emoji: '🍛', recommendation: '浓郁醇厚！' },
+            ],
+            fastfood: [
+                { name: '炸鸡排', emoji: '🍗', recommendation: '香脆多汁！' },
+                { name: '肉夹馍', emoji: '🥙', recommendation: '中式汉堡，绝了！' },
+                { name: '煎饼果子', emoji: '🥞', recommendation: '天津经典！' },
+                { name: '鸡蛋灌饼', emoji: '🥚', recommendation: '早餐首选！' },
+                { name: '肠粉', emoji: '🥟', recommendation: '广式早茶必点！' },
+                { name: '手抓饼', emoji: '🫓', recommendation: '酥脆掉渣！' },
+            ],
+            snacks: [
+                { name: '烤串', emoji: '🍡', recommendation: '夜宵之王！' },
+                { name: '臭豆腐', emoji: '🍳', recommendation: '闻着臭吃着香！' },
+                { name: '煎饼', emoji: '🥞', recommendation: '万物皆可卷！' },
+                { name: '奶茶', emoji: '🧋', recommendation: '快乐肥宅水！' },
+                { name: '炸串', emoji: '🍢', recommendation: '种类繁多！' },
+                { name: '凉皮', emoji: '🥗', recommendation: '清爽解暑！' },
+                { name: '螺蛳粉', emoji: '🍜', recommendation: '酸辣上头！' },
+            ],
+            dessert: [
+                { name: '蛋糕', emoji: '🍰', recommendation: '甜蜜暴击！' },
+                { name: '冰淇淋', emoji: '🍦', recommendation: '冰凉解暑！' },
+                { name: '奶茶', emoji: '🧋', recommendation: '快乐源泉！' },
+                { name: '水果捞', emoji: '🍓', recommendation: '健康美味！' },
+                { name: '泡芙', emoji: '🍩', recommendation: '酥软香甜！' },
+                { name: '芝士蛋糕', emoji: '🧀', recommendation: '浓郁奶香！' },
+                { name: '雪媚娘', emoji: '🍡', recommendation: '软糯Q弹！' },
+            ]
+        };
+
+        // 背景渐变
+        const backgrounds = [
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)'
+        ];
+
+        const categoryNames = {
+            chinese: '中餐',
+            western: '西餐',
+            japanese: '日料',
+            fastfood: '快餐',
+            snacks: '小吃',
+            dessert: '甜品'
+        };
+
+        let selectedCategory = 'all';
+        let selectedBg = 0;
+        let currentFood = null;
+
+        // 分类按钮事件
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.category-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                selectedCategory = btn.dataset.category;
+            });
+        });
+
+        // 背景选择事件
+        document.querySelectorAll('.background-option').forEach(opt => {
+            opt.addEventListener('click', () => {
+                document.querySelectorAll('.background-option').forEach(o => o.classList.remove('selected'));
+                opt.classList.add('selected');
+                selectedBg = parseInt(opt.dataset.bg);
+            });
+        });
+
+        // 抽取美食
+        function spinFood() {
+            const result = document.getElementById('result');
+            const actions = document.getElementById('actions');
+
+            result.classList.remove('hidden');
+            result.classList.add('shaking');
+
+            // 获取选中分类的美食
+            let foods = [];
+            if (selectedCategory === 'all') {
+                Object.values(foodData).forEach(cat => foods.push(...cat));
+            } else {
+                foods = foodData[selectedCategory] || [];
+            }
+
+            // 随机动画效果
+            let times = 0;
+            const maxTimes = 15;
+            const interval = setInterval(() => {
+                const randomFood = foods[Math.floor(Math.random() * foods.length)];
+                document.getElementById('foodEmoji').textContent = randomFood.emoji;
+                document.getElementById('foodName').textContent = randomFood.name;
+                times++;
+
+                if (times >= maxTimes) {
+                    clearInterval(interval);
+                    result.classList.remove('shaking');
+
+                    // 最终选择
+                    currentFood = foods[Math.floor(Math.random() * foods.length)];
+                    document.getElementById('foodEmoji').textContent = currentFood.emoji;
+                    document.getElementById('foodName').textContent = currentFood.name;
+                    document.getElementById('foodCategory').textContent = categoryNames[selectedCategory] || '今日推荐';
+                    document.getElementById('recommendation').textContent = currentFood.recommendation;
+
+                    // 更新卡片背景
+                    result.style.background = backgrounds[selectedBg];
+
+                    // 显示操作按钮
+                    actions.classList.remove('hidden');
+                    actions.classList.add('flex');
+                }
+            }, 100);
+        }
+
+        // 下载图片
+        function downloadCard() {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const nickname = document.getElementById('nickname').value || '今天吃什么';
+
+            canvas.width = 600;
+            canvas.height = 500;
+
+            // 绘制背景
+            const gradient = ctx.createLinearGradient(0, 0, 600, 500);
+            if (selectedBg === 0) {
+                gradient.addColorStop(0, '#f093fb');
+                gradient.addColorStop(1, '#f5576c');
+            } else if (selectedBg === 1) {
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+            } else if (selectedBg === 2) {
+                gradient.addColorStop(0, '#fa709a');
+                gradient.addColorStop(1, '#fee140');
+            } else if (selectedBg === 3) {
+                gradient.addColorStop(0, '#4facfe');
+                gradient.addColorStop(1, '#00f2fe');
+            } else if (selectedBg === 4) {
+                gradient.addColorStop(0, '#43e97b');
+                gradient.addColorStop(1, '#38f9d7');
+            } else if (selectedBg === 5) {
+                gradient.addColorStop(0, '#fa709a');
+                gradient.addColorStop(1, '#f5576c');
+            } else if (selectedBg === 6) {
+                gradient.addColorStop(0, '#a8edea');
+                gradient.addColorStop(1, '#fed6e3');
+            } else {
+                gradient.addColorStop(0, '#ff9a9e');
+                gradient.addColorStop(1, '#fecfef');
+            }
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 500);
+
+            // 绘制圆角背景
+            ctx.fillStyle = 'rgba(255,255,255,0.2)';
+            roundRect(ctx, 30, 30, 540, 440, 20);
+            ctx.fill();
+
+            // 绘制标题
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 32px "Noto Sans SC", sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('今天吃什么？', 300, 70);
+
+            // 绘制昵称
+            ctx.font = '20px "Noto Sans SC", sans-serif';
+            ctx.fillText(`来自 ${nickname} 的今日推荐`, 300, 100);
+
+            // 绘制美食emoji
+            ctx.font = '80px serif';
+            ctx.fillText(currentFood.emoji, 300, 180);
+
+            // 绘制美食名称
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 48px "Noto Sans SC", sans-serif';
+            ctx.fillText(currentFood.name, 300, 260);
+
+            // 绘制分类
+            ctx.font = '24px "Noto Sans SC", sans-serif';
+            ctx.fillText(categoryNames[selectedCategory] || '今日推荐', 300, 300);
+
+            // 绘制推荐语
+            ctx.font = '18px "Noto Sans SC", sans-serif';
+            ctx.fillText(currentFood.recommendation, 300, 360);
+
+            // 绘制水印
+            ctx.font = '14px "Noto Sans SC", sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillText('用 auto-tools 生成', 300, 440);
+
+            // 下载
+            const link = document.createElement('a');
+            link.download = '今天吃什么.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        // 复制到剪贴板
+        async function copyToClipboard() {
+            const nickname = document.getElementById('nickname').value || '';
+            const text = `🍽️ 今天吃什么？
+
+${nickname ? `来自 ${nickname} 的今日推荐：` : ''}
+${currentFood.emoji} ${currentFood.name}
+📂 ${categoryNames[selectedCategory] || '今日推荐'}
+💡 ${currentFood.recommendation}
+
+用 auto-tools 生成 https://luows666.github.io/auto-tools/food-picker.html`;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                alert('已复制到剪贴板！');
+            } catch (err) {
+                // 备用方案
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('已复制到剪贴板！');
+            }
+        }
+
+        // 绘制圆角矩形
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+    </script>
+</body>
+</html>

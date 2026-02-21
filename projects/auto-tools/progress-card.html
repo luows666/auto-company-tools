@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>时间进度卡 - 生成你的进度卡片</title>
+    <meta name="description" content="生成精美的进度卡片，展示今日、本周、本月、本年进度一键分享到社交媒体">
+    <meta name="keywords" content="时间进度,进度卡片,年度进度,今日进度,分享卡片">
+    <meta property="og:title" content="时间进度卡 - 生成你的进度卡片">
+    <meta property="og:description" content="生成精美的进度卡片，展示你的时间进度">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 100px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .preview-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .preview-card h3 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .progress-circle {
+            width: 180px;
+            height: 180px;
+            margin: 0 auto 20px;
+            position: relative;
+        }
+
+        .progress-circle svg {
+            transform: rotate(-90deg);
+            width: 100%;
+            height: 100%;
+        }
+
+        .progress-circle .bg {
+            fill: none;
+            stroke: #e2e8f0;
+            stroke-width: 12;
+        }
+
+        .progress-circle .progress {
+            fill: none;
+            stroke: var(--primary);
+            stroke-width: 12;
+            stroke-linecap: round;
+            stroke-dasharray: 440;
+            stroke-dashoffset: 440;
+            transition: stroke-dashoffset 0.5s ease;
+        }
+
+        .progress-circle .center-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        .progress-circle .percentage {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .progress-circle .label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+
+        .card-info {
+            text-align: center;
+        }
+
+        .card-info .title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .card-info .subtitle {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .card-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .options {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .option-group {
+            margin-bottom: 16px;
+        }
+
+        .option-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .option-group select,
+        .option-group input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+        }
+
+        .color-options {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .color-option {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            min-width: 140px;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: var(--text);
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary);
+        }
+
+        .tip {
+            background: #f0f9ff;
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            font-size: 0.875rem;
+            color: #0369a1;
+        }
+
+        .tip strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* Modal for image preview */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .modal-content h3 {
+            margin-bottom: 16px;
+        }
+
+        .modal-content img {
+            max-width: 100%;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 20px;
+        }
+
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+
+        <header>
+            <h1>⏰ 时间进度卡</h1>
+            <p>生成精美进度卡片，分享你的时间进度</p>
+        </header>
+
+        <div class="preview-card">
+            <h3>预览</h3>
+            <div class="progress-circle">
+                <svg viewBox="0 0 160 160">
+                    <circle class="bg" cx="80" cy="80" r="70"/>
+                    <circle class="progress" id="progress-ring" cx="80" cy="80" r="70"/>
+                </svg>
+                <div class="center-text">
+                    <div class="percentage" id="percentage">0%</div>
+                    <div class="label" id="progress-label">今日</div>
+                </div>
+            </div>
+            <div class="card-info">
+                <div class="title" id="card-title">今日进度</div>
+                <div class="subtitle" id="card-subtitle">2025年2月21日</div>
+            </div>
+            <div class="card-footer">
+                由 Auto Tools 生成
+            </div>
+        </div>
+
+        <div class="options">
+            <div class="option-group">
+                <label>进度类型</label>
+                <select id="progress-type">
+                    <option value="day">今日进度</option>
+                    <option value="week">本周进度</option>
+                    <option value="month">本月进度</option>
+                    <option value="year">本年进度</option>
+                </select>
+            </div>
+
+            <div class="option-group">
+                <label>自定义标题（可选）</label>
+                <input type="text" id="custom-title" placeholder="留空使用默认标题">
+            </div>
+
+            <div class="option-group">
+                <label>卡片颜色</label>
+                <div class="color-options">
+                    <div class="color-option active" style="background: linear-gradient(135deg, #6366f1, #4f46e5)" data-color="#6366f1"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #10b981, #059669)" data-color="#10b981"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #f59e0b, #d97706)" data-color="#f59e0b"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #ef4444, #dc2626)" data-color="#ef4444"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #3b82f6, #2563eb)" data-color="#3b82f6"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed)" data-color="#8b5cf6"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #ec4899, #db2777)" data-color="#ec4899"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #14b8a6, #0d9488)" data-color="#14b8a6"></div>
+                </div>
+            </div>
+
+            <div class="btn-group">
+                <button class="btn btn-primary" id="download-btn">下载卡片图片</button>
+                <button class="btn btn-secondary" id="share-btn">复制到剪贴板</button>
+            </div>
+        </div>
+
+        <div class="tip">
+            <strong>💡 小贴士</strong>
+            将进度卡片保存后，分享到朋友圈、微博、Twitter 等社交媒体，让朋友们也感受时间的飞逝吧！
+        </div>
+    </div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content">
+            <h3>✅ 已复制到剪贴板</h3>
+            <p>图片已复制，请在社交媒体粘贴分享</p>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const progressType = document.getElementById('progress-type');
+        const customTitle = document.getElementById('custom-title');
+        const progressRing = document.getElementById('progress-ring');
+        const percentage = document.getElementById('percentage');
+        const progressLabel = document.getElementById('progress-label');
+        const cardTitle = document.getElementById('card-title');
+        const cardSubtitle = document.getElementById('card-subtitle');
+        const colorOptions = document.querySelectorAll('.color-option');
+        const downloadBtn = document.getElementById('download-btn');
+        const shareBtn = document.getElementById('share-btn');
+
+        let selectedColor = '#6366f1';
+        const circumference = 2 * Math.PI * 70;
+
+        // Color labels
+        const colorLabels = {
+            '#6366f1': '紫色',
+            '#10b981': '绿色',
+            '#f59e0b': '橙色',
+            '#ef4444': '红色',
+            '#3b82f6': '蓝色',
+            '#8b5cf6': '紫罗兰',
+            '#ec4899': '粉色',
+            '#14b8a6': '青色'
+        };
+
+        function calculateProgress(type) {
+            const now = new Date();
+            let progress, label;
+
+            switch(type) {
+                case 'day':
+                    const dayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                    const dayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+                    progress = (now - dayStart) / (dayEnd - dayStart) * 100;
+                    label = '今日';
+                    break;
+                case 'week':
+                    const weekStart = new Date(now);
+                    weekStart.setDate(now.getDate() - now.getDay());
+                    weekStart.setHours(0, 0, 0, 0);
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 7);
+                    progress = (now - weekStart) / (weekEnd - weekStart) * 100;
+                    label = '本周';
+                    break;
+                case 'month':
+                    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+                    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+                    progress = (now - monthStart) / (monthEnd - monthStart) * 100;
+                    label = '本月';
+                    break;
+                case 'year':
+                    const yearStart = new Date(now.getFullYear(), 0, 1);
+                    const yearEnd = new Date(now.getFullYear() + 1, 0, 1);
+                    progress = (now - yearStart) / (yearEnd - yearStart) * 100;
+                    label = '本年';
+                    break;
+            }
+
+            return {
+                progress: Math.min(Math.max(progress, 0), 100),
+                label
+            };
+        }
+
+        function formatDate(type) {
+            const now = new Date();
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+
+            switch(type) {
+                case 'day':
+                    return now.toLocaleDateString('zh-CN', options);
+                case 'week':
+                    return '第' + Math.ceil((now - new Date(now.getFullYear(), 0, 1)) / (7 * 24 * 60 * 60 * 1000)) + '周';
+                case 'month':
+                    return now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long' });
+                case 'year':
+                    return now.getFullYear() + '年';
+            }
+        }
+
+        function updateProgress() {
+            const type = progressType.value;
+            const data = calculateProgress(type);
+
+            const offset = circumference - (data.progress / 100) * circumference;
+            progressRing.style.strokeDasharray = circumference;
+            progressRing.style.strokeDashoffset = offset;
+            progressRing.style.stroke = selectedColor;
+
+            percentage.textContent = Math.round(data.progress) + '%';
+            progressLabel.textContent = data.label;
+
+            const title = customTitle.value || (data.label + '进度');
+            cardTitle.textContent = title;
+            cardSubtitle.textContent = formatDate(type);
+
+            // Update CSS custom property for gradient
+            document.documentElement.style.setProperty('--primary', selectedColor);
+        }
+
+        // Color selection
+        colorOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                colorOptions.forEach(o => o.classList.remove('active'));
+                option.classList.add('active');
+                selectedColor = option.dataset.color;
+                updateProgress();
+            });
+        });
+
+        // Event listeners
+        progressType.addEventListener('change', updateProgress);
+        customTitle.addEventListener('input', updateProgress);
+
+        // Download as image
+        downloadBtn.addEventListener('click', async () => {
+            const card = document.querySelector('.preview-card');
+
+            try {
+                // Use html2canvas-like approach with canvas
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 600;
+                canvas.height = 400;
+
+                // Background
+                const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+                gradient.addColorStop(0, selectedColor);
+                gradient.addColorStop(1, adjustColor(selectedColor, -30));
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 600, 400);
+
+                // Title
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(cardTitle.textContent, 300, 50);
+
+                // Progress circle
+                const data = calculateProgress(progressType.value);
+                const radius = 80;
+                const centerX = 300;
+                const centerY = 200;
+
+                // Background circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 16;
+                ctx.stroke();
+
+                // Progress arc
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, -Math.PI/2, -Math.PI/2 + (data.progress/100) * 2 * Math.PI);
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 16;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                // Percentage
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(Math.round(data.progress) + '%', centerX, centerY + 10);
+                ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(data.label, centerX, centerY + 35);
+
+                // Subtitle
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(cardSubtitle.textContent, 300, 330);
+
+                // Footer
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText('由 Auto Tools 生成', 300, 370);
+
+                // Download
+                const link = document.createElement('a');
+                link.download = 'progress-card-' + Date.now() + '.png';
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+
+            } catch (e) {
+                alert('生成图片失败，请重试');
+                console.error(e);
+            }
+        });
+
+        // Share to clipboard
+        shareBtn.addEventListener('click', async () => {
+            const card = document.querySelector('.preview-card');
+
+            try {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 600;
+                canvas.height = 400;
+
+                // Background
+                const gradient = ctx.createLinearGradient(0, 0, 600, 400);
+                gradient.addColorStop(0, selectedColor);
+                gradient.addColorStop(1, adjustColor(selectedColor, -30));
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, 600, 400);
+
+                // Title
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 28px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(cardTitle.textContent, 300, 50);
+
+                // Progress circle
+                const data = calculateProgress(progressType.value);
+                const radius = 80;
+                const centerX = 300;
+                const centerY = 200;
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 16;
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, -Math.PI/2, -Math.PI/2 + (data.progress/100) * 2 * Math.PI);
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 16;
+                ctx.lineCap = 'round';
+                ctx.stroke();
+
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 48px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(Math.round(data.progress) + '%', centerX, centerY + 10);
+                ctx.font = '16px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(data.label, centerX, centerY + 35);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.8)';
+                ctx.font = '18px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText(cardSubtitle.textContent, 300, 330);
+
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.font = '14px -apple-system, BlinkMacSystemFont, sans-serif';
+                ctx.fillText('由 Auto Tools 生成', 300, 370);
+
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+
+                showModal();
+            } catch (e) {
+                alert('复制失败，请尝试下载图片');
+                console.error(e);
+            }
+        });
+
+        function adjustColor(color, amount) {
+            const hex = color.replace('#', '');
+            const r = Math.max(0, Math.min(255, parseInt(hex.substr(0, 2), 16) + amount));
+            const g = Math.max(0, Math.min(255, parseInt(hex.substr(2, 2), 16) + amount));
+            const b = Math.max(0, Math.min(255, parseInt(hex.substr(4, 2), 16) + amount));
+            return '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('');
+        }
+
+        function showModal() {
+            document.getElementById('modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('show');
+        }
+
+        // Close modal on outside click
+        document.getElementById('modal').addEventListener('click', (e) => {
+            if (e.target === e.currentTarget) closeModal();
+        });
+
+        // Initialize
+        updateProgress();
+
+        // Auto refresh every minute
+        setInterval(updateProgress, 60000);
+    </script>
+</body>
+</html>
