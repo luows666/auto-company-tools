@@ -408,6 +408,22 @@
             border-radius: 8px;
             margin-top: 12px;
         }
+
+        /* Sponsor */
+        .sponsor {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--card);
+            padding: 12px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+            font-size: 0.75rem;
+            color: var(--text-light);
+            z-index: 1000;
+        }
+        .sponsor a { color: var(--primary); text-decoration: none; }
     </style>
 </head>
 <body>
@@ -849,6 +865,12 @@
                 </p>
             </div>
         </div>
+
+        <div style="height: 60px;"></div>
+    </div>
+
+    <div class="sponsor">
+        支持我们: <a href="payment-qr.html" target="_blank">赞助</a> | <a href="mailto:feedback@autocompany.dev">反馈</a>
     </div>
 
     <script>
