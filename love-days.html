@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>恋爱天数计算器 - 专属卡片</title>
+    <meta name="description" content="计算你们在一起的天数，生成专属卡片分享到朋友圈">
+    <meta name="keywords" content="恋爱,纪念日,天数计算,情侣,表白,分享,朋友圈">
+    <style>
+        :root {
+            --primary: #f43f5e;
+            --primary-dark: #e11d48;
+            --bg: #fff1f2;
+            --card: #ffffff;
+            --text: #1f2937;
+            --text-light: #6b7280;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 8px;
+            color: var(--primary);
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--text-light);
+            font-size: 0.875rem;
+            margin-bottom: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: var(--text);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Preview Card Styles */
+        #previewCard {
+            display: none;
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #previewCard.show {
+            display: block;
+        }
+
+        .heart-icon {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .couple-names {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .days-number {
+            font-size: 4rem;
+            font-weight: 800;
+            color: white;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            line-height: 1.1;
+            margin: 16px 0;
+        }
+
+        .days-label {
+            font-size: 1.25rem;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 16px;
+        }
+
+        .start-date {
+            font-size: 0.875rem;
+            color: rgba(255,255,255,0.8);
+        }
+
+        .anniversary-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255,255,255,0.3);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Background Styles */
+        .bg-gradient-1 { background: linear-gradient(135deg, #f43f5e 0%, #fb7185 100%); }
+        .bg-gradient-2 { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+        .bg-gradient-3 { background: linear-gradient(135deg, #06b6d4 0%, #22d3ee 100%); }
+        .bg-gradient-4 { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+        .bg-gradient-5 { background: linear-gradient(135deg, #10b981 0%, #34d399 100%); }
+        .bg-gradient-6 { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+        .bg-gradient-7 { background: linear-gradient(135deg, #ec4899 0%, #f472b6 100%); }
+        .bg-gradient-8 { background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%); }
+
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .style-option {
+            aspect-ratio: 1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .style-option:hover {
+            transform: scale(1.05);
+        }
+
+        .style-option.selected {
+            border-color: var(--text);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #canvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💕 恋爱天数计算器</h1>
+        <p class="subtitle">生成专属纪念日卡片，一键分享到朋友圈</p>
+
+        <div class="card" id="inputCard">
+            <div class="form-group">
+                <label>你的昵称</label>
+                <input type="text" id="name1" placeholder="例如：小明" maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label>TA 的昵称</label>
+                <input type="text" id="name2" placeholder="例如：小红" maxlength="10">
+            </div>
+
+            <div class="form-group">
+                <label>在一起的日子</label>
+                <input type="date" id="startDate">
+            </div>
+
+            <div class="form-group">
+                <label>选择卡片风格</label>
+                <div class="style-options">
+                    <div class="style-option bg-gradient-1 selected" data-style="1" onclick="selectStyle(1)"></div>
+                    <div class="style-option bg-gradient-2" data-style="2" onclick="selectStyle(2)"></div>
+                    <div class="style-option bg-gradient-3" data-style="3" onclick="selectStyle(3)"></div>
+                    <div class="style-option bg-gradient-4" data-style="4" onclick="selectStyle(4)"></div>
+                    <div class="style-option bg-gradient-5" data-style="5" onclick="selectStyle(5)"></div>
+                    <div class="style-option bg-gradient-6" data-style="6" onclick="selectStyle(6)"></div>
+                    <div class="style-option bg-gradient-7" data-style="7" onclick="selectStyle(7)"></div>
+                    <div class="style-option bg-gradient-8" data-style="8" onclick="selectStyle(8)"></div>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateCard()">生成卡片</button>
+        </div>
+
+        <div id="previewCard" class="bg-gradient-1">
+            <div class="anniversary-badge" id="anniversaryBadge"></div>
+            <div class="heart-icon">❤️</div>
+            <div class="couple-names" id="displayNames"></div>
+            <div class="days-number" id="displayDays"></div>
+            <div class="days-label">在一起的日子</div>
+            <div class="start-date" id="displayDate"></div>
+        </div>
+
+        <div class="btn-group hidden" id="actionButtons">
+            <button class="btn btn-primary" onclick="downloadCard()">📥 下载图片</button>
+            <button class="btn btn-secondary" onclick="copyCard()">📋 复制图片</button>
+        </div>
+
+        <button class="btn btn-secondary" onclick="resetCard()" id="resetBtn" style="display: none;">🔄 重新生成</button>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        let selectedStyle = 1;
+
+        // Set default date to today
+        document.getElementById('startDate').valueAsDate = new Date();
+
+        function selectStyle(num) {
+            selectedStyle = num;
+            document.querySelectorAll('.style-option').forEach(opt => {
+                opt.classList.remove('selected');
+                if (opt.dataset.style == num) {
+                    opt.classList.add('selected');
+                }
+            });
+        }
+
+        function generateCard() {
+            const name1 = document.getElementById('name1').value.trim() || '我';
+            const name2 = document.getElementById('name2').value.trim() || 'TA';
+            const startDate = document.getElementById('startDate').value;
+
+            if (!startDate) {
+                alert('请选择在一起的日子');
+                return;
+            }
+
+            const start = new Date(startDate);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            start.setHours(0, 0, 0, 0);
+
+            const diffTime = today - start;
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays < 0) {
+                alert('在一起的日子不能是未来哦~');
+                return;
+            }
+
+            // Update preview
+            document.getElementById('displayNames').textContent = `${name1} ❤️ ${name2}`;
+            document.getElementById('displayDays').textContent = diffDays;
+            document.getElementById('displayDate').textContent = `从 ${startDate} 开始`;
+
+            // Check for anniversary
+            const anniversaryBadge = document.getElementById('anniversaryBadge');
+            if (diffDays > 0 && diffDays % 100 === 0) {
+                anniversaryBadge.textContent = `🎉 ${diffDays}天纪念日`;
+            } else if (diffDays > 0 && diffDays % 365 === 0) {
+                anniversaryBadge.textContent = `💍 ${diffDays / 365}周年快乐`;
+            } else {
+                anniversaryBadge.textContent = '';
+            }
+
+            // Update style
+            const preview = document.getElementById('previewCard');
+            preview.className = 'bg-gradient-' + selectedStyle;
+
+            // Show preview and hide input
+            document.getElementById('inputCard').style.display = 'none';
+            document.getElementById('previewCard').classList.add('show');
+            document.getElementById('actionButtons').classList.remove('hidden');
+            document.getElementById('resetBtn').style.display = 'block';
+        }
+
+        function resetCard() {
+            document.getElementById('inputCard').style.display = 'block';
+            document.getElementById('previewCard').classList.remove('show');
+            document.getElementById('actionButtons').classList.add('hidden');
+            document.getElementById('resetBtn').style.display = 'none';
+        }
+
+        function downloadCard() {
+            const canvas = document.getElementById('canvas');
+            const preview = document.getElementById('previewCard');
+
+            canvas.width = 600;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            // Draw gradient background
+            const gradients = [
+                ['#f43f5e', '#fb7185'],
+                ['#8b5cf6', '#a78bfa'],
+                ['#06b6d4', '#22d3ee'],
+                ['#f59e0b', '#fbbf24'],
+                ['#10b981', '#34d399'],
+                ['#3b82f6', '#60a5fa'],
+                ['#ec4899', '#f472b6'],
+                ['#6366f1', '#818cf8']
+            ];
+
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, gradients[selectedStyle - 1][0]);
+            gradient.addColorStop(1, gradients[selectedStyle - 1][1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // Draw anniversary badge
+            const badgeText = document.getElementById('anniversaryBadge').textContent;
+            if (badgeText) {
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.roundRect(380, 30, 180, 36, 18);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = '14px -apple-system, sans-serif';
+                ctx.fillText(badgeText, 395, 52);
+            }
+
+            // Draw heart
+            ctx.font = '48px sans-serif';
+            ctx.fillText('❤️', 270, 120);
+
+            // Draw names
+            const name1 = document.getElementById('name1').value.trim() || '我';
+            const name2 = document.getElementById('name2').value.trim() || 'TA';
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 28px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${name1} ❤️ ${name2}`, 300, 200);
+
+            // Draw days number
+            const days = document.getElementById('displayDays').textContent;
+            ctx.font = 'bold 100px -apple-system, sans-serif';
+            ctx.fillText(days, 300, 380);
+
+            // Draw "在一起的日子"
+            ctx.font = '24px -apple-system, sans-serif';
+            ctx.fillText('在一起的日子', 300, 430);
+
+            // Draw start date
+            const startDate = document.getElementById('startDate').value;
+            ctx.font = '16px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText(`从 ${startDate} 开始`, 300, 480);
+
+            // Draw watermark
+            ctx.font = '12px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillText('用 Auto Tools 生成', 300, 750);
+
+            // Download
+            const link = document.createElement('a');
+            link.download = `love-days-${startDate}.png`;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyCard() {
+            const canvas = document.getElementById('canvas');
+
+            // Generate canvas first
+            const gradients = [
+                ['#f43f5e', '#fb7185'],
+                ['#8b5cf6', '#a78bfa'],
+                ['#06b6d4', '#22d3ee'],
+                ['#f59e0b', '#fbbf24'],
+                ['#10b981', '#34d399'],
+                ['#3b82f6', '#60a5fa'],
+                ['#ec4899', '#f472b6'],
+                ['#6366f1', '#818cf8']
+            ];
+
+            canvas.width = 600;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, gradients[selectedStyle - 1][0]);
+            gradient.addColorStop(1, gradients[selectedStyle - 1][1]);
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 800);
+
+            const badgeText = document.getElementById('anniversaryBadge').textContent;
+            if (badgeText) {
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.roundRect(380, 30, 180, 36, 18);
+                ctx.fill();
+                ctx.fillStyle = 'white';
+                ctx.font = '14px -apple-system, sans-serif';
+                ctx.fillText(badgeText, 395, 52);
+            }
+
+            ctx.font = '48px sans-serif';
+            ctx.fillText('❤️', 270, 120);
+
+            const name1 = document.getElementById('name1').value.trim() || '我';
+            const name2 = document.getElementById('name2').value.trim() || 'TA';
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 28px -apple-system, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${name1} ❤️ ${name2}`, 300, 200);
+
+            const days = document.getElementById('displayDays').textContent;
+            ctx.font = 'bold 100px -apple-system, sans-serif';
+            ctx.fillText(days, 300, 380);
+
+            ctx.font = '24px -apple-system, sans-serif';
+            ctx.fillText('在一起的日子', 300, 430);
+
+            const startDate = document.getElementById('startDate').value;
+            ctx.font = '16px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.8)';
+            ctx.fillText(`从 ${startDate} 开始`, 300, 480);
+
+            ctx.font = '12px -apple-system, sans-serif';
+            ctx.fillStyle = 'rgba(255,255,255,0.6)';
+            ctx.fillText('用 Auto Tools 生成', 300, 750);
+
+            try {
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('✅ 图片已复制到剪贴板，可以直接粘贴分享啦！');
+            } catch (e) {
+                alert('复制失败，请尝试下载图片');
+            }
+        }
+
+        // Polyfill for roundRect
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>
