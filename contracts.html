@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>合同文档生成器 - Auto Tools</title>
+    <meta name="description" content="免费在线合同生成器 - 生成服务合同、租赁合同、报价单、收据等文档，支持打印和导出">
+    <meta name="keywords" content="合同生成器,报价单,收据,文档模板,免费合同">
+    <meta property="og:title" content="合同文档生成器">
+    <meta property="og:description" content="免费生成服务合同、报价单、收据">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+            opacity: 0.9;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .doc-type-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .doc-type-btn {
+            padding: 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+        }
+
+        .doc-type-btn:hover {
+            border-color: var(--primary);
+        }
+
+        .doc-type-btn.active {
+            border-color: var(--primary);
+            background: #eef2ff;
+        }
+
+        .doc-type-btn .icon {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .doc-type-btn .title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .doc-type-btn .desc {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        /* Preview */
+        .preview-section {
+            display: none;
+        }
+
+        .preview-section.active {
+            display: block;
+        }
+
+        .doc-preview {
+            background: white;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 32px;
+            min-height: 400px;
+            font-family: 'SimSun', 'Songti SC', serif;
+            line-height: 1.8;
+        }
+
+        .doc-preview h3 {
+            text-align: center;
+            font-size: 1.25rem;
+            margin-bottom: 24px;
+            font-weight: bold;
+        }
+
+        .doc-preview .doc-info {
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+
+        .doc-preview .doc-info p {
+            margin-bottom: 8px;
+        }
+
+        .doc-preview .label {
+            display: inline-block;
+            min-width: 80px;
+            color: var(--text-light);
+        }
+
+        .doc-preview .content {
+            margin-bottom: 20px;
+            text-align: justify;
+        }
+
+        .doc-preview .signature {
+            margin-top: 48px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .doc-preview .signature-item {
+            text-align: center;
+            width: 45%;
+        }
+
+        .doc-preview .signature-line {
+            margin-top: 48px;
+            border-top: 1px solid #333;
+            padding-top: 8px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Saved Docs */
+        .saved-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .saved-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+
+        .saved-item .info .type {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .saved-item .info .date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .saved-item .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .saved-item .btn {
+            padding: 8px 12px;
+            font-size: 0.875rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-light);
+        }
+
+        /* Footer */
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-light);
+            font-size: 0.75rem;
+        }
+
+        footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-link">← 返回工具首页</a>
+        <h1>📝 合同文档生成器</h1>
+        <p>免费生成服务合同、报价单、收据</p>
+    </header>
+
+    <div class="container">
+        <div class="tabs">
+            <button class="tab active" data-tab="create">新建文档</button>
+            <button class="tab" data-tab="saved">已保存</button>
+        </div>
+
+        <!-- Create Tab -->
+        <div class="tab-content" id="create">
+            <div class="card">
+                <h2>选择文档类型</h2>
+                <div class="doc-type-grid">
+                    <button class="doc-type-btn active" data-type="service">
+                        <span class="icon">📄</span>
+                        <div class="title">服务合同</div>
+                        <div class="desc">提供服务的双方协议</div>
+                    </button>
+                    <button class="doc-type-btn" data-type="rental">
+                        <span class="icon">🏠</span>
+                        <div class="title">租赁合同</div>
+                        <div class="desc">房屋或设备租赁协议</div>
+                    </button>
+                    <button class="doc-type-btn" data-type="quote">
+                        <span class="icon">💰</span>
+                        <div class="title">报价单</div>
+                        <div class="desc">产品或服务报价</div>
+                    </button>
+                    <button class="doc-type-btn" data-type="receipt">
+                        <span class="icon">🧾</span>
+                        <div class="title">收据</div>
+                        <div class="desc">收款凭证</div>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card" id="formSection">
+                <!-- Dynamic form will be inserted here -->
+            </div>
+
+            <div class="card preview-section" id="previewSection">
+                <h2>📋 文档预览</h2>
+                <div class="doc-preview" id="docPreview"></div>
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="printDoc()">打印 / 导出 PDF</button>
+                    <button class="btn btn-success" onclick="saveDoc()">保存</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Tab -->
+        <div class="tab-content" id="saved" style="display: none;">
+            <div class="card">
+                <h2>💾 已保存的文档</h2>
+                <div class="saved-list" id="savedList">
+                    <div class="empty-state">暂无保存的文档</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <a href="index.html">返回首页</a> |
+        <a href="mailto:feedback@autocompany.dev">反馈</a>
+    </footer>
+
+    <script>
+        // State
+        let currentType = 'service';
+        let formData = {};
+
+        // Form Templates
+        const forms = {
+            service: `
+                <h2>📝 服务合同信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>甲方（委托方）</label>
+                        <input type="text" id="partyA" placeholder="公司名称或个人姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>乙方（服务方）</label>
+                        <input type="text" id="partyB" placeholder="公司名称或个人姓名">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>签订日期</label>
+                        <input type="date" id="signDate">
+                    </div>
+                    <div class="form-group">
+                        <label>服务期限</label>
+                        <input type="text" id="servicePeriod" placeholder="如：1年/6个月">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>服务内容</label>
+                    <textarea id="serviceContent" placeholder="详细描述服务内容..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>服务费用（元）</label>
+                        <input type="number" id="serviceFee" placeholder="金额">
+                    </div>
+                    <div class="form-group">
+                        <label>付款方式</label>
+                        <select id="paymentMethod">
+                            <option value="一次性支付">一次性支付</option>
+                            <option value="月付">每月支付</option>
+                            <option value="季付">每季支付</option>
+                            <option value="完成后支付">完成后支付</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>其他条款</label>
+                    <textarea id="otherTerms" placeholder="其他约定条款（可选）..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="generateDoc()">生成预览</button>
+            `,
+            rental: `
+                <h2>🏠 租赁合同信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>甲方（出租方）</label>
+                        <input type="text" id="partyA" placeholder="房东姓名或公司">
+                    </div>
+                    <div class="form-group">
+                        <label>乙方（承租方）</label>
+                        <input type="text" id="partyB" placeholder="租客姓名或公司">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>租赁物品/房屋</label>
+                    <input type="text" id="rentalItem" placeholder="如：XX路XX号房屋/设备名称">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>租赁开始日期</label>
+                        <input type="date" id="startDate">
+                    </div>
+                    <div class="form-group">
+                        <label>租赁结束日期</label>
+                        <input type="date" id="endDate">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>月租金（元）</label>
+                        <input type="number" id="monthlyRent" placeholder="租金金额">
+                    </div>
+                    <div class="form-group">
+                        <label>押金（元）</label>
+                        <input type="number" id="deposit" placeholder="押金金额">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>付款方式</label>
+                    <select id="paymentMethod">
+                        <option value="月付">每月付</option>
+                        <option value="季付">每季付</option>
+                        <option value="半年付">每半年付</option>
+                        <option value="年付">每年付</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>其他条款</label>
+                    <textarea id="otherTerms" placeholder="其他约定条款（可选）..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="generateDoc()">生成预览</button>
+            `,
+            quote: `
+                <h2>💰 报价单信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>报价方</label>
+                        <input type="text" id="fromParty" placeholder="您的公司/姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>报价日期</label>
+                        <input type="date" id="quoteDate">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>客户名称</label>
+                    <input type="text" id="toParty" placeholder="客户公司/姓名">
+                </div>
+                <div class="form-group">
+                    <label>产品/服务明细</label>
+                    <textarea id="items" placeholder="产品1: 单价 x 数量&#10;产品2: 单价 x 数量&#10;..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>合计金额（元）</label>
+                        <input type="number" id="totalAmount" placeholder="总金额">
+                    </div>
+                    <div class="form-group">
+                        <label>有效期</label>
+                        <input type="text" id="validPeriod" placeholder="如：30天">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>备注</label>
+                    <textarea id="remarks" placeholder="其他说明（可选）..."></textarea>
+                </div>
+                <button class="btn btn-primary" onclick="generateDoc()">生成预览</button>
+            `,
+            receipt: `
+                <h2>🧾 收据信息</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>收款方</label>
+                        <input type="text" id="fromParty" placeholder="您的公司/姓名">
+                    </div>
+                    <div class="form-group">
+                        <label>付款方</label>
+                        <input type="text" id="toParty" placeholder="客户公司/姓名">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>收款日期</label>
+                        <input type="date" id="receiptDate">
+                    </div>
+                    <div class="form-group">
+                        <label>收据编号</label>
+                        <input type="text" id="receiptNo" placeholder="可选">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>收款金额（元）</label>
+                        <input type="number" id="amount" placeholder="金额">
+                    </div>
+                    <div class="form-group">
+                        <label>收款方式</label>
+                        <select id="paymentMethod">
+                            <option value="现金">现金</option>
+                            <option value="银行转账">银行转账</option>
+                            <option value="支付宝">支付宝</option>
+                            <option value="微信支付">微信支付</option>
+                            <option value="其他">其他</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>收款事由</label>
+                    <input type="text" id="reason" placeholder="如：服务费/货款/租金">
+                </div>
+                <button class="btn btn-primary" onclick="generateDoc()">生成预览</button>
+            `
+        };
+
+        // Doc Templates
+        const templates = {
+            service: (d) => `
+                <h3>服务合同</h3>
+                <div class="doc-info">
+                    <p><span class="label">签订日期：</span>${d.signDate || '_________'}</p>
+                    <p><span class="label">甲方：</span>${d.partyA || '_________'}</p>
+                    <p><span class="label">乙方：</span>${d.partyB || '_________'}</p>
+                </div>
+                <div class="content">
+                    <p>甲乙双方本着平等自愿的原则，就甲方委托乙方提供服务事宜达成如下协议：</p>
+                    <p><strong>第一条 服务内容</strong></p>
+                    <p>${d.serviceContent || '____________________________'}</p>
+                    <p><strong>第二条 服务期限</strong></p>
+                    <p>服务期限：${d.servicePeriod || '________'}</p>
+                    <p><strong>第三条 服务费用</strong></p>
+                    <p>服务费用总额为人民币（大写）：${toChinese(d.serviceFee || 0)} 元整（¥${d.serviceFee || 0}）</p>
+                    <p>付款方式：${d.paymentMethod || '________'}</p>
+                    ${d.otherTerms ? `<p><strong>第四条 其他约定</strong></p><p>${d.otherTerms}</p>` : ''}
+                </div>
+                <div class="signature">
+                    <div class="signature-item">
+                        <p>甲方（盖章）：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                    <div class="signature-item">
+                        <p>乙方（盖章）：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                </div>
+            `,
+            rental: (d) => `
+                <h3>租赁合同</h3>
+                <div class="doc-info">
+                    <p><span class="label">签订日期：</span>${d.startDate || '_________'}</p>
+                    <p><span class="label">甲方：</span>${d.partyA || '_________'}</p>
+                    <p><span class="label">乙方：</span>${d.partyB || '_________'}</p>
+                </div>
+                <div class="content">
+                    <p>甲乙双方本着平等自愿的原则，就甲方将${d.rentalItem || '____________'}出租给乙方使用事宜达成如下协议：</p>
+                    <p><strong>第一条 租赁期限</strong></p>
+                    <p>租赁期限：自 ${d.startDate || '____年__月__日'} 至 ${d.endDate || '____年__月__日'}</p>
+                    <p><strong>第二条 租金及押金</strong></p>
+                    <p>月租金：人民币（大写）：${toChinese(d.monthlyRent || 0)} 元整（¥${d.monthlyRent || 0}）</p>
+                    <p>押金：人民币（大写）：${toChinese(d.deposit || 0)} 元整（¥${d.deposit || 0}）</p>
+                    <p>付款方式：${d.paymentMethod || '________'}</p>
+                    ${d.otherTerms ? `<p><strong>第三条 其他约定</strong></p><p>${d.otherTerms}</p>` : ''}
+                </div>
+                <div class="signature">
+                    <div class="signature-item">
+                        <p>甲方（签字）：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                    <div class="signature-item">
+                        <p>乙方（签字）：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                </div>
+            `,
+            quote: (d) => `
+                <h3>报价单</h3>
+                <div class="doc-info">
+                    <p><span class="label">报价日期：</span>${d.quoteDate || '_________'}</p>
+                    <p><span class="label">报价方：</span>${d.fromParty || '_________'}</p>
+                    <p><span class="label">客户：</span>${d.toParty || '_________'}</p>
+                </div>
+                <div class="content">
+                    <p><strong>报价明细：</strong></p>
+                    <p style="white-space: pre-line;">${d.items || '____________________________'}</p>
+                    <p><strong>合计金额：</strong>人民币（大写）：${toChinese(d.totalAmount || 0)} 元整（¥${d.totalAmount || 0}）</p>
+                    <p><strong>有效期：</strong>${d.validPeriod || '________'}</p>
+                    ${d.remarks ? `<p><strong>备注：</strong>${d.remarks}</p>` : ''}
+                </div>
+                <div class="signature">
+                    <div class="signature-item">
+                        <p>报价方（盖章）：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                    <div class="signature-item">
+                        <p>客户确认：</p>
+                        <div class="signature-line"></div>
+                        <p>日期：</p>
+                    </div>
+                </div>
+            `,
+            receipt: (d) => `
+                <h3>收据</h3>
+                <div class="doc-info">
+                    <p><span class="label">日期：</span>${d.receiptDate || '_________'}</p>
+                    <p><span class="label">编号：</span>${d.receiptNo || '_________'}</p>
+                </div>
+                <div class="content">
+                    <p>今收到 <strong>${d.toParty || '_________'}</strong> 支付的款项，具体如下：</p>
+                    <p><strong>收款金额：</strong>人民币（大写）：${toChinese(d.amount || 0)} 元整（¥${d.amount || 0}）</p>
+                    <p><strong>收款方式：</strong>${d.paymentMethod || '________'}</p>
+                    <p><strong>收款事由：</strong>${d.reason || '________'}</p>
+                </div>
+                <div class="signature">
+                    <div class="signature-item">
+                        <p>收款人：</p>
+                        <div class="signature-line"></div>
+                        <p>（签字/盖章）</p>
+                    </div>
+                    <div class="signature-item">
+                        <p>付款人：</p>
+                        <div class="signature-line"></div>
+                        <p>（签字）</p>
+                    </div>
+                </div>
+            `
+        };
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set default date
+            document.getElementById('signDate')?.setAttribute('value', new Date().toISOString().split('T')[0]);
+            document.getElementById('startDate')?.setAttribute('value', new Date().toISOString().split('T')[0]);
+            document.getElementById('quoteDate')?.setAttribute('value', new Date().toISOString().split('T')[0]);
+            document.getElementById('receiptDate')?.setAttribute('value', new Date().toISOString().split('T')[0]);
+
+            renderForm();
+            loadSavedDocs();
+        });
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none');
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).style.display = 'block';
+            });
+        });
+
+        // Doc type selection
+        document.querySelectorAll('.doc-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.doc-type-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                currentType = btn.dataset.type;
+                renderForm();
+            });
+        });
+
+        function renderForm() {
+            const formSection = document.getElementById('formSection');
+            formSection.innerHTML = forms[currentType];
+            document.getElementById('previewSection').classList.remove('active');
+
+            // Set default dates for new form
+            const today = new Date().toISOString().split('T')[0];
+            const dateInputs = formSection.querySelectorAll('input[type="date"]');
+            dateInputs.forEach(input => {
+                if (!input.value) input.value = today;
+            });
+        }
+
+        function generateDoc() {
+            // Collect form data
+            const inputs = document.querySelectorAll('#formSection input, #formSection textarea, #formSection select');
+            formData = {};
+            inputs.forEach(input => {
+                formData[input.id] = input.value;
+            });
+            formData.type = currentType;
+
+            // Generate preview
+            const preview = document.getElementById('docPreview');
+            preview.innerHTML = templates[currentType](formData);
+            document.getElementById('previewSection').classList.add('active');
+        }
+
+        function printDoc() {
+            const content = document.getElementById('docPreview').innerHTML;
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>打印文档</title>
+                    <style>
+                        body { font-family: 'SimSun', 'Songti SC', serif; padding: 40px; line-height: 1.8; }
+                        h3 { text-align: center; font-size: 18pt; margin-bottom: 24px; }
+                        .doc-info { margin-bottom: 20px; }
+                        .doc-info p { margin-bottom: 8px; }
+                        .label { display: inline-block; min-width: 80px; color: #666; }
+                        .content { text-align: justify; margin-bottom: 20px; }
+                        .content p { margin-bottom: 12px; }
+                        .signature { margin-top: 48px; display: flex; justify-content: space-between; }
+                        .signature-item { text-align: center; width: 45%; }
+                        .signature-line { margin-top: 48px; border-top: 1px solid #333; padding-top: 8px; }
+                        @media print { body { padding: 0; } }
+                    </style>
+                </head>
+                <body>${content}</body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+
+        function saveDoc() {
+            const saved = JSON.parse(localStorage.getItem('savedDocs') || '[]');
+            formData.savedAt = Date.now();
+            formData.id = Date.now();
+            saved.unshift(formData);
+            localStorage.setItem('savedDocs', JSON.stringify(saved));
+            alert('文档已保存！');
+            loadSavedDocs();
+        }
+
+        function loadSavedDocs() {
+            const saved = JSON.parse(localStorage.getItem('savedDocs') || '[]');
+            const list = document.getElementById('savedList');
+
+            if (saved.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无保存的文档</div>';
+                return;
+            }
+
+            const typeNames = {
+                service: '服务合同',
+                rental: '租赁合同',
+                quote: '报价单',
+                receipt: '收据'
+            };
+
+            list.innerHTML = saved.map(doc => `
+                <div class="saved-item">
+                    <div class="info">
+                        <div class="type">${typeNames[doc.type] || doc.type}</div>
+                        <div class="date">${new Date(doc.savedAt).toLocaleString('zh-CN')}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="btn btn-secondary" onclick="loadDoc(${doc.id})">查看</button>
+                        <button class="btn btn-secondary" onclick="deleteDoc(${doc.id})">删除</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadDoc(id) {
+            const saved = JSON.parse(localStorage.getItem('savedDocs') || '[]');
+            const doc = saved.find(d => d.id === id);
+            if (!doc) return;
+
+            currentType = doc.type;
+            formData = doc;
+
+            // Update UI
+            document.querySelectorAll('.doc-type-btn').forEach(b => {
+                b.classList.toggle('active', b.dataset.type === currentType);
+            });
+
+            // Switch to create tab
+            document.querySelector('.tab[data-tab="create"]').click();
+            renderForm();
+
+            // Fill form
+            Object.keys(doc).forEach(key => {
+                const el = document.getElementById(key);
+                if (el) el.value = doc[key];
+            });
+
+            // Generate preview
+            generateDoc();
+        }
+
+        function deleteDoc(id) {
+            if (!confirm('确定删除此文档？')) return;
+            let saved = JSON.parse(localStorage.getItem('savedDocs') || '[]');
+            saved = saved.filter(d => d.id !== id);
+            localStorage.setItem('savedDocs', JSON.stringify(saved));
+            loadSavedDocs();
+        }
+
+        // Number to Chinese
+        function toChinese(num) {
+            if (!num) return '零';
+            const digits = ['零', '壹', '贰', '叁', '肆', '伍', '陆', '柒', '捌', '玖'];
+            const units = ['', '拾', '佰', '仟', '万'];
+
+            num = Math.round(num);
+            if (num === 0) return '零';
+
+            let result = '';
+            let str = num.toString();
+            let len = str.length;
+
+            for (let i = 0; i < len; i++) {
+                let n = parseInt(str[i]);
+                let unit = len - i - 1;
+                if (n !== 0) {
+                    result += digits[n] + units[unit];
+                } else if (result.length > 0 && result[result.length - 1] !== '零') {
+                    result += '零';
+                }
+            }
+
+            result = result.replace(/零+$/, '');
+            return result || '零';
+        }
+    </script>
+</body>
+</html>
