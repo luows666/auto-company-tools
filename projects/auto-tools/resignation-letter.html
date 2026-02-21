@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>辞职信生成器 - 一键生成优雅辞职信</title>
+    <meta name="description" content="一键生成优雅辞职信，支持多种风格，HR看了都感动！">
+    <meta property="og:title" content="辞职信生成器">
+    <meta property="og:description" content="一键生成优雅辞职信">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        header { text-align: center; padding: 30px 20px; background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); color: white; border-radius: 20px; margin-bottom: 20px; box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3); }
+        header h1 { font-size: 1.8rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; }
+        .card { background: var(--card); border-radius: 16px; padding: 24px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 16px; }
+        label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text); }
+        input, select, textarea { width: 100%; padding: 14px; border: 2px solid #e2e8f0; border-radius: 10px; font-size: 1rem; margin-bottom: 16px; transition: border-color 0.2s; }
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); }
+        textarea { min-height: 150px; resize: vertical; }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 12px; }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); transform: translateY(-2px); }
+        .btn-secondary { background: #f1f5f9; color: var(--text); }
+        .btn-secondary:hover { background: #e2e8f0; }
+        .result { display: none; background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border: 2px solid #22c55e; border-radius: 12px; padding: 20px; margin-top: 20px; }
+        .result.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .result h3 { color: #16a34a; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .result-content { background: white; padding: 16px; border-radius: 8px; font-family: 'Georgia', serif; line-height: 1.8; white-space: pre-wrap; }
+        .actions { display: flex; gap: 10px; margin-top: 16px; }
+        .actions button { flex: 1; padding: 12px; font-size: 0.9rem; }
+        .tips { background: #fffbeb; border: 1px solid #fcd34d; border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+        .tips h4 { color: #d97706; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+        .tips ul { margin-left: 20px; color: #92400e; font-size: 0.9rem; }
+        .tips li { margin-bottom: 4px; }
+        .history { margin-top: 20px; }
+        .history h3 { margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .history-item { background: #f8fafc; padding: 12px; border-radius: 8px; margin-bottom: 8px; font-size: 0.85rem; cursor: pointer; transition: background 0.2s; }
+        .history-item:hover { background: #f1f5f9; }
+        .history-item .date { color: #94a3b8; font-size: 0.75rem; }
+        .style-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
+        .style-option { padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; text-align: center; cursor: pointer; transition: all 0.2s; }
+        .style-option:hover { border-color: var(--primary); }
+        .style-option.selected { border-color: var(--primary); background: #eef2ff; }
+        .style-option .emoji { font-size: 1.5rem; display: block; margin-bottom: 4px; }
+        .style-option .name { font-weight: 500; font-size: 0.9rem; }
+        .floating-btn { position: fixed; bottom: 20px; right: 20px; width: 56px; height: 56px; background: linear-gradient(135deg, var(--primary), var(--primary-dark)); border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(99, 102, 241, 0.4); cursor: pointer; z-index: 100; text-decoration: none; }
+        .floating-btn span { color: white; font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🚪 辞职信生成器</h1>
+            <p>一键生成优雅辞职信，HR看了都感动！</p>
+        </header>
+
+        <div class="card">
+            <label>您的姓名</label>
+            <input type="text" id="name" placeholder="请输入您的姓名">
+
+            <label>公司名称</label>
+            <input type="text" id="company" placeholder="请输入公司名称（选填）">
+
+            <label>离职原因（选填，会自动优化表述）</label>
+            <select id="reason">
+                <option value="">随机生成</option>
+                <option value="个人发展">个人发展</option>
+                <option value="薪资问题">薪资问题</option>
+                <option value="工作压力">工作压力</option>
+                <option value="通勤距离">通勤距离</option>
+                <option value="创业">创业</option>
+                <option value="继续深造">继续深造</option>
+                <option value="休息调整">休息调整</option>
+            </select>
+
+            <label>选择风格</label>
+            <div class="style-options">
+                <div class="style-option selected" data-style="polite">
+                    <span class="emoji">😊</span>
+                    <span class="name">礼貌版</span>
+                </div>
+                <div class="style-option" data-style="humorous">
+                    <span class="emoji">😄</span>
+                    <span class="name">幽默版</span>
+                </div>
+                <div class="style-option" data-style="formal">
+                    <span class="emoji">📋</span>
+                    <span class="name">正式版</span>
+                </div>
+                <div class="style-option" data-style="emotional">
+                    <span class="emoji">😭</span>
+                    <span class="name">感性版</span>
+                </div>
+            </div>
+
+            <button class="btn btn-primary" onclick="generateLetter()">生成辞职信</button>
+        </div>
+
+        <div class="tips">
+            <h4>💡 小贴士</h4>
+            <ul>
+                <li>建议先保存草稿，再提离职</li>
+                <li>提前30天书面申请是正统做法</li>
+                <li>做好工作交接，站好最后一班岗</li>
+                <li>离职见人品，好聚好散</li>
+            </ul>
+        </div>
+
+        <div class="result" id="result">
+            <h3>✨ 您的辞职信已生成</h3>
+            <div class="result-content" id="letterContent"></div>
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="copyToClipboard()">📋 复制到剪贴板</button>
+                <button class="btn btn-secondary" onclick="downloadTxt()">💾 下载TXT</button>
+            </div>
+        </div>
+
+        <div class="history" id="historySection" style="display:none;">
+            <h3>📜 历史记录</h3>
+            <div id="historyList"></div>
+        </div>
+    </div>
+
+    <a href="index.html" class="floating-btn"><span>🏠</span></a>
+
+    <script>
+        let selectedStyle = 'polite';
+
+        // 风格选择
+        document.querySelectorAll('.style-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedStyle = this.dataset.style;
+            });
+        });
+
+        // 辞职信模板
+        const templates = {
+            polite: {
+                openings: [
+                    '尊敬的领导：',
+                    '亲爱的老板：',
+                    '尊敬的各位领导：',
+                ],
+                reasons: [
+                    '经过深思熟虑，我决定寻求个人职业发展的新机会。',
+                    '感谢公司给予我这段宝贵的工作经历。',
+                    '在公司的这段时间，我收获了很多，也成长了很多。',
+                ],
+                closings: [
+                    '在此，我衷心感谢公司全体同事的支持与帮助。',
+                    '最后，祝愿公司发展顺利，业绩蒸蒸日上！',
+                    '感谢这段时间的培养与信任，我会永远铭记。',
+                ]
+            },
+            humorous: {
+                openings: [
+                    '亲爱的老板（和可能正在看这篇的HR）：',
+                    '致我亲爱的公司和可爱的同事们：',
+                    '各位江湖再见的后浪们：',
+                ],
+                reasons: [
+                    '经过精密计算，我发现继续上班的ROI（投资回报率）已经不够高了。',
+                    '我决定去追求我的诗和远方，毕竟世界那么大，我想去看看。',
+                    '经过深思熟虑，我决定给我的肝放个假。',
+                ],
+                closings: [
+                    '青山不改，绿水长流，江湖路远，后会有期！',
+                    '各位江湖再见，记得给我朋友圈点赞！',
+                    '感谢各位的陪伴，我会想念公司楼下的盒饭的。',
+                ]
+            },
+            formal: {
+                openings: [
+                    '致公司人力资源部：',
+                    '尊敬的公司领导：',
+                    '致公司全体同仁：',
+                ],
+                reasons: [
+                    '因个人职业发展需要，现正式向公司提出离职申请。',
+                    '经慎重考虑，我决定于近期离职，寻找新的发展机会。',
+                    '基于个人职业规划，我将于30天后正式离职。',
+                ],
+                closings: [
+                    '我将全力配合完成工作交接，确保平稳过渡。',
+                    '感谢公司提供的平台和机会，祝愿公司前程似锦。',
+                    '此致敬礼！',
+                ]
+            },
+            emotional: {
+                openings: [
+                    '亲爱的家人们：',
+                    '致我最爱的一群人：',
+                    '在这里的每一天：',
+                ],
+                reasons: [
+                    '离开是我做过最艰难的决定，这里有我太多不舍。',
+                    '在这里的每一天都是珍贵的回忆，我会永远珍藏。',
+                    '感恩遇见的每一个人，每一段经历都是成长的礼物。',
+                ],
+                closings: [
+                    '江湖路远，但我们的故事不会结束。',
+                    '无论走到哪里，我都会记得这段美好时光。',
+                    '后会有期，我的朋友们！',
+                ]
+            }
+        };
+
+        function getRandom(arr) {
+            return arr[Math.floor(Math.random() * arr.length)];
+        }
+
+        function generateLetter() {
+            const name = document.getElementById('name').value || '本人';
+            const company = document.getElementById('company').value || '本公司';
+            const reason = document.getElementById('reason').value;
+
+            const style = templates[selectedStyle];
+            let reasonText = reason ? getOptimizedReason(reason) : getRandom(style.reasons);
+
+            const today = new Date();
+            const dateStr = today.getFullYear() + '年' + (today.getMonth() + 1) + '月' + today.getDate() + '日';
+
+            let letter = `${getRandom(style.openings)}\n\n`;
+            letter += `    您好！我是${name}，在此郑重向公司提出离职申请。\n\n`;
+            letter += `    日期：${dateStr}\n\n`;
+            letter += `    ${reasonText}\n\n`;
+            letter += `    在${company}工作的这段时间，我收获了宝贵的经验和成长。感谢公司提供的平台，感谢领导的培养，感谢同事们的帮助。\n\n`;
+            letter += `    ${getRandom(style.closings)}\n\n`;
+            letter += `                                        ${name}\n`;
+            letter += `                                        ${dateStr}`;
+
+            document.getElementById('letterContent').textContent = letter;
+            document.getElementById('result').classList.add('show');
+
+            saveToHistory(name, selectedStyle, letter);
+        }
+
+        function getOptimizedReason(reason) {
+            const optimizedReasons = {
+                '个人发展': '经过深思熟虑，我决定寻求个人职业发展的新机会，迎接更大的挑战。',
+                '薪资问题': '经过慎重考虑，我希望寻找更符合个人价值的职业发展机会。',
+                '工作压力': '为了更好地调整工作与生活的平衡，我决定暂时休息调整。',
+                '通勤距离': '因工作地点与居住地距离较远，经过综合考虑做出此决定。',
+                '创业': '经过长期准备，我决定开始自己的创业之路。',
+                '继续深造': '我决定继续深造学习，提升个人专业能力。',
+                '休息调整': '经过一段时间的工作，我希望暂时休息，调整状态。'
+            };
+            return optimizedReasons[reason] || '经过深思熟虑，我决定寻求新的发展机会。';
+        }
+
+        function copyToClipboard() {
+            const content = document.getElementById('letterContent').textContent;
+            navigator.clipboard.writeText(content).then(() => {
+                alert('已复制到剪贴板！');
+            });
+        }
+
+        function downloadTxt() {
+            const content = document.getElementById('letterContent').textContent;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = '辞职信.txt';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function saveToHistory(name, style, content) {
+            let history = JSON.parse(localStorage.getItem('resignationHistory') || '[]');
+            history.unshift({
+                name,
+                style,
+                content,
+                date: new Date().toLocaleString()
+            });
+            history = history.slice(0, 10);
+            localStorage.setItem('resignationHistory', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('resignationHistory') || '[]');
+            const historySection = document.getElementById('historySection');
+            const historyList = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                historySection.style.display = 'none';
+                return;
+            }
+
+            historySection.style.display = 'block';
+            historyList.innerHTML = history.map((item, index) => `
+                <div class="history-item" onclick="loadHistory(${index})">
+                    <div>${item.name} - ${getStyleName(item.style)}</div>
+                    <div class="date">${item.date}</div>
+                </div>
+            `).join('');
+        }
+
+        function getStyleName(style) {
+            const names = { polite: '礼貌版', humorous: '幽默版', formal: '正式版', emotional: '感性版' };
+            return names[style] || style;
+        }
+
+        function loadHistory(index) {
+            const history = JSON.parse(localStorage.getItem('resignationHistory') || '[]');
+            const item = history[index];
+            if (item) {
+                document.getElementById('letterContent').textContent = item.content;
+                document.getElementById('result').classList.add('show');
+            }
+        }
+
+        renderHistory();
+    </script>
+</body>
+</html>
