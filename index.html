@@ -43,7 +43,9 @@
             "字数统计",
             "习惯打卡",
             "文件哈希校验",
-            "时间进度卡"
+            "时间进度卡",
+            "年度回忆生成器",
+            "毒鸡汤生成器"
         ],
         "browserRequirements": "Requires JavaScript"
     }
@@ -459,6 +461,7 @@
         <button class="tab" data-tab="hashcheck">哈希校验</button>
         <button class="tab" data-tab="progresscard">进度卡</button>
         <button class="tab" data-tab="yearreview">年度回忆</button>
+        <button class="tab" data-tab="quotecard">毒鸡汤</button>
     </div>
 
     <div class="content">
@@ -862,6 +865,20 @@
                 <button class="btn-primary" onclick="window.open('year-review.html', '_blank')">打开生成器</button>
                 <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
                     记录每一年，遇见更好的自己
+                </p>
+            </div>
+        </div>
+
+        <!-- Quote Card -->
+        <div class="tool-section" id="quotecard">
+            <div class="card">
+                <h2>💬 毒鸡汤生成器</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    生成精美语录卡片，毒鸡汤/励志/爱情语录
+                </p>
+                <button class="btn-primary" onclick="window.open('quote-card.html', '_blank')">打开生成器</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    一键生成可分享卡片，朋友圈必备
                 </p>
             </div>
         </div>
