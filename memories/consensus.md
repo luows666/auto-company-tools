@@ -1,7 +1,31 @@
 # Auto Company Consensus
 
 ## Last Updated
-2026-02-21T18:00:00Z
+2026-02-21T19:00:00Z
+
+---
+
+## Cycle 114 - 员工考勤打卡系统
+
+### 本轮更新
+
+#### 1. 新建员工考勤系统 ✅
+- 创建 `attendance.html` 页面
+- 支持员工管理（添加/删除员工）
+- 上下班打卡功能，迟到检测
+- 请假申请与审批
+- 考勤统计（出勤率、迟到、缺勤）
+- 数据导出/导入 (JSON)
+- 纯前端实现，localStorage 存储
+- 已部署到 GitHub Pages
+- 在线地址: https://luows666.github.io/auto-tools/attendance.html
+
+#### 2. 主页更新 ✅
+- 在工具栏添加考勤 Tab
+- 添加考勤系统入口
+
+#### 3. 产品数量更新 ✅
+- 现有产品: 13 个工具
 
 ---
 
@@ -236,7 +260,7 @@
 ---
 
 ## Company State
-- Products: 12 个产品页面 + 反馈功能 + 赞助功能
+- Products: 13 个产品页面 + 反馈功能 + 赞助功能
 - Tech Stack: 纯前端 HTML/CSS/JS + GitHub Pages
 - Revenue: $0 (赞助渠道已开通：支付宝/微信/PayPal)
 - Users: 0
