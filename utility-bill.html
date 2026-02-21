@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>水电费分摊计算器 - 房东租客必备</title>
+    <meta name="description" content="免费在线水电费分摊计算器，按人数、天数、面积智能分摊水电费，支持城中村房东、合租房东、商铺业主">
+    <meta name="keywords" content="水电费计算,电费分摊,水费计算,房租水电,分摊计算器,房东必备">
+    <meta property="og:title" content="水电费分摊计算器">
+    <meta property="og:description" content="按人数/天数/面积分摊水电费">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="utility-bill.html">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 500px; margin: 0 auto; }
+        .card {
+            background: #fff;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 25px;
+        }
+        .input-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            color: #444;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        input, select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+            background: #fafafa;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+        }
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .tab {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            background: #fafafa;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 600;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border-color: transparent;
+        }
+        .split-type {
+            display: none;
+        }
+        .split-type.active { display: block; }
+        .person-list {
+            margin-top: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+        }
+        .person-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #fff;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .person-item:last-child { margin-bottom: 0; }
+        .person-name { font-weight: 600; color: #333; }
+        .person-days { color: #666; font-size: 0.85rem; }
+        .person-amount {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .add-person {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .add-person input { flex: 1; }
+        .btn-add {
+            padding: 14px 20px;
+            background: #667eea;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        .btn-add:hover { background: #5a6fd6; }
+        .btn-calc {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s;
+        }
+        .btn-calc:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        .result {
+            margin-top: 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 16px;
+            padding: 20px;
+            color: #fff;
+            display: none;
+        }
+        .result.show { display: block; }
+        .result-title {
+            text-align: center;
+            font-size: 1rem;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+        .result-grid {
+            display: grid;
+            gap: 10px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255,255,255,0.15);
+            padding: 12px 15px;
+            border-radius: 10px;
+        }
+        .result-name { font-weight: 600; }
+        .result-amount { font-size: 1.2rem; font-weight: 700; }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .footer a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .delete-btn {
+            background: #ff6b6b;
+            color: #fff;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .preset-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .preset-btn {
+            padding: 8px 16px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            color: #666;
+            transition: all 0.3s;
+        }
+        .preset-btn:hover { background: #e0e0e0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>💧⚡ 水电费分摊计算器</h1>
+            <p class="subtitle">房东租客必备 | 智能分摊水电费</p>
+
+            <div class="input-group">
+                <label>💰 总费用 (元)</label>
+                <input type="number" id="totalBill" placeholder="输入水电费总额" step="0.01">
+            </div>
+
+            <div class="tabs">
+                <div class="tab active" data-type="days">按天数</div>
+                <div class="tab" data-type="people">按人数</div>
+                <div class="tab" data-type="area">按面积</div>
+            </div>
+
+            <!-- 按天数分摊 -->
+            <div class="split-type active" id="type-days">
+                <label>👥 住户列表 (输入入住天数)</label>
+                <div class="person-list" id="daysList">
+                    <div class="person-item">
+                        <div>
+                            <div class="person-name">租客 A</div>
+                            <div class="person-days">入住: 30 天</div>
+                        </div>
+                        <div class="person-amount">-</div>
+                    </div>
+                </div>
+                <div class="add-person">
+                    <input type="text" id="daysName" placeholder="姓名（如租客A）">
+                    <input type="number" id="daysCount" placeholder="天数" style="width: 80px;">
+                    <button class="btn-add" onclick="addPerson('days')">+</button>
+                </div>
+            </div>
+
+            <!-- 按人数分摊 -->
+            <div class="split-type" id="type-people">
+                <label>👥 住户列表 (人数)</label>
+                <div class="preset-btns">
+                    <button class="preset-btn" onclick="setPreset(2)">2人</button>
+                    <button class="preset-btn" onclick="setPreset(3)">3人</button>
+                    <button class="preset-btn" onclick="setPreset(4)">4人</button>
+                    <button class="preset-btn" onclick="setPreset(5)">5人</button>
+                </div>
+                <div class="person-list" id="peopleList"></div>
+                <div class="add-person">
+                    <input type="text" id="peopleName" placeholder="姓名">
+                    <button class="btn-add" onclick="addPerson('people')">+</button>
+                </div>
+            </div>
+
+            <!-- 按面积分摊 -->
+            <div class="split-type" id="type-area">
+                <label>📐 住户列表 (面积 m²)</label>
+                <div class="person-list" id="areaList"></div>
+                <div class="add-person">
+                    <input type="text" id="areaName" placeholder="姓名/房号">
+                    <input type="number" id="areaCount" placeholder="面积" style="width: 80px;">
+                    <button class="btn-add" onclick="addPerson('area')">+</button>
+                </div>
+            </div>
+
+            <button class="btn-calc" onclick="calculate()">📊 计算分摊</button>
+
+            <div class="result" id="result">
+                <div class="result-title">💡 分摊结果</div>
+                <div class="total-row">
+                    <span>总费用</span>
+                    <span id="resultTotal">¥0.00</span>
+                </div>
+                <div class="result-grid" id="resultGrid"></div>
+            </div>
+
+            <div class="footer">
+                <a href="index.html">← 返回工具中心</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentType = 'days';
+        let persons = {
+            days: [{name: '租客 A', value: 30}],
+            people: [],
+            area: []
+        };
+
+        // Tab 切换
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.split-type').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentType = tab.dataset.type;
+                document.getElementById('type-' + currentType).classList.add('active');
+                renderList(currentType);
+            });
+        });
+
+        function setPreset(num) {
+            persons.people = [];
+            for (let i = 0; i < num; i++) {
+                persons.people.push({name: '住户 ' + String.fromCharCode(65 + i), value: 1});
+            }
+            renderList('people');
+        }
+
+        function addPerson(type) {
+            const nameInput = document.getElementById(type + 'Name');
+            const valueInput = document.getElementById(type + 'Count');
+            const name = nameInput.value.trim();
+            const value = parseFloat(valueInput?.value) || 1;
+
+            if (!name) {
+                alert('请输入姓名');
+                return;
+            }
+
+            if (type === 'days' && !value) {
+                alert('请输入天数');
+                return;
+            }
+
+            persons[type].push({name, value: type === 'days' ? value : 1});
+            nameInput.value = '';
+            if (valueInput) valueInput.value = '';
+            renderList(type);
+        }
+
+        function deletePerson(type, index) {
+            persons[type].splice(index, 1);
+            renderList(type);
+        }
+
+        function renderList(type) {
+            const list = document.getElementById(type + 'List');
+            const labels = {days: '天', people: '人', area: 'm²'};
+            list.innerHTML = persons[type].map((p, i) => `
+                <div class="person-item">
+                    <div>
+                        <div class="person-name">${p.name}</div>
+                        <div class="person-days">${type === 'days' ? '入住: ' + p.value + ' 天' : type === 'people' ? '1 人' : p.value + ' m²'}</div>
+                    </div>
+                    <button class="delete-btn" onclick="deletePerson('${type}', ${i})">删除</button>
+                </div>
+            `).join('') || '<p style="text-align: center; color: #999; padding: 20px;">点击上方 + 添加住户</p>';
+        }
+
+        function calculate() {
+            const total = parseFloat(document.getElementById('totalBill').value);
+            if (!total || total <= 0) {
+                alert('请输入有效的费用金额');
+                return;
+            }
+
+            const list = persons[currentType];
+            if (list.length === 0) {
+                alert('请先添加住户');
+                return;
+            }
+
+            const totalValue = list.reduce((sum, p) => sum + p.value, 0);
+            const amountPerUnit = total / totalValue;
+
+            document.getElementById('result').classList.add('show');
+            document.getElementById('resultTotal').textContent = '¥' + total.toFixed(2);
+
+            const labels = {days: '天', people: '人', area: 'm²'};
+            document.getElementById('resultGrid').innerHTML = list.map(p => `
+                <div class="result-item">
+                    <span class="result-name">${p.name} (${p.value}${labels[currentType]})</span>
+                    <span class="result-amount">¥${(p.value * amountPerUnit).toFixed(2)}</span>
+                </div>
+            `).join('');
+        }
+
+        // 初始化
+        renderList('days');
+    </script>
+</body>
+</html>
