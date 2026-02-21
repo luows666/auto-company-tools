@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文字转语音 - Auto Tools</title>
+    <meta name="description" content="免费在线文字转语音工具 - 支持多种语音、语速调节、音调控制。无需联网，浏览器原生支持。">
+    <meta name="keywords" content="文字转语音,TTS,语音合成,在线语音,免费配音">
+    <meta property="og:title" content="文字转语音 - Auto Tools">
+    <meta property="og:description" content="免费在线文字转语音工具，支持多种语音选择">
+    <meta property="og:type" content="website">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "文字转语音工具",
+        "description": "免费在线文字转语音工具 - 支持多种语音、语速调节、音调控制",
+        "url": "https://luows666.github.io/auto-tools/tts.html",
+        "applicationCategory": "UtilitiesApplication",
+        "offers": {"@type": "Offer", "price": "0", "priceCurrency": "USD"}
+    }
+    </script>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+        header h1 { font-size: 1.5rem; margin-bottom: 8px; }
+        header p { opacity: 0.9; font-size: 0.875rem; }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: white;
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+        .back-link:hover { opacity: 1; }
+        .content {
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+        .card h2 {
+            font-size: 1rem;
+            margin-bottom: 16px;
+            color: var(--text-light);
+        }
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            resize: vertical;
+            font-family: inherit;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 16px;
+        }
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .control-group label {
+            font-size: 0.875rem;
+            color: var(--text-light);
+        }
+        select, input[type="range"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9rem;
+        }
+        input[type="range"] {
+            padding: 0;
+            cursor: pointer;
+        }
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        button {
+            flex: 1;
+            padding: 14px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+        .btn-primary:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+        .status {
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            display: none;
+        }
+        .status.speaking {
+            display: block;
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        .status.done {
+            display: block;
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .voice-preview {
+            margin-top: 16px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .voice-preview strong {
+            color: var(--primary);
+        }
+        @media (max-width: 480px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+        <h1>🎤 文字转语音</h1>
+        <p>输入文字，转换为语音朗读</p>
+    </header>
+
+    <div class="content">
+        <div class="card">
+            <h2>输入要转换的文字</h2>
+            <textarea id="textInput" placeholder="在这里输入要转换的文字...">你好，这是一个测试。我可以使用这个工具将文字转换为语音。</textarea>
+        </div>
+
+        <div class="card">
+            <h2>语音设置</h2>
+            <div class="controls">
+                <div class="control-group">
+                    <label>语音选择</label>
+                    <select id="voiceSelect">
+                        <option value="">加载中...</option>
+                    </select>
+                </div>
+                <div class="control-group">
+                    <label>语速: <span id="rateValue">1.0</span>x</label>
+                    <input type="range" id="rateRange" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>音调: <span id="pitchValue">1.0</span></label>
+                    <input type="range" id="pitchRange" min="0.5" max="2" step="0.1" value="1">
+                </div>
+                <div class="control-group">
+                    <label>音量: <span id="volumeValue">1.0</span></label>
+                    <input type="range" id="volumeRange" min="0" max="1" step="0.1" value="1">
+                </div>
+            </div>
+            <div class="voice-preview" id="voicePreview">
+                点击"播放语音"按钮开始朗读
+            </div>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn-primary" id="speakBtn">▶ 播放语音</button>
+            <button class="btn-secondary" id="stopBtn">⏹ 停止</button>
+        </div>
+
+        <div class="status" id="status"></div>
+    </div>
+
+    <script>
+        const textInput = document.getElementById('textInput');
+        const voiceSelect = document.getElementById('voiceSelect');
+        const rateRange = document.getElementById('rateRange');
+        const pitchRange = document.getElementById('pitchRange');
+        const volumeRange = document.getElementById('volumeRange');
+        const speakBtn = document.getElementById('speakBtn');
+        const stopBtn = document.getElementById('stopBtn');
+        const status = document.getElementById('status');
+        const voicePreview = document.getElementById('voicePreview');
+
+        let voices = [];
+        let utterance = null;
+
+        // Load voices
+        function loadVoices() {
+            voices = speechSynthesis.getVoices();
+            voiceSelect.innerHTML = '';
+
+            const chineseVoices = voices.filter(v => v.lang.includes('zh'));
+            const englishVoices = voices.filter(v => v.lang.includes('en'));
+            const otherVoices = voices.filter(v => !v.lang.includes('zh') && !v.lang.includes('en'));
+
+            if (chineseVoices.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = '中文语音';
+                chineseVoices.forEach((voice, i) => {
+                    const option = document.createElement('option');
+                    option.value = i;
+                    option.textContent = voice.name + (voice.default ? ' (默认)' : '');
+                    group.appendChild(option);
+                });
+                voiceSelect.appendChild(group);
+            }
+
+            if (englishVoices.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = 'English';
+                englishVoices.forEach((voice, i) => {
+                    const option = document.createElement('option');
+                    option.value = voices.indexOf(voice);
+                    option.textContent = voice.name;
+                    group.appendChild(option);
+                });
+                voiceSelect.appendChild(group);
+            }
+
+            if (otherVoices.length > 0) {
+                const group = document.createElement('optgroup');
+                group.label = '其他';
+                otherVoices.forEach((voice, i) => {
+                    const option = document.createElement('option');
+                    option.value = voices.indexOf(voice);
+                    option.textContent = voice.name;
+                    group.appendChild(option);
+                });
+                voiceSelect.appendChild(group);
+            }
+
+            // Auto select Chinese voice if available
+            if (chineseVoices.length > 0) {
+                voiceSelect.value = voices.indexOf(chineseVoices[0]);
+            }
+        }
+
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+        loadVoices();
+
+        // Update value displays
+        rateRange.addEventListener('input', () => {
+            document.getElementById('rateValue').textContent = rateRange.value;
+        });
+        pitchRange.addEventListener('input', () => {
+            document.getElementById('pitchValue').textContent = pitchRange.value;
+        });
+        volumeRange.addEventListener('input', () => {
+            document.getElementById('volumeValue').textContent = volumeRange.value;
+        });
+
+        // Speak
+        speakBtn.addEventListener('click', () => {
+            const text = textInput.value.trim();
+            if (!text) {
+                alert('请输入要转换的文字');
+                return;
+            }
+
+            speechSynthesis.cancel();
+
+            utterance = new SpeechSynthesisUtterance(text);
+            utterance.rate = parseFloat(rateRange.value);
+            utterance.pitch = parseFloat(pitchRange.value);
+            utterance.volume = parseFloat(volumeRange.value);
+
+            const selectedVoice = voices[voiceSelect.value];
+            if (selectedVoice) {
+                utterance.voice = selectedVoice;
+            }
+
+            utterance.onstart = () => {
+                speakBtn.disabled = true;
+                status.className = 'status speaking';
+                status.textContent = '🔊 正在朗读...';
+                voicePreview.innerHTML = `正在使用 <strong>${selectedVoice ? selectedVoice.name : '默认语音'}</strong> 朗读`;
+            };
+
+            utterance.onend = () => {
+                speakBtn.disabled = false;
+                status.className = 'status done';
+                status.textContent = '✅ 朗读完成';
+            };
+
+            utterance.onerror = (event) => {
+                speakBtn.disabled = false;
+                status.className = 'status';
+                status.textContent = '❌ 播放出错: ' + event.error;
+            };
+
+            speechSynthesis.speak(utterance);
+        });
+
+        // Stop
+        stopBtn.addEventListener('click', () => {
+            speechSynthesis.cancel();
+            speakBtn.disabled = false;
+            status.className = 'status';
+            status.textContent = '已停止';
+            voicePreview.textContent = '点击"播放语音"按钮开始朗读';
+        });
+    </script>
+</body>
+</html>

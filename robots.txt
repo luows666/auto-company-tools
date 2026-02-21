@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://luows666.github.io/auto-tools/sitemap.xml

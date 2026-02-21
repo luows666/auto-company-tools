@@ -10,6 +10,37 @@
     <meta property="og:title" content="Auto Tools - 离线工具套件">
     <meta property="og:description" content="100%离线开发者工具箱，数据本地存储，隐私安全">
     <meta property="og:type" content="website">
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Auto Tools - 离线工具套件",
+        "description": "100%离线开发者工具箱 - JSON格式化、密码生成、Base64编码、单位转换、计时器、颜色工具。数据本地存储，隐私安全，无需联网。",
+        "url": "https://luows666.github.io/auto-tools/",
+        "applicationCategory": "UtilitiesApplication",
+        "operatingSystem": "All",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "featureList": [
+            "密码生成器",
+            "JSON格式化",
+            "Base64编码解码",
+            "单位转换器",
+            "计时器",
+            "颜色工具",
+            "Hash生成器",
+            "聚合收款码",
+            "发票管理",
+            "员工考勤",
+            "合同生成",
+            "任务清单"
+        ],
+        "browserRequirements": "Requires JavaScript"
+    }
+    </script>
     <style>
         :root {
             --primary: #6366f1;
@@ -379,6 +410,7 @@
         <button class="tab" data-tab="attendance">考勤</button>
         <button class="tab" data-tab="contracts">合同</button>
         <button class="tab" data-tab="todo">任务清单</button>
+        <button class="tab" data-tab="tts">语音合成</button>
     </div>
 
     <div class="content">
@@ -670,6 +702,20 @@
                 <button class="btn-primary" onclick="window.open('todo.html', '_blank')">打开任务清单</button>
                 <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
                     支持分类标签、优先级、截止日期、数据导出
+                </p>
+            </div>
+        </div>
+
+        <!-- TTS -->
+        <div class="tool-section" id="tts">
+            <div class="card">
+                <h2>🎤 文字转语音</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    将文字转换为语音朗读
+                </p>
+                <button class="btn-primary" onclick="window.open('tts.html', '_blank')">打开语音合成</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持多种语音选择、语速调节、音调控制
                 </p>
             </div>
         </div>
