@@ -1,0 +1,925 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>发票管理 - Auto Tools</title>
+    <meta name="description" content="简单易用的发票管理工具，支持创建、编辑、打印发票，跟踪付款状态。适合小商户和自由职业者。">
+    <meta name="keywords" content="发票管理,收据管理,发票打印,开票工具,自由职业者">
+    <meta property="og:title" content="发票管理工具">
+    <meta property="og:description" content="简单易用的发票管理工具">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --border: #e2e8f0;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+        }
+        header h1 { font-size: 1.5rem; margin-bottom: 4px; }
+        header p { opacity: 0.9; font-size: 0.875rem; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+        .tab.active { background: var(--primary); color: white; }
+        .card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-success { background: var(--success); color: white; }
+        .btn-danger { background: var(--error); color: white; }
+        .btn-secondary { background: #f1f5f9; color: var(--text); }
+        .btn-sm { padding: 6px 12px; font-size: 0.75rem; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.875rem; font-weight: 500; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; }
+        .invoice-card {
+            background: var(--card);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .invoice-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+        .invoice-header { display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px; }
+        .invoice-number { font-weight: 600; font-size: 1rem; }
+        .invoice-amount { font-size: 1.25rem; font-weight: 700; color: var(--primary); }
+        .invoice-meta { font-size: 0.75rem; color: var(--text-light); }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500; }
+        .status-paid { background: #d1fae5; color: #065f46; }
+        .status-unpaid { background: #fef3c7; color: #92400e; }
+        .status-overdue { background: #fee2e2; color: #991b1b; }
+        .table { width: 100%; border-collapse: collapse; }
+        .table th, .table td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        .table th { font-weight: 600; font-size: 0.75rem; text-transform: uppercase; color: var(--text-light); }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        .modal.show { display: flex; align-items: center; justify-content: center; }
+        .modal-content {
+            background: var(--card);
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 24px;
+            margin: 20px;
+        }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .modal-header h2 { font-size: 1.25rem; }
+        .close-btn { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-light); }
+        .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .stat-card { background: var(--card); padding: 16px; border-radius: 12px; text-align: center; }
+        .stat-value { font-size: 1.5rem; font-weight: 700; color: var(--primary); }
+        .stat-label { font-size: 0.75rem; color: var(--text-light); }
+        .search-box { position: relative; margin-bottom: 16px; }
+        .search-box input { padding-left: 40px; }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-light); }
+        .empty-state { text-align: center; padding: 40px; color: var(--text-light); }
+        .action-bar { display: flex; gap: 8px; margin-top: 12px; }
+        @media print {
+            body * { visibility: hidden; }
+            #invoice-print, #invoice-print * { visibility: visible; }
+            #invoice-print { position: absolute; left: 0; top: 0; width: 100%; }
+            .no-print { display: none !important; }
+        }
+        #invoice-print {
+            display: none;
+            padding: 40px;
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        #invoice-print.show { display: block; }
+        .print-header { text-align: center; margin-bottom: 30px; border-bottom: 2px solid var(--primary); padding-bottom: 20px; }
+        .print-title { font-size: 2rem; font-weight: 700; color: var(--primary); }
+        .print-info { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .print-label { color: var(--text-light); font-size: 0.875rem; }
+        .print-total { font-size: 1.5rem; font-weight: 700; text-align: right; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>📄 发票管理</h1>
+        <p>创建、打印、跟踪发票</p>
+    </header>
+
+    <div class="tabs no-print">
+        <button class="tab active" data-tab="invoices">发票列表</button>
+        <button class="tab" data-tab="create">新建发票</button>
+        <button class="tab" data-tab="customers">客户管理</button>
+        <button class="tab" data-tab="products">产品/服务</button>
+        <button class="tab" data-tab="settings">设置</button>
+    </div>
+
+    <div class="container">
+        <!-- 发票列表 -->
+        <div id="tab-invoices">
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-value" id="total-invoices">0</div>
+                    <div class="stat-label">总发票数</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="unpaid-amount">¥0</div>
+                    <div class="stat-label">待收款</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="paid-amount">¥0</div>
+                    <div class="stat-label">已收款</div>
+                </div>
+            </div>
+            <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="search-invoice" placeholder="搜索发票号、客户名...">
+            </div>
+            <div class="action-bar">
+                <button class="btn btn-primary" onclick="showCreateInvoice()">+ 新建发票</button>
+                <button class="btn btn-secondary" onclick="exportData()">导出数据</button>
+                <button class="btn btn-secondary" onclick="importData()">导入数据</button>
+                <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+            </div>
+            <div id="invoice-list" class="grid" style="margin-top: 16px;"></div>
+        </div>
+
+        <!-- 新建发票 -->
+        <div id="tab-create" style="display: none;">
+            <div class="card">
+                <h2 style="margin-bottom: 16px;">新建发票</h2>
+                <form id="invoice-form">
+                    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>发票号码</label>
+                            <input type="text" id="inv-number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>开票日期</label>
+                            <input type="date" id="inv-date" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>客户</label>
+                        <select id="inv-customer" required>
+                            <option value="">选择客户</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>到期日期</label>
+                        <input type="date" id="inv-due-date">
+                    </div>
+                    <div class="form-group">
+                        <label>产品/服务</label>
+                        <div id="inv-items"></div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="addItem()">+ 添加项目</button>
+                    </div>
+                    <div class="form-group">
+                        <label>备注</label>
+                        <textarea id="inv-notes" rows="2"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>总计</label>
+                        <div style="font-size: 1.5rem; font-weight: 700; color: var(--primary);" id="inv-total">¥0.00</div>
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="submit" class="btn btn-primary">保存发票</button>
+                        <button type="button" class="btn btn-secondary" onclick="switchTab('invoices')">取消</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- 客户管理 -->
+        <div id="tab-customers" style="display: none;">
+            <div class="card">
+                <h2 style="margin-bottom: 16px;">客户管理</h2>
+                <form id="customer-form" style="margin-bottom: 20px;">
+                    <div class="grid" style="grid-template-columns: 1fr 1fr;">
+                        <div class="form-group">
+                            <label>客户名称</label>
+                            <input type="text" id="cust-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>电话</label>
+                            <input type="tel" id="cust-phone">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="cust-email">
+                    </div>
+                    <div class="form-group">
+                        <label>地址</label>
+                        <input type="text" id="cust-address">
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加客户</button>
+                </form>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>电话</th>
+                            <th>邮箱</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customer-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 产品管理 -->
+        <div id="tab-products" style="display: none;">
+            <div class="card">
+                <h2 style="margin-bottom: 16px;">产品/服务管理</h2>
+                <form id="product-form" style="margin-bottom: 20px;">
+                    <div class="grid" style="grid-template-columns: 2fr 1fr;">
+                        <div class="form-group">
+                            <label>产品名称</label>
+                            <input type="text" id="prod-name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>单价 (¥)</label>
+                            <input type="number" id="prod-price" step="0.01" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>单位</label>
+                        <input type="text" id="prod-unit" placeholder="如: 个、小时、次">
+                    </div>
+                    <button type="submit" class="btn btn-primary">添加产品</button>
+                </form>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>名称</th>
+                            <th>单价</th>
+                            <th>单位</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="product-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 设置 -->
+        <div id="tab-settings" style="display: none;">
+            <div class="card">
+                <h2 style="margin-bottom: 16px;">设置</h2>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label>公司/个人名称</label>
+                        <input type="text" id="setting-company">
+                    </div>
+                    <div class="form-group">
+                        <label>公司地址</label>
+                        <input type="text" id="setting-address">
+                    </div>
+                    <div class="form-group">
+                        <label>联系电话</label>
+                        <input type="tel" id="setting-phone">
+                    </div>
+                    <div class="form-group">
+                        <label>邮箱</label>
+                        <input type="email" id="setting-email">
+                    </div>
+                    <button type="submit" class="btn btn-primary">保存设置</button>
+                </form>
+                <hr style="margin: 20px 0; border: none; border-top: 1px solid var(--border);">
+                <button class="btn btn-danger" onclick="clearAllData()">清空所有数据</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 发票详情弹窗 -->
+    <div class="modal" id="invoice-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>发票详情</h2>
+                <button class="close-btn" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="invoice-detail"></div>
+        </div>
+    </div>
+
+    <!-- 打印区域 -->
+    <div id="invoice-print"></div>
+
+    <script>
+        // 数据存储
+        let invoices = JSON.parse(localStorage.getItem('invoices') || '[]');
+        let customers = JSON.parse(localStorage.getItem('invoice-customers') || '[]');
+        let products = JSON.parse(localStorage.getItem('invoice-products') || '[]');
+        let settings = JSON.parse(localStorage.getItem('invoice-settings') || '{}');
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            initTabs();
+            renderInvoices();
+            renderCustomers();
+            renderProducts();
+            loadSettings();
+            setDefaultInvoiceNumber();
+        });
+
+        // Tab 切换
+        function initTabs() {
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            document.querySelectorAll('[id^="tab-"]').forEach(div => div.style.display = 'none');
+            document.getElementById(`tab-${tabName}`).style.display = 'block';
+            if (tabName === 'create') {
+                loadCustomerDropdown();
+                loadProductDropdown();
+            }
+        }
+
+        // 默认发票号
+        function setDefaultInvoiceNumber() {
+            const today = new Date().toISOString().slice(0, 10).replace(/-/g, '');
+            const count = invoices.filter(i => i.number.startsWith(`INV-${today}`)).length + 1;
+            document.getElementById('inv-number').value = `INV-${today}-${String(count).padStart(3, '0')}`;
+            document.getElementById('inv-date').value = new Date().toISOString().slice(0, 10);
+        }
+
+        // 发票列表
+        function renderInvoices() {
+            const list = document.getElementById('invoice-list');
+            const search = document.getElementById('search-invoice').value.toLowerCase();
+            let total = 0, unpaid = 0, paid = 0;
+
+            const filtered = invoices.filter(inv => {
+                if (!search) return true;
+                return inv.number.toLowerCase().includes(search) ||
+                       (inv.customerName || '').toLowerCase().includes(search);
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            filtered.forEach(inv => {
+                const amount = parseFloat(inv.total) || 0;
+                total += amount;
+                if (inv.status === 'paid') paid += amount;
+                else unpaid += amount;
+            });
+
+            document.getElementById('total-invoices').textContent = invoices.length;
+            document.getElementById('unpaid-amount').textContent = `¥${unpaid.toFixed(0)}`;
+            document.getElementById('paid-amount').textContent = `¥${paid.toFixed(0)}`;
+
+            if (filtered.length === 0) {
+                list.innerHTML = '<div class="empty-state">暂无发票，点击"新建发票"开始</div>';
+                return;
+            }
+
+            list.innerHTML = filtered.map(inv => {
+                const statusClass = inv.status === 'paid' ? 'status-paid' :
+                                   (inv.status === 'overdue' ? 'status-overdue' : 'status-unpaid');
+                const statusText = inv.status === 'paid' ? '已付款' :
+                                  (inv.status === 'overdue' ? '已逾期' : '待付款');
+                return `
+                    <div class="invoice-card" onclick="viewInvoice('${inv.id}')">
+                        <div class="invoice-header">
+                            <div>
+                                <div class="invoice-number">${inv.number}</div>
+                                <div class="invoice-meta">${inv.customerName || '未知客户'}</div>
+                            </div>
+                            <span class="status ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="invoice-amount">¥${parseFloat(inv.total || 0).toFixed(2)}</div>
+                        <div class="invoice-meta">开票: ${inv.date} | 到期: ${inv.dueDate || '-'}</div>
+                        <div class="action-bar no-print">
+                            <button class="btn btn-sm btn-secondary" onclick="event.stopPropagation(); printInvoice('${inv.id}')">打印</button>
+                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); markPaid('${inv.id}')">${inv.status === 'paid' ? '标记未付' : '标记已付'}</button>
+                            <button class="btn btn-sm btn-danger" onclick="event.stopPropagation(); deleteInvoice('${inv.id}')">删除</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('search-invoice').addEventListener('input', renderInvoices);
+
+        // 查看发票详情
+        function viewInvoice(id) {
+            const inv = invoices.find(i => i.id === id);
+            if (!inv) return;
+
+            const items = (inv.items || []).map(item => `
+                <tr>
+                    <td>${item.name}</td>
+                    <td>${item.quantity} ${item.unit || ''}</td>
+                    <td>¥${parseFloat(item.price).toFixed(2)}</td>
+                    <td>¥${(item.quantity * item.price).toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            const statusClass = inv.status === 'paid' ? 'status-paid' :
+                               (inv.status === 'overdue' ? 'status-overdue' : 'status-unpaid');
+            const statusText = inv.status === 'paid' ? '已付款' :
+                              (inv.status === 'overdue' ? '已逾期' : '待付款');
+
+            document.getElementById('invoice-detail').innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <span class="status ${statusClass}">${statusText}</span>
+                </div>
+                <table class="table">
+                    <tr><th>发票号</th><td>${inv.number}</td></tr>
+                    <tr><th>客户</th><td>${inv.customerName || '-'}</td></tr>
+                    <tr><th>开票日期</th><td>${inv.date}</td></tr>
+                    <tr><th>到期日期</th><td>${inv.dueDate || '-'}</td></tr>
+                </table>
+                <h3 style="margin: 16px 0;">项目明细</h3>
+                <table class="table">
+                    <thead><tr><th>名称</th><th>数量</th><th>单价</th><th>小计</th></tr></thead>
+                    <tbody>${items}</tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3">总计</th>
+                            <th style="color: var(--primary); font-size: 1.25rem;">¥${parseFloat(inv.total || 0).toFixed(2)}</th>
+                        </tr>
+                    </tfoot>
+                </table>
+                ${inv.notes ? `<p style="margin-top: 16px;"><strong>备注:</strong> ${inv.notes}</p>` : ''}
+                <div class="action-bar no-print" style="margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="printInvoice('${inv.id}')">打印</button>
+                    <button class="btn btn-secondary" onclick="markPaid('${inv.id}')">${inv.status === 'paid' ? '标记未付' : '标记已付'}</button>
+                    <button class="btn btn-danger" onclick="deleteInvoice('${inv.id}')">删除</button>
+                </div>
+            `;
+            document.getElementById('invoice-modal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('invoice-modal').classList.remove('show');
+        }
+
+        // 打印发票
+        function printInvoice(id) {
+            const inv = invoices.find(i => i.id === id);
+            if (!inv) return;
+
+            const items = (inv.items || []).map(item => `
+                <tr>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee;">${item.name}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: center;">${item.quantity} ${item.unit || ''}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">¥${parseFloat(item.price).toFixed(2)}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid #eee; text-align: right;">¥${(item.quantity * item.price).toFixed(2)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('invoice-print').innerHTML = `
+                <div class="print-header">
+                    <div class="print-title">发票 / Invoice</div>
+                    <div style="margin-top: 8px;">${settings.company || '公司名称'}</div>
+                </div>
+                <div class="print-info">
+                    <div>
+                        <div class="print-label">发票号码</div>
+                        <div>${inv.number}</div>
+                    </div>
+                    <div>
+                        <div class="print-label">开票日期</div>
+                        <div>${inv.date}</div>
+                    </div>
+                    <div>
+                        <div class="print-label">到期日期</div>
+                        <div>${inv.dueDate || '-'}</div>
+                    </div>
+                </div>
+                <div style="margin-bottom: 20px;">
+                    <div class="print-label">客户</div>
+                    <div>${inv.customerName || '-'}</div>
+                </div>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <thead>
+                        <tr style="background: #f5f5f5;">
+                            <th style="padding: 10px; text-align: left;">项目</th>
+                            <th style="padding: 10px; text-align: center;">数量</th>
+                            <th style="padding: 10px; text-align: right;">单价</th>
+                            <th style="padding: 10px; text-align: right;">小计</th>
+                        </tr>
+                    </thead>
+                    <tbody>${items}</tbody>
+                </table>
+                <div class="print-total">合计: ¥${parseFloat(inv.total || 0).toFixed(2)}</div>
+                ${inv.notes ? `<div style="margin-top: 20px; color: #666;"><strong>备注:</strong> ${inv.notes}</div>` : ''}
+                <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #999;">
+                    <p>公司: ${settings.company || '-'} | 电话: ${settings.phone || '-'} | 邮箱: ${settings.email || '-'}</p>
+                    <p>地址: ${settings.address || '-'}</p>
+                </div>
+            `;
+            document.getElementById('invoice-print').classList.add('show');
+            window.print();
+            setTimeout(() => {
+                document.getElementById('invoice-print').classList.remove('show');
+            }, 1000);
+        }
+
+        // 标记付款状态
+        function markPaid(id) {
+            const inv = invoices.find(i => i.id === id);
+            if (!inv) return;
+            inv.status = inv.status === 'paid' ? 'unpaid' : 'paid';
+            saveInvoices();
+            renderInvoices();
+            closeModal();
+        }
+
+        // 删除发票
+        function deleteInvoice(id) {
+            if (!confirm('确定删除此发票?')) return;
+            invoices = invoices.filter(i => i.id !== id);
+            saveInvoices();
+            renderInvoices();
+            closeModal();
+        }
+
+        // 保存发票
+        document.getElementById('invoice-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const items = [];
+            document.querySelectorAll('#inv-items .item-row').forEach(row => {
+                items.push({
+                    name: row.querySelector('.item-name').value,
+                    quantity: parseFloat(row.querySelector('.item-qty').value) || 1,
+                    unit: row.querySelector('.item-unit').value,
+                    price: parseFloat(row.querySelector('.item-price').value) || 0
+                });
+            });
+
+            const customerSelect = document.getElementById('inv-customer');
+            const customerId = customerSelect.value;
+            const customer = customers.find(c => c.id === customerId);
+
+            const inv = {
+                id: document.getElementById('inv-number').dataset.id || Date.now().toString(),
+                number: document.getElementById('inv-number').value,
+                date: document.getElementById('inv-date').value,
+                customerId: customerId,
+                customerName: customer ? customer.name : '',
+                dueDate: document.getElementById('inv-due-date').value,
+                items: items,
+                total: items.reduce((sum, item) => sum + (item.quantity * item.price), 0),
+                notes: document.getElementById('inv-notes').value,
+                status: 'unpaid',
+                createdAt: new Date().toISOString()
+            };
+
+            // 检查是否过期
+            if (inv.dueDate && new Date(inv.dueDate) < new Date() && inv.status !== 'paid') {
+                inv.status = 'overdue';
+            }
+
+            const existingIndex = invoices.findIndex(i => i.id === inv.id);
+            if (existingIndex >= 0) {
+                invoices[existingIndex] = inv;
+            } else {
+                invoices.push(inv);
+            }
+
+            saveInvoices();
+            renderInvoices();
+            switchTab('invoices');
+            document.getElementById('invoice-form').reset();
+            setDefaultInvoiceNumber();
+        });
+
+        function showCreateInvoice() {
+            switchTab('create');
+            setDefaultInvoiceNumber();
+            document.getElementById('inv-items').innerHTML = '';
+            addItem();
+        }
+
+        function loadCustomerDropdown() {
+            const select = document.getElementById('inv-customer');
+            select.innerHTML = '<option value="">选择客户</option>' +
+                customers.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function loadProductDropdown() {
+            const container = document.getElementById('inv-items');
+            container.querySelectorAll('.item-row').forEach(row => {
+                const select = row.querySelector('.item-product');
+                if (select) {
+                    select.innerHTML = '<option value="">选择产品</option>' +
+                        products.map(p => `<option value="${p.id}" data-name="${p.name}" data-price="${p.price}" data-unit="${p.unit || ''}">${p.name} - ¥${p.price}</option>`).join('');
+                    select.addEventListener('change', (e) => {
+                        const option = e.target.selectedOptions[0];
+                        if (option && option.value) {
+                            row.querySelector('.item-name').value = option.dataset.name;
+                            row.querySelector('.item-price').value = option.dataset.price;
+                            row.querySelector('.item-unit').value = option.dataset.unit;
+                            updateTotal();
+                        }
+                    });
+                }
+            });
+        }
+
+        function addItem() {
+            const container = document.getElementById('inv-items');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.style.cssText = 'display: grid; grid-template-columns: 2fr 80px 80px 100px 30px; gap: 8px; margin-bottom: 8px; align-items: end;';
+            div.innerHTML = `
+                <div class="form-group" style="margin: 0;">
+                    <select class="item-product" style="width: 100%;">
+                        <option value="">选择产品或输入</option>
+                        ${products.map(p => `<option value="${p.id}" data-name="${p.name}" data-price="${p.price}" data-unit="${p.unit || ''}">${p.name}</option>`).join('')}
+                    </select>
+                    <input type="text" class="item-name" placeholder="产品名称" style="margin-top: 4px;">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <input type="number" class="item-qty" value="1" min="1" placeholder="数量">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <input type="text" class="item-unit" placeholder="单位">
+                </div>
+                <div class="form-group" style="margin: 0;">
+                    <input type="number" class="item-price" value="0" step="0.01" placeholder="单价">
+                </div>
+                <button type="button" class="btn btn-danger btn-sm" onclick="this.parentElement.remove(); updateTotal();">×</button>
+            `;
+            container.appendChild(div);
+
+            // 添加产品选择事件
+            const select = div.querySelector('.item-product');
+            select.addEventListener('change', (e) => {
+                const option = e.target.selectedOptions[0];
+                if (option && option.value) {
+                    div.querySelector('.item-name').value = option.dataset.name;
+                    div.querySelector('.item-price').value = option.dataset.price;
+                    div.querySelector('.item-unit').value = option.dataset.unit;
+                    updateTotal();
+                }
+            });
+
+            // 添加数量和单价变化事件
+            div.querySelector('.item-qty').addEventListener('input', updateTotal);
+            div.querySelector('.item-price').addEventListener('input', updateTotal);
+        }
+
+        function updateTotal() {
+            let total = 0;
+            document.querySelectorAll('#inv-items .item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                total += qty * price;
+            });
+            document.getElementById('inv-total').textContent = `¥${total.toFixed(2)}`;
+        }
+
+        // 客户管理
+        document.getElementById('customer-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const customer = {
+                id: Date.now().toString(),
+                name: document.getElementById('cust-name').value,
+                phone: document.getElementById('cust-phone').value,
+                email: document.getElementById('cust-email').value,
+                address: document.getElementById('cust-address').value
+            };
+            customers.push(customer);
+            localStorage.setItem('invoice-customers', JSON.stringify(customers));
+            renderCustomers();
+            document.getElementById('customer-form').reset();
+        });
+
+        function renderCustomers() {
+            const tbody = document.getElementById('customer-list');
+            if (customers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">暂无客户</td></tr>';
+                return;
+            }
+            tbody.innerHTML = customers.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.phone || '-'}</td>
+                    <td>${c.email || '-'}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteCustomer('${c.id}')">删除</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteCustomer(id) {
+            if (!confirm('确定删除此客户?')) return;
+            customers = customers.filter(c => c.id !== id);
+            localStorage.setItem('invoice-customers', JSON.stringify(customers));
+            renderCustomers();
+        }
+
+        // 产品管理
+        document.getElementById('product-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const product = {
+                id: Date.now().toString(),
+                name: document.getElementById('prod-name').value,
+                price: parseFloat(document.getElementById('prod-price').value) || 0,
+                unit: document.getElementById('prod-unit').value
+            };
+            products.push(product);
+            localStorage.setItem('invoice-products', JSON.stringify(products));
+            renderProducts();
+            document.getElementById('product-form').reset();
+        });
+
+        function renderProducts() {
+            const tbody = document.getElementById('product-list');
+            if (products.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-light);">暂无产品</td></tr>';
+                return;
+            }
+            tbody.innerHTML = products.map(p => `
+                <tr>
+                    <td>${p.name}</td>
+                    <td>¥${p.price.toFixed(2)}</td>
+                    <td>${p.unit || '-'}</td>
+                    <td><button class="btn btn-danger btn-sm" onclick="deleteProduct('${p.id}')">删除</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteProduct(id) {
+            if (!confirm('确定删除此产品?')) return;
+            products = products.filter(p => p.id !== id);
+            localStorage.setItem('invoice-products', JSON.stringify(products));
+            renderProducts();
+        }
+
+        // 设置
+        function loadSettings() {
+            document.getElementById('setting-company').value = settings.company || '';
+            document.getElementById('setting-address').value = settings.address || '';
+            document.getElementById('setting-phone').value = settings.phone || '';
+            document.getElementById('setting-email').value = settings.email || '';
+        }
+
+        document.getElementById('settings-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            settings = {
+                company: document.getElementById('setting-company').value,
+                address: document.getElementById('setting-address').value,
+                phone: document.getElementById('setting-phone').value,
+                email: document.getElementById('setting-email').value
+            };
+            localStorage.setItem('invoice-settings', JSON.stringify(settings));
+            alert('设置已保存');
+        });
+
+        // 数据导出/导入
+        function exportData() {
+            const data = { invoices, customers, products, settings };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `invoice-data-${new Date().toISOString().slice(0,10)}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('import-file').click();
+        }
+
+        function handleImport(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    if (data.invoices) invoices = data.invoices;
+                    if (data.customers) customers = data.customers;
+                    if (data.products) products = data.products;
+                    if (data.settings) settings = data.settings;
+                    saveInvoices();
+                    localStorage.setItem('invoice-customers', JSON.stringify(customers));
+                    localStorage.setItem('invoice-products', JSON.stringify(products));
+                    localStorage.setItem('invoice-settings', JSON.stringify(settings));
+                    renderInvoices();
+                    renderCustomers();
+                    renderProducts();
+                    loadSettings();
+                    alert('数据导入成功');
+                } catch (err) {
+                    alert('导入失败: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function saveInvoices() {
+            localStorage.setItem('invoices', JSON.stringify(invoices));
+        }
+
+        function clearAllData() {
+            if (!confirm('确定清空所有数据? 此操作不可恢复!')) return;
+            localStorage.removeItem('invoices');
+            localStorage.removeItem('invoice-customers');
+            localStorage.removeItem('invoice-products');
+            localStorage.removeItem('invoice-settings');
+            invoices = [];
+            customers = [];
+            products = [];
+            settings = {};
+            renderInvoices();
+            renderCustomers();
+            renderProducts();
+            loadSettings();
+        }
+
+        // 点击外部关闭弹窗
+        document.getElementById('invoice-modal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('invoice-modal')) closeModal();
+        });
+    </script>
+</body>
+</html>
