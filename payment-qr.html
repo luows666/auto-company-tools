@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>聚合收款码 - 多码合一</title>
+    <meta name="description" content="将支付宝、微信、QQ钱包等多个收款码合成为一个页面，方便客户扫码支付。支持本地存储，无需服务器。">
+    <meta name="keywords" content="聚合收款码,支付宝收款,微信收款,多码合一,商家收款">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #1677ff;
+            --success: #52c41a;
+            --bg: #f5f5f5;
+            --card: #ffffff;
+            --text: #333;
+            --text-light: #666;
+            --border: #e8e8e8;
+            --alipay: #1677ff;
+            --wechat: #07c160;
+            --qq: #12b7f5;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #4096ff 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 30px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(22, 119, 255, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .qr-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .qr-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 12px;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .qr-item:hover {
+            background: #f0f0f0;
+        }
+
+        .qr-item.alipay { border-color: var(--alipay); }
+        .qr-item.wechat { border-color: var(--wechat); }
+        .qr-item.qq { border-color: var(--qq); }
+
+        .qr-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .qr-icon.alipay { background: var(--alipay); }
+        .qr-icon.wechat { background: var(--wechat); }
+        .qr-icon.qq { background: var(--qq); }
+
+        .qr-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .qr-info .name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .qr-info .status {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .qr-info .status.active {
+            color: var(--success);
+        }
+
+        .qr-preview {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+            background: #eee;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .qr-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #4096ff;
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--border);
+            color: var(--text);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group .btn {
+            flex: 1;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--border);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: #f0f7ff;
+        }
+
+        .upload-area .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .upload-area .text {
+            color: var(--text-light);
+            font-size: 0.875rem;
+        }
+
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .preview-item {
+            position: relative;
+            aspect-ratio: 1;
+            border-radius: 12px;
+            overflow: hidden;
+            background: #f5f5f5;
+        }
+
+        .preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .preview-item .remove {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            width: 24px;
+            height: 24px;
+            background: rgba(0,0,0,0.6);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            cursor: pointer;
+        }
+
+        /* Payment Page Mode */
+        body.pay-mode {
+            background: #f0f2f5;
+        }
+
+        body.pay-mode header {
+            border-radius: 0;
+        }
+
+        body.pay-mode .admin-panel {
+            display: none;
+        }
+
+        body.pay-mode .payment-panel {
+            display: block;
+        }
+
+        .payment-panel {
+            display: none;
+        }
+
+        .payment-title {
+            text-align: center;
+            padding: 20px;
+            font-size: 1.25rem;
+            font-weight: 600;
+            background: white;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .payment-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .payment-method {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .payment-method:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .payment-method .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .payment-method .info {
+            flex: 1;
+        }
+
+        .payment-method .info .label {
+            font-weight: 500;
+        }
+
+        .payment-method .info .hint {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .payment-method .arrow {
+            color: var(--text-light);
+        }
+
+        .qr-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .qr-modal.active {
+            display: flex;
+        }
+
+        .qr-modal .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .qr-modal .modal-content h3 {
+            margin-bottom: 16px;
+        }
+
+        .qr-modal .modal-content img {
+            max-width: 280px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .qr-modal .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .amount-input {
+            font-size: 1.5rem;
+            text-align: center;
+            font-weight: 600;
+            padding: 16px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .empty-state .icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        /* Edit modal */
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .edit-modal.active {
+            display: flex;
+        }
+
+        .edit-modal .modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .edit-modal .modal-content h3 {
+            margin-bottom: 16px;
+        }
+
+        .edit-modal input[type="text"] {
+            margin-bottom: 12px;
+        }
+
+        .edit-modal .btn-group {
+            margin-top: 16px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 8px;
+ 16px;
+        }
+
+        .            margin-bottom:tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #f5f5f5;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .visitor-counter {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .visitor-counter span {
+            font-weight: 600;
+        }
+
+        .share-section {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+
+        .share-section .hint {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 8px;
+        }
+
+        .share-link {
+            display: flex;
+            gap: 8px;
+        }
+
+        .share-link input {
+            flex: 1;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            background: #f5f5f5;
+        }
+
+        .share-link .btn {
+            padding: 8px 12px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>聚合收款码</h1>
+        <p>多码合一，方便客户扫码支付</p>
+        <div class="visitor-counter">
+            <span>👁</span> <span id="visitorCount">1</span> 次浏览
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- Admin Panel -->
+        <div class="admin-panel">
+            <div class="card">
+                <h2>💳 添加收款码</h2>
+                <div class="tabs">
+                    <button class="tab active" data-tab="alipay">支付宝</button>
+                    <button class="tab" data-tab="wechat">微信</button>
+                    <button class="tab" data-tab="qq">QQ钱包</button>
+                </div>
+
+                <div class="tab-content active" id="alipay-panel">
+                    <label class="upload-area" id="alipay-upload">
+                        <input type="file" accept="image/*" data-type="alipay">
+                        <div class="icon">📷</div>
+                        <div class="text">点击上传支付宝收款码</div>
+                    </label>
+                    <div class="preview-container" id="alipay-preview"></div>
+                </div>
+
+                <div class="tab-content" id="wechat-panel">
+                    <label class="upload-area" id="wechat-upload">
+                        <input type="file" accept="image/*" data-type="wechat">
+                        <div class="icon">📷</div>
+                        <div class="text">点击上传微信收款码</div>
+                    </label>
+                    <div class="preview-container" id="wechat-preview"></div>
+                </div>
+
+                <div class="tab-content" id="qq-panel">
+                    <label class="upload-area" id="qq-upload">
+                        <input type="file" accept="image/*" data-type="qq">
+                        <div class="icon">📷</div>
+                        <div class="text">点击上传QQ钱包收款码</div>
+                    </label>
+                    <div class="preview-container" id="qq-preview"></div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>📋 已添加的收款码</h2>
+                <div class="qr-list" id="qrList">
+                    <div class="empty-state">
+                        <div class="icon">📭</div>
+                        <p>尚未添加任何收款码</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🔗 分享链接</h2>
+                <p style="font-size: 0.875rem; color: var(--text-light); margin-bottom: 12px;">
+                    将下方链接分享给客户，他们可以直接选择支付方式扫码付款
+                </p>
+                <div class="share-section">
+                    <div class="hint">您的收款页面链接：</div>
+                    <div class="share-link">
+                        <input type="text" id="shareLink" readonly>
+                        <button class="btn btn-primary" onclick="copyShareLink()">复制</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2>🗑️ 数据管理</h2>
+                <div class="btn-group">
+                    <button class="btn btn-secondary" onclick="exportData()">导出配置</button>
+                    <button class="btn btn-secondary" onclick="importData()">导入配置</button>
+                    <button class="btn btn-outline" onclick="clearData()" style="color: #ff4d4f;">清空数据</button>
+                </div>
+                <input type="file" id="importFile" accept=".json" style="display: none;">
+            </div>
+        </div>
+
+        <!-- Payment Panel (for customers) -->
+        <div class="payment-panel">
+            <div class="payment-title">
+                <span id="storeName">扫码支付</span>
+            </div>
+
+            <div class="card">
+                <div style="margin-bottom: 12px;">
+                    <input type="number" id="paymentAmount" class="amount-input" placeholder="请输入金额" step="0.01">
+                </div>
+            </div>
+
+            <div class="payment-methods" id="paymentMethods">
+                <!-- Payment methods will be rendered here -->
+            </div>
+
+            <div class="card" style="margin-top: 16px; text-align: center;">
+                <p style="font-size: 0.75rem; color: var(--text-light);">
+                    选择上方任意支付方式，扫码完成付款
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- QR Modal -->
+    <div class="qr-modal" id="qrModal">
+        <div class="modal-content">
+            <h3 id="modalTitle">支付方式</h3>
+            <img id="modalQr" src="" alt="收款码">
+            <p style="font-size: 0.875rem; color: var(--text-light);">请使用对应的 APP 扫码支付</p>
+            <button class="btn btn-secondary" style="margin-top: 16px; width: 100%;" onclick="closeModal()">关闭</button>
+        </div>
+    </div>
+
+    <!-- Edit Modal -->
+    <div class="edit-modal" id="editModal">
+        <div class="modal-content">
+            <h3>编辑收款码</h3>
+            <input type="text" id="editName" placeholder="备注名称（可选）">
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="saveEdit()">保存</button>
+                <button class="btn btn-secondary" onclick="closeEditModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Payment data storage
+        const STORAGE_KEY = 'payment-qr-data';
+
+        let paymentData = {
+            alipay: null,
+            wechat: null,
+            qq: null
+        };
+
+        let editingType = null;
+
+        // Check if in payment mode
+        const urlParams = new URLSearchParams(window.location.search);
+        const isPaymentMode = urlParams.get('pay') === '1';
+
+        if (isPaymentMode) {
+            document.body.classList.add('pay-mode');
+            loadPaymentData();
+            renderPaymentPage();
+        } else {
+            loadPaymentData();
+            renderQrList();
+            updateShareLink();
+        }
+
+        // Visitor counter
+        (function() {
+            const key = 'payment-qr-visits';
+            let count = parseInt(localStorage.getItem(key) || '0');
+            count++;
+            localStorage.setItem(key, count.toString());
+            document.getElementById('visitorCount').textContent = count.toLocaleString();
+        })();
+
+        // Tab navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab + '-panel').classList.add('active');
+            });
+        });
+
+        // File upload handling
+        document.querySelectorAll('input[type="file"]').forEach(input => {
+            input.addEventListener('change', handleFileUpload);
+        });
+
+        function handleFileUpload(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const type = e.target.dataset.type;
+            const reader = new FileReader();
+
+            reader.onload = function(event) {
+                paymentData[type] = event.target.result;
+                savePaymentData();
+                renderQrList();
+                updateShareLink();
+
+                // Show preview
+                const preview = document.getElementById(type + '-preview');
+                preview.innerHTML = `<div class="preview-item">
+                    <img src="${event.target.result}" alt="${type}">
+                    <div class="remove" onclick="removeQr('${type}')">×</div>
+                </div>`;
+            };
+
+            reader.readAsDataURL(file);
+            // Reset input
+            e.target.value = '';
+        }
+
+        function removeQr(type) {
+            if (confirm('确定要删除这个收款码吗？')) {
+                paymentData[type] = null;
+                savePaymentData();
+                renderQrList();
+                updateShareLink();
+                document.getElementById(type + '-preview').innerHTML = '';
+            }
+        }
+
+        function savePaymentData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(paymentData));
+        }
+
+        function loadPaymentData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) {
+                paymentData = JSON.parse(saved);
+
+                // Update previews
+                ['alipay', 'wechat', 'qq'].forEach(type => {
+                    if (paymentData[type]) {
+                        const preview = document.getElementById(type + '-preview');
+                        preview.innerHTML = `<div class="preview-item">
+                            <img src="${paymentData[type]}" alt="${type}">
+                            <div class="remove" onclick="removeQr('${type}')">×</div>
+                        </div>`;
+                    }
+                });
+            }
+        }
+
+        function renderQrList() {
+            const list = document.getElementById('qrList');
+            const items = [];
+
+            const typeLabels = {
+                alipay: '支付宝',
+                wechat: '微信支付',
+                qq: 'QQ钱包'
+            };
+
+            const typeIcons = {
+                alipay: '💳',
+                wechat: '💬',
+                qq: '🐧'
+            };
+
+            ['alipay', 'wechat', 'qq'].forEach(type => {
+                if (paymentData[type]) {
+                    items.push(`
+                        <div class="qr-item ${type}">
+                            <div class="qr-icon ${type}">${typeIcons[type]}</div>
+                            <div class="qr-info">
+                                <div class="name">${typeLabels[type]}</div>
+                                <div class="status active">✓ 已添加</div>
+                            </div>
+                            <div class="qr-preview">
+                                <img src="${paymentData[type]}" alt="${type}">
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            if (items.length === 0) {
+                list.innerHTML = `<div class="empty-state">
+                    <div class="icon">📭</div>
+                    <p>尚未添加任何收款码</p>
+                </div>`;
+            } else {
+                list.innerHTML = items.join('');
+            }
+        }
+
+        function updateShareLink() {
+            const baseUrl = window.location.href.split('?')[0];
+            const shareUrl = baseUrl + '?pay=1';
+            document.getElementById('shareLink').value = shareUrl;
+        }
+
+        function copyShareLink() {
+            const input = document.getElementById('shareLink');
+            input.select();
+            document.execCommand('copy');
+            alert('链接已复制到剪贴板！');
+        }
+
+        // Payment page rendering
+        function renderPaymentPage() {
+            const methods = document.getElementById('paymentMethods');
+            const items = [];
+
+            const typeLabels = {
+                alipay: '支付宝',
+                wechat: '微信支付',
+                qq: 'QQ钱包'
+            };
+
+            const typeIcons = {
+                alipay: '💳',
+                wechat: '💬',
+                qq: '🐧'
+            };
+
+            ['alipay', 'wechat', 'qq'].forEach(type => {
+                if (paymentData[type]) {
+                    items.push(`
+                        <div class="payment-method" onclick="showQr('${type}')">
+                            <div class="icon" style="background: ${
+                                type === 'alipay' ? 'var(--alipay)' :
+                                type === 'wechat' ? 'var(--wechat)' : 'var(--qq)'
+                            }">${typeIcons[type]}</div>
+                            <div class="info">
+                                <div class="label">${typeLabels[type]}</div>
+                                <div class="hint">扫码支付</div>
+                            </div>
+                            <div class="arrow">›</div>
+                        </div>
+                    `);
+                }
+            });
+
+            if (items.length === 0) {
+                methods.innerHTML = `<div class="empty-state">
+                    <div class="icon">😢</div>
+                    <p>暂无可用支付方式</p>
+                </div>`;
+            } else {
+                methods.innerHTML = items.join('');
+            }
+        }
+
+        function showQr(type) {
+            if (!paymentData[type]) return;
+
+            const typeLabels = {
+                alipay: '支付宝',
+                wechat: '微信支付',
+                qq: 'QQ钱包'
+            };
+
+            document.getElementById('modalTitle').textContent = typeLabels[type];
+            document.getElementById('modalQr').src = paymentData[type];
+            document.getElementById('qrModal').classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('qrModal').classList.remove('active');
+        }
+
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        function saveEdit() {
+            const name = document.getElementById('editName').value;
+            if (name) {
+                paymentData[editingType + 'Name'] = name;
+                savePaymentData();
+                renderQrList();
+            }
+            closeEditModal();
+        }
+
+        // Data management
+        function exportData() {
+            const dataStr = JSON.stringify(paymentData, null, 2);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'payment-qr-config.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        document.getElementById('importFile').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    paymentData = data;
+                    savePaymentData();
+                    renderQrList();
+                    updateShareLink();
+
+                    // Update previews
+                    ['alipay', 'wechat', 'qq'].forEach(type => {
+                        const preview = document.getElementById(type + '-preview');
+                        if (paymentData[type]) {
+                            preview.innerHTML = `<div class="preview-item">
+                                <img src="${paymentData[type]}" alt="${type}">
+                                <div class="remove" onclick="removeQr('${type}')">×</div>
+                            </div>`;
+                        } else {
+                            preview.innerHTML = '';
+                        }
+                    });
+
+                    alert('配置导入成功！');
+                } catch (err) {
+                    alert('导入失败：无效的配置文件');
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = '';
+        });
+
+        function clearData() {
+            if (confirm('确定要清空所有收款码数据吗？此操作不可恢复！')) {
+                paymentData = { alipay: null, wechat: null, qq: null };
+                savePaymentData();
+                renderQrList();
+                updateShareLink();
+
+                ['alipay', 'wechat', 'qq'].forEach(type => {
+                    document.getElementById(type + '-preview').innerHTML = '';
+                });
+
+                alert('数据已清空');
+            }
+        }
+
+        // Close modals on outside click
+        document.getElementById('qrModal').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        document.getElementById('editModal').addEventListener('click', function(e) {
+            if (e.target === this) closeEditModal();
+        });
+    </script>
+</body>
+</html>

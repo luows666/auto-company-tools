@@ -3,237 +3,947 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Auto Company 产品中心 - 免费在线工具</title>
-    <meta name="description" content="Auto Company 提供免费离线工具：密码生成器、JSON工具、记账、单位转换、计时器等实用工具">
-    <meta name="keywords" content="密码生成器,JSON工具,记账软件,单位转换,计时器,免费工具,在线工具">
+    <title>Auto Tools - 离线工具套件</title>
+    <meta name="description" content="100%离线开发者工具箱 - JSON格式化、密码生成、Base64编码、单位转换、计时器、颜色工具。数据本地存储，隐私安全，无需联网。">
+    <meta name="keywords" content="离线工具,开发者工具,JSON格式化,密码生成器,Base64编码,单位转换器,计时器,隐私工具">
     <meta name="author" content="Auto Company">
-    <meta property="og:title" content="Auto Company 产品中心 - 免费在线工具">
-    <meta property="og:description" content="免费离线工具：密码生成、JSON格式化、记账、单位转换等">
+    <meta property="og:title" content="Auto Tools - 离线工具套件">
+    <meta property="og:description" content="100%离线开发者工具箱，数据本地存储，隐私安全">
     <meta property="og:type" content="website">
-    <link rel="canonical" href="./">
     <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --income: #3b82f6;
+            --expense: #f97316;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: var(--bg);
+            color: var(--text);
             min-height: 100vh;
-            padding: 40px 20px;
+            padding-bottom: 80px;
         }
-        .container { max-width: 900px; margin: 0 auto; }
-        h1 {
-            color: #fff;
-            text-align: center;
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 40px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
         }
-        .subtitle {
-            color: rgba(255,255,255,0.7);
-            text-align: center;
-            margin-bottom: 40px;
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
         }
-        .products {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-            gap: 20px;
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
         }
-        .product-card {
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-            border-radius: 16px;
-            padding: 24px;
-            border: 1px solid rgba(255,255,255,0.1);
-            transition: all 0.3s ease;
-            text-decoration: none;
+
+        .visitor-counter {
+            margin-top: 12px;
+            font-size: 0.75rem;
+            opacity: 0.8;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+
+        .visitor-counter span {
+            font-weight: 600;
+        }
+
+        /* Tab Navigation */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 16px;
+            overflow-x: auto;
+            background: var(--card);
+            border-bottom: 1px solid #e2e8f0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .tab {
+            padding: 10px 16px;
+            border: none;
+            background: #f1f5f9;
+            color: var(--text-light);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Content */
+        .content {
+            padding: 16px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .tool-section {
+            display: none;
+        }
+
+        .tool-section.active {
             display: block;
         }
-        .product-card:hover {
-            transform: translateY(-5px);
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.3);
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
         }
-        .product-icon {
-            font-size: 2rem;
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Form Elements */
+        input, textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-group button {
+            flex: 1;
+        }
+
+        /* Password Generator */
+        .password-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.25rem;
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 12px;
+            text-align: center;
+            word-break: break-all;
+            min-height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 12px;
         }
-        .product-name {
-            color: #fff;
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.875rem;
+        }
+
+        .option input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        /* JSON Formatter */
+        .code-output {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 16px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            white-space: pre-wrap;
+            word-break: break-all;
+            max-height: 400px;
+            overflow: auto;
+        }
+
+        /* Budget */
+        .budget-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .summary-item {
+            text-align: center;
+            padding: 16px;
+            border-radius: 12px;
+            background: #f8fafc;
+        }
+
+        .summary-item.income {
+            background: #dbeafe;
+        }
+
+        .summary-item.expense {
+            background: #ffedd5;
+        }
+
+        .summary-item.balance {
+            background: #dcfce7;
+        }
+
+        .summary-item .label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .summary-item .value {
             font-size: 1.25rem;
             font-weight: 600;
+        }
+
+        .transaction {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
             margin-bottom: 8px;
         }
-        .product-desc {
-            color: rgba(255,255,255,0.6);
-            font-size: 0.875rem;
-            line-height: 1.5;
+
+        .transaction .desc {
+            font-weight: 500;
         }
-        .product-count {
-            color: rgba(255,255,255,0.5);
-            text-align: center;
-            margin-top: 40px;
-            font-size: 0.875rem;
-        }
-        .sponsor-section {
-            background: rgba(255,255,255,0.05);
-            border-radius: 16px;
-            padding: 30px;
-            margin-top: 40px;
-            text-align: center;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .sponsor-title {
-            color: #fff;
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-        }
-        .sponsor-desc {
-            color: rgba(255,255,255,0.6);
-            margin-bottom: 20px;
-        }
-        .sponsor-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .sponsor-btn {
-            padding: 12px 30px;
-            border-radius: 8px;
-            text-decoration: none;
+
+        .transaction .amount {
             font-weight: 600;
-            transition: all 0.3s;
         }
-        .sponsor-btn:hover {
-            transform: translateY(-2px);
+
+        .transaction .amount.income {
+            color: var(--income);
         }
-        .alipay { background: #1677ff; color: #fff; }
-        .wechat { background: #07c160; color: #fff; }
-        .crypto-section { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.1); }
-        .crypto-title { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-bottom: 12px; }
-        .crypto-address { background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 6px; margin: 6px 0; cursor: pointer; font-family: monospace; font-size: 0.75rem; display: flex; align-items: center; justify-content: center; gap: 8px; }
-        .crypto-address:hover { background: rgba(0,0,0,0.5); }
-        .crypto-label { color: #f7931a; font-weight: bold; }
-        .crypto-value { color: rgba(255,255,255,0.7); word-break: break-all; }
-        .copy-hint { color: rgba(255,255,255,0.4); font-size: 0.65rem; white-space: nowrap; }
-        .paypal { background: #003087; color: #fff; }
+
+        .transaction .amount.expense {
+            color: var(--expense);
+        }
+
+        /* Converter */
+        .converter-grid {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .converter-grid .arrow {
+            font-size: 1.5rem;
+            padding-bottom: 12px;
+        }
+
+        /* Timer */
+        .timer-display {
+            font-size: 4rem;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            padding: 40px 0;
+        }
+
+        .timer-controls {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        /* Color Picker */
+        .color-preview {
+            height: 100px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+        }
+
+        .color-values {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        /* Hash */
+        .hash-output {
+            font-family: 'Courier New', monospace;
+            font-size: 0.875rem;
+            word-break: break-all;
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🚀 Auto Company</h1>
-        <p class="subtitle">自主 AI 公司 - 离线工具产品矩阵</p>
-
-        <div class="products">
-            <a href="suite.html" class="product-card">
-                <div class="product-icon">🛠️</div>
-                <div class="product-name">统一离线工具套件</div>
-                <div class="product-desc">7 合 1 离线工具：密码生成、JSON 工具、记账、单位转换、计时器、颜色提取、Hash</div>
-            </a>
-
-            <a href="personal-budget.html" class="product-card">
-                <div class="product-icon">💰</div>
-                <div class="product-name">个人预算管家</div>
-                <div class="product-desc">简单记账、预算管理、收支分析、财务规划</div>
-            </a>
-
-            <a href="dev-tools.html" class="product-card">
-                <div class="product-icon">⚡</div>
-                <div class="product-name">开发者工具箱</div>
-                <div class="product-desc">16 个工具：JSON、Base64、URL、颜色、时间戳、正则、Hash、Markdown、JWT、Cron、XML、二维码、Diff、UUID、HTML转义、SQL格式化</div>
-            </a>
-
-            <a href="suite.html" class="product-card">
-                <div class="product-icon">🔐</div>
-                <div class="product-name">密码生成器</div>
-                <div class="product-desc">安全随机密码生成、自定义选项、历史记录</div>
-            </a>
-
-            <a href="cash-register.html" class="product-card">
-                <div class="product-icon">📊</div>
-                <div class="product-name">收银记账</div>
-                <div class="product-desc">小商户记账神器 - 记收入、记支出、语音播报、数据导出</div>
-            </a>
-
-            <a href="marketing.html" class="product-card">
-                <div class="product-icon">🤖</div>
-                <div class="product-name">本地智屏 - AI 营销</div>
-                <div class="product-desc">为小商户生成专业营销文案，朋友圈、抖音文案一键生成</div>
-            </a>
-
-            <a href="qrcode.html" class="product-card">
-                <div class="product-icon">📱</div>
-                <div class="product-name">QR 码生成器</div>
-                <div class="product-desc">免费在线生成二维码，支持文本、URL、WiFi、联系人、邮箱、电话</div>
-            </a>
-
-            <a href="utility-bill.html" class="product-card">
-                <div class="product-icon">🏠</div>
-                <div class="product-name">水电费分摊</div>
-                <div class="product-desc">按天数/人数/面积智能分摊水电费，房东租客必备</div>
-            </a>
-
-            <a href="inventory.html" class="product-card">
-                <div class="product-icon">📦</div>
-                <div class="product-name">库存管理</div>
-                <div class="product-desc">小商户库存管理工具，商品管理、入库出库、数据导出</div>
-            </a>
-
-            <a href="suite.html" class="product-card">
-                <div name="product-icon">📈</div>
-                <div class="product-name">更多工具</div>
-                <div class="product-desc">更多离线工具即将上线</div>
-            </a>
+    <header>
+        <h1>Auto Tools</h1>
+        <p>离线工具套件 - 随时可用</p>
+        <div class="visitor-counter">
+            <span>👁</span> <span id="visitorCount">1</span> 次浏览
         </div>
+    </header>
 
-        <p class="product-count">共 10 个产品 | 可离线使用 | 无需服务器</p>
+    <div class="tabs">
+        <button class="tab active" data-tab="password">密码生成</button>
+        <button class="tab" data-tab="json">JSON 工具</button>
+        <button class="tab" data-tab="budget">记账</button>
+        <button class="tab" data-tab="converter">单位转换</button>
+        <button class="tab" data-tab="timer">计时器</button>
+        <button class="tab" data-tab="color">颜色</button>
+        <button class="tab" data-tab="hash">Hash</button>
+        <button class="tab" data-tab="payment">收款码</button>
+    </div>
 
-        <div class="sponsor-section">
-            <h2 class="sponsor-title">☕ 支持我们</h2>
-            <p class="sponsor-desc">如果你喜欢我们的工具，欢迎赞助一杯咖啡！</p>
-            <div class="sponsor-buttons">
-                <a href="https://qr.alipay.com/fk0941829sglvdprm8wgv0e" target="_blank" class="sponsor-btn alipay">支付宝赞助</a>
-                <a href="weixin://wxpay/bizpayurl?pr=placeholder" class="sponsor-btn wechat">微信赞助</a>
-                <a href="https://paypal.me/autocompany" target="_blank" class="sponsor-btn paypal">PayPal</a>
-            </div>
-            <div class="crypto-section">
-                <p class="crypto-title">💎 加密货币</p>
-                <div class="crypto-address" onclick="copyAddress('btc', 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')">
-                    <span class="crypto-label">BTC:</span>
-                    <span class="crypto-value">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
-                    <span class="copy-hint">点击复制</span>
+    <div class="content">
+        <!-- Password Generator -->
+        <div class="tool-section active" id="password">
+            <div class="card">
+                <h2>🔐 密码生成器</h2>
+                <div class="password-display" id="passwordDisplay">点击生成</div>
+                <div class="options">
+                    <label class="option"><input type="checkbox" id="useUppercase" checked> 大写字母</label>
+                    <label class="option"><input type="checkbox" id="useLowercase" checked> 小写字母</label>
+                    <label class="option"><input type="checkbox" id="useNumbers" checked> 数字</label>
+                    <label class="option"><input type="checkbox" id="useSymbols" checked> 符号</label>
                 </div>
-                <div class="crypto-address" onclick="copyAddress('eth', '0x1234567890abcdef1234567890abcdef12345678')">
-                    <span class="crypto-label">ETH/USDT:</span>
-                    <span class="crypto-value">0x1234567890abcdef1234567890abcdef12345678</span>
-                    <span class="copy-hint">点击复制</span>
+                <div style="margin-bottom: 12px;">
+                    <label style="font-size: 0.875rem;">长度: <span id="lengthValue">16</span></label>
+                    <input type="range" id="passwordLength" min="4" max="64" value="16" style="margin-bottom: 0;">
                 </div>
-                <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.1);">
-                    <p style="color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 10px;">其他赞助方式请联系:</p>
-                    <a href="mailto:sponsor@autocompany.dev?subject=赞助 Auto Company" style="color: #38ef7d; text-decoration: none; font-size: 0.9rem;">📧 sponsor@autocompany.dev</a>
+                <button class="btn-primary" onclick="generatePassword()">生成密码</button>
+                <div class="btn-group" style="margin-top: 8px;">
+                    <button class="btn-secondary" onclick="copyToClipboard(document.getElementById('passwordDisplay').textContent)">复制</button>
                 </div>
             </div>
         </div>
-        <script>
-        function copyAddress(coin, addr) {
-            navigator.clipboard.writeText(addr).then(function() {
-                alert(coin.toUpperCase() + ' 地址已复制: ' + addr);
-            });
-        }
-        </script>
 
-        <div style="text-align: center; margin-top: 30px;">
-            <a href="download.html" class="product-card" style="display: inline-block; background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
-                <div class="product-icon">📦</div>
-                <div class="product-name">下载离线版本</div>
-                <div class="product-desc">保存到本地，随时离线使用</div>
-            </a>
+        <!-- JSON Tools -->
+        <div class="tool-section" id="json">
+            <div class="card">
+                <h2>📄 JSON 格式化</h2>
+                <textarea id="jsonInput" rows="6" placeholder="粘贴 JSON..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="formatJSON()">格式化</button>
+                    <button class="btn-secondary" onclick="minifyJSON()">压缩</button>
+                </div>
+                <div class="btn-group" style="margin-top: 8px;">
+                    <button class="btn-secondary" onclick="validateJSON()">验证</button>
+                    <button class="btn-secondary" onclick="copyJSON()">复制结果</button>
+                </div>
+                <div class="code-output" id="jsonOutput" style="margin-top: 16px; display: none;"></div>
+            </div>
+            <div class="card">
+                <h2>🔄 Base64 编解码</h2>
+                <textarea id="base64Input" rows="3" placeholder="输入内容..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="encodeBase64()">编码</button>
+                    <button class="btn-secondary" onclick="decodeBase64()">解码</button>
+                </div>
+                <div class="hash-output" id="base64Output" style="display: none; margin-top: 12px;"></div>
+            </div>
+            <div class="card">
+                <h2>🔗 URL 编解码</h2>
+                <textarea id="urlInput" rows="3" placeholder="输入 URL..."></textarea>
+                <div class="btn-group">
+                    <button class="btn-primary" onclick="encodeURL()">编码</button>
+                    <button class="btn-secondary" onclick="decodeURL()">解码</button>
+                </div>
+                <div class="hash-output" id="urlOutput" style="display: none; margin-top: 12px;"></div>
+            </div>
         </div>
 
-        <div style="text-align: center; margin-top: 30px; margin-bottom: 20px;">
-            <p style="color: rgba(255,255,255,0.6); font-size: 0.9rem; margin-bottom: 12px;">有建议或问题？</p>
-            <a href="mailto:feedback@autocompany.dev?subject=工具反馈" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 20px; color: #fff; text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);">💬 发送反馈</a>
-            <span style="color: rgba(255,255,255,0.4); margin: 0 10px;">|</span>
-            <a href="https://github.com/luows666/auto-company-tools/issues" target="_blank" style="display: inline-block; padding: 10px 20px; background: rgba(255,255,255,0.1); border-radius: 20px; color: #fff; text-decoration: none; font-size: 0.9rem; border: 1px solid rgba(255,255,255,0.2);">🐛 报告问题</a>
+        <!-- Budget -->
+        <div class="tool-section" id="budget">
+            <div class="card">
+                <h2>💰 记账本</h2>
+                <div class="budget-summary">
+                    <div class="summary-item income">
+                        <div class="label">收入</div>
+                        <div class="value" id="totalIncome">¥0</div>
+                    </div>
+                    <div class="summary-item expense">
+                        <div class="label">支出</div>
+                        <div class="value" id="totalExpense">¥0</div>
+                    </div>
+                    <div class="summary-item balance">
+                        <div class="label">结余</div>
+                        <div class="value" id="totalBalance">¥0</div>
+                    </div>
+                </div>
+                <input type="text" id="txDesc" placeholder="描述 (可选)">
+                <input type="number" id="txAmount" placeholder="金额">
+                <div class="btn-group">
+                    <button class="btn-success" onclick="addTransaction('income')">收入</button>
+                    <button class="btn-primary" onclick="addTransaction('expense')">支出</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>📊 交易记录</h2>
+                <div id="transactionList">
+                    <p style="color: var(--text-light); text-align: center;">暂无记录</p>
+                </div>
+                <button class="btn-secondary" style="margin-top: 12px; width: 100%;" onclick="clearTransactions()">清空记录</button>
+            </div>
+        </div>
+
+        <!-- Converter -->
+        <div class="tool-section" id="converter">
+            <div class="card">
+                <h2>📐 单位转换</h2>
+                <div class="converter-grid">
+                    <div>
+                        <input type="number" id="convInput" placeholder="输入数值">
+                        <select id="convFrom">
+                            <option value="km">公里</option>
+                            <option value="m">米</option>
+                            <option value="cm">厘米</option>
+                            <option value="mm">毫米</option>
+                            <option value="mi">英里</option>
+                            <option value="ft">英尺</option>
+                            <option value="in">英寸</option>
+                        </select>
+                    </div>
+                    <div class="arrow">→</div>
+                    <div>
+                        <select id="convTo">
+                            <option value="m">米</option>
+                            <option value="km">公里</option>
+                            <option value="cm">厘米</option>
+                            <option value="mm">毫米</option>
+                            <option value="mi">英里</option>
+                            <option value="ft">英尺</option>
+                            <option value="in">英寸</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="convert()">转换</button>
+                <div class="password-display" id="convResult" style="margin-top: 12px;">-</div>
+            </div>
+            <div class="card">
+                <h2>🌡️ 温度转换</h2>
+                <input type="number" id="tempInput" placeholder="输入温度">
+                <select id="tempFrom">
+                    <option value="c">摄氏度 (°C)</option>
+                    <option value="f">华氏度 (°F)</option>
+                    <option value="k">开尔文 (K)</option>
+                </select>
+                <select id="tempTo">
+                    <option value="f">华氏度 (°F)</option>
+                    <option value="c">摄氏度 (°C)</option>
+                    <option value="k">开尔文 (K)</option>
+                </select>
+                <button class="btn-primary" onclick="convertTemp()">转换</button>
+                <div class="password-display" id="tempResult" style="margin-top: 12px;">-</div>
+            </div>
+            <div class="card">
+                <h2>⚖️ 重量转换</h2>
+                <input type="number" id="weightInput" placeholder="输入重量">
+                <select id="weightFrom">
+                    <option value="kg">千克</option>
+                    <option value="g">克</option>
+                    <option value="lb">磅</option>
+                    <option value="oz">盎司</option>
+                </select>
+                <select id="weightTo">
+                    <option value="g">克</option>
+                    <option value="kg">千克</option>
+                    <option value="lb">磅</option>
+                    <option value="oz">盎司</option>
+                </select>
+                <button class="btn-primary" onclick="convertWeight()">转换</button>
+                <div class="password-display" id="weightResult" style="margin-top: 12px;">-</div>
+            </div>
+        </div>
+
+        <!-- Timer -->
+        <div class="tool-section" id="timer">
+            <div class="card">
+                <h2>⏱️ 计时器</h2>
+                <div class="timer-display" id="timerDisplay">00:00:00</div>
+                <div class="timer-controls">
+                    <button class="btn-primary" id="timerStartBtn" onclick="startTimer()">开始</button>
+                    <button class="btn-secondary" onclick="stopTimer()">停止</button>
+                    <button class="btn-secondary" onclick="resetTimer()">重置</button>
+                </div>
+            </div>
+            <div class="card">
+                <h2>⏰ 倒计时</h2>
+                <input type="number" id="countdownInput" placeholder="秒数" value="60">
+                <button class="btn-primary" onclick="startCountdown()">开始倒计时</button>
+            </div>
+        </div>
+
+        <!-- Color -->
+        <div class="tool-section" id="color">
+            <div class="card">
+                <h2>🎨 颜色提取</h2>
+                <input type="color" id="colorPicker" value="#6366f1" style="height: 50px; padding: 8px;" onchange="updateColor()">
+                <div class="color-preview" id="colorPreview" style="background: #6366f1;">
+                    #6366f1
+                </div>
+                <div class="color-values">
+                    <div>
+                        <label style="font-size: 0.75rem;">HEX</label>
+                        <input type="text" id="hexValue" value="#6366f1" readonly>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">RGB</label>
+                        <input type="text" id="rgbValue" value="99, 102, 241" readonly>
+                    </div>
+                    <div>
+                        <label style="font-size: 0.75rem;">HSL</label>
+                        <input type="text" id="hslValue" value="239, 84%, 67%" readonly>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Hash -->
+        <div class="tool-section" id="hash">
+            <div class="card">
+                <h2>#️⃣ Hash 生成</h2>
+                <textarea id="hashInput" rows="4" placeholder="输入文本..."></textarea>
+                <button class="btn-primary" onclick="generateHash('md5')">MD5</button>
+                <div class="btn-group" style="margin-top: 8px;">
+                    <button class="btn-secondary" onclick="generateHash('sha1')">SHA-1</button>
+                    <button class="btn-secondary" onclick="generateHash('sha256')">SHA-256</button>
+                </div>
+                <div class="hash-output" id="hashOutput" style="display: none;"></div>
+            </div>
+        </div>
+
+        <!-- Payment QR -->
+        <div class="tool-section" id="payment">
+            <div class="card">
+                <h2>💳 聚合收款码</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    将支付宝、微信、QQ钱包收款码合成为一个页面，方便客户扫码支付
+                </p>
+                <button class="btn-primary" onclick="window.open('payment-qr.html', '_blank')">打开收款码管理</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    在新页面中上传您的收款码图片，然后分享链接给客户
+                </p>
+            </div>
+            <div class="card">
+                <h2>🔗 快速使用</h2>
+                <p style="font-size: 0.875rem; margin-bottom: 12px;">直接打开收款页面：</p>
+                <button class="btn-secondary" style="width: 100%;" onclick="window.open('payment-qr.html?pay=1', '_blank')">打开付款页面</button>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Visitor Counter
+        (function() {
+            const key = 'auto-tools-visits';
+            let count = parseInt(localStorage.getItem(key) || '0');
+            count++;
+            localStorage.setItem(key, count.toString());
+            document.getElementById('visitorCount').textContent = count.toLocaleString();
+        })();
+
+        // Tab Navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Password Generator
+        const chars = {
+            upper: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+            lower: 'abcdefghijklmnopqrstuvwxyz',
+            number: '0123456789',
+            symbol: '!@#$%^&*()_+-=[]{}|;:,.<>?'
+        };
+
+        document.getElementById('passwordLength').addEventListener('input', function() {
+            document.getElementById('lengthValue').textContent = this.value;
+        });
+
+        function generatePassword() {
+            let charset = '';
+            charset += document.getElementById('useUppercase').checked ? chars.upper : '';
+            charset += document.getElementById('useLowercase').checked ? chars.lower : '';
+            charset += document.getElementById('useNumbers').checked ? chars.number : '';
+            charset += document.getElementById('useSymbols').checked ? chars.symbol : '';
+
+            if (!charset) {
+                alert('请至少选择一种字符类型');
+                return;
+            }
+
+            const length = parseInt(document.getElementById('passwordLength').value);
+            let password = '';
+            for (let i = 0; i < length; i++) {
+                password += charset[Math.floor(Math.random() * charset.length)];
+            }
+            document.getElementById('passwordDisplay').textContent = password;
+        }
+
+        // JSON Tools
+        function formatJSON() {
+            try {
+                const input = document.getElementById('jsonInput').value;
+                const obj = JSON.parse(input);
+                const formatted = JSON.stringify(obj, null, 2);
+                const output = document.getElementById('jsonOutput');
+                output.textContent = formatted;
+                output.style.display = 'block';
+            } catch (e) {
+                alert('无效的 JSON: ' + e.message);
+            }
+        }
+
+        function minifyJSON() {
+            try {
+                const input = document.getElementById('jsonInput').value;
+                const obj = JSON.parse(input);
+                const minified = JSON.stringify(obj);
+                const output = document.getElementById('jsonOutput');
+                output.textContent = minified;
+                output.style.display = 'block';
+            } catch (e) {
+                alert('无效的 JSON: ' + e.message);
+            }
+        }
+
+        function validateJSON() {
+            try {
+                JSON.parse(document.getElementById('jsonInput').value);
+                alert('✓ JSON 有效');
+            } catch (e) {
+                alert('✗ JSON 无效: ' + e.message);
+            }
+        }
+
+        function copyJSON() {
+            const text = document.getElementById('jsonOutput').textContent;
+            copyToClipboard(text);
+        }
+
+        function encodeBase64() {
+            const input = document.getElementById('base64Input').value;
+            const output = document.getElementById('base64Output');
+            output.textContent = btoa(unescape(encodeURIComponent(input)));
+            output.style.display = 'block';
+        }
+
+        function decodeBase64() {
+            try {
+                const input = document.getElementById('base64Input').value;
+                const output = document.getElementById('base64Output');
+                output.textContent = decodeURIComponent(escape(atob(input)));
+                output.style.display = 'block';
+            } catch (e) {
+                alert('解码失败');
+            }
+        }
+
+        function encodeURL() {
+            const input = document.getElementById('urlInput').value;
+            const output = document.getElementById('urlOutput');
+            output.textContent = encodeURIComponent(input);
+            output.style.display = 'block';
+        }
+
+        function decodeURL() {
+            const input = document.getElementById('urlInput').value;
+            const output = document.getElementById('urlOutput');
+            output.textContent = decodeURIComponent(input);
+            output.style.display = 'block';
+        }
+
+        // Budget
+        let transactions = JSON.parse(localStorage.getItem('transactions') || '[]');
+
+        function updateBudget() {
+            let income = 0, expense = 0;
+            transactions.forEach(tx => {
+                if (tx.type === 'income') income += tx.amount;
+                else expense += tx.amount;
+            });
+            document.getElementById('totalIncome').textContent = '¥' + income.toFixed(0);
+            document.getElementById('totalExpense').textContent = '¥' + expense.toFixed(0);
+            document.getElementById('totalBalance').textContent = '¥' + (income - expense).toFixed(0);
+
+            const list = document.getElementById('transactionList');
+            if (transactions.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-light); text-align: center;">暂无记录</p>';
+            } else {
+                list.innerHTML = transactions.map((tx, i) => `
+                    <div class="transaction">
+                        <span class="desc">${tx.desc || (tx.type === 'income' ? '收入' : '支出')}</span>
+                        <span class="amount ${tx.type}">${tx.type === 'income' ? '+' : '-'}¥${tx.amount}</span>
+                    </div>
+                `).reverse().join('');
+            }
+            localStorage.setItem('transactions', JSON.stringify(transactions));
+        }
+
+        function addTransaction(type) {
+            const amount = parseFloat(document.getElementById('txAmount').value);
+            if (!amount || amount <= 0) {
+                alert('请输入有效金额');
+                return;
+            }
+            const desc = document.getElementById('txDesc').value;
+            transactions.push({ type, amount, desc, date: Date.now() });
+            document.getElementById('txAmount').value = '';
+            document.getElementById('txDesc').value = '';
+            updateBudget();
+        }
+
+        function clearTransactions() {
+            if (confirm('确定清空所有记录?')) {
+                transactions = [];
+                updateBudget();
+            }
+        }
+
+        updateBudget();
+
+        // Converter
+        const lengthFactors = { km: 1000, m: 1, cm: 0.01, mm: 0.001, mi: 1609.344, ft: 0.3048, in: 0.0254 };
+        const weightFactors = { kg: 1000, g: 1, lb: 453.592, oz: 28.3495 };
+
+        function convert() {
+            const val = parseFloat(document.getElementById('convInput').value);
+            const from = document.getElementById('convFrom').value;
+            const to = document.getElementById('convTo').value;
+            if (isNaN(val)) return;
+            const meters = val * lengthFactors[from];
+            const result = meters / lengthFactors[to];
+            document.getElementById('convResult').textContent = result.toFixed(4);
+        }
+
+        function convertTemp() {
+            const val = parseFloat(document.getElementById('tempInput').value);
+            const from = document.getElementById('tempFrom').value;
+            const to = document.getElementById('tempTo').value;
+            if (isNaN(val)) return;
+
+            let celsius;
+            if (from === 'c') celsius = val;
+            else if (from === 'f') celsius = (val - 32) * 5/9;
+            else celsius = val - 273.15;
+
+            let result;
+            if (to === 'c') result = celsius;
+            else if (to === 'f') result = celsius * 9/5 + 32;
+            else result = celsius + 273.15;
+
+            document.getElementById('tempResult').textContent = result.toFixed(2);
+        }
+
+        function convertWeight() {
+            const val = parseFloat(document.getElementById('weightInput').value);
+            const from = document.getElementById('weightFrom').value;
+            const to = document.getElementById('weightTo').value;
+            if (isNaN(val)) return;
+            const grams = val * weightFactors[from];
+            const result = grams / weightFactors[to];
+            document.getElementById('weightResult').textContent = result.toFixed(4);
+        }
+
+        // Timer
+        let timerInterval = null;
+        let seconds = 0;
+
+        function startTimer() {
+            if (timerInterval) return;
+            document.getElementById('timerStartBtn').disabled = true;
+            timerInterval = setInterval(() => {
+                seconds++;
+                updateTimerDisplay();
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('timerStartBtn').disabled = false;
+        }
+
+        function resetTimer() {
+            stopTimer();
+            seconds = 0;
+            updateTimerDisplay();
+        }
+
+        function updateTimerDisplay() {
+            const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
+            const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
+            const s = (seconds % 60).toString().padStart(2, '0');
+            document.getElementById('timerDisplay').textContent = `${h}:${m}:${s}`;
+        }
+
+        function startCountdown() {
+            let sec = parseInt(document.getElementById('countdownInput').value);
+            if (isNaN(sec) || sec <= 0) return;
+            const display = document.getElementById('timerDisplay');
+            const interval = setInterval(() => {
+                const m = Math.floor(sec / 60).toString().padStart(2, '0');
+                const s = (sec % 60).toString().padStart(2, '0');
+                display.textContent = `${m}:${s}`;
+                if (--sec < 0) {
+                    clearInterval(interval);
+                    display.textContent = '00:00';
+                    alert('倒计时结束!');
+                }
+            }, 1000);
+        }
+
+        // Color
+        function updateColor() {
+            const hex = document.getElementById('colorPicker').value;
+            const preview = document.getElementById('colorPreview');
+            preview.style.background = hex;
+            preview.textContent = hex;
+
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+
+            document.getElementById('hexValue').value = hex;
+            document.getElementById('rgbValue').value = `${r}, ${g}, ${b}`;
+
+            const rNorm = r / 255, gNorm = g / 255, bNorm = b / 255;
+            const max = Math.max(rNorm, gNorm, bNorm), min = Math.min(rNorm, gNorm, bNorm);
+            let h, s, l = (max + min) / 2;
+            if (max === min) {
+                h = s = 0;
+            } else {
+                const d = max - min;
+                s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+                switch (max) {
+                    case rNorm: h = ((gNorm - bNorm) / d + (gNorm < bNorm ? 6 : 0)) / 6; break;
+                    case gNorm: h = ((bNorm - rNorm) / d + 2) / 6; break;
+                    case bNorm: h = ((rNorm - gNorm) / d + 4) / 6; break;
+                }
+            }
+            document.getElementById('hslValue').value = `${Math.round(h * 360)}, ${Math.round(s * 100)}%, ${Math.round(l * 100)}%`;
+        }
+
+        // Hash (Simple implementation)
+        async function generateHash(type) {
+            const input = document.getElementById('hashInput').value;
+            const encoder = new TextEncoder();
+            const data = encoder.encode(input);
+
+            let hashBuffer;
+            if (type === 'md5') {
+                // MD5 not available in Web Crypto, use simple fallback
+                alert('MD5 需要外部库，使用 SHA-256 代替');
+                return;
+            } else if (type === 'sha1') {
+                hashBuffer = await crypto.subtle.digest('SHA-1', data);
+            } else {
+                hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            }
+
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            const output = document.getElementById('hashOutput');
+            output.textContent = hashHex;
+            output.style.display = 'block';
+        }
+
+        // Utilities
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板');
+            }).catch(() => {
+                alert('复制失败，请手动复制');
+            });
+        }
+    </script>
 </body>
 </html>
