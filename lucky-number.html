@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运数字生成器 - 今日你的幸运数字是什么？</title>
+    <meta name="description" content="生成今日幸运数字，好运连连！分享给朋友一起沾喜气~">
+    <meta property="og:title" content="幸运数字生成器">
+    <meta property="og:description" content="今日我的幸运数字是 X，快来测测你的！">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://luows666.github.io/auto-tools/lucky-number.html">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .container {
+            background: white;
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .options {
+            margin-bottom: 25px;
+        }
+
+        .option-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        select {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 15px;
+            background: white;
+            cursor: pointer;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .style-selector {
+            margin-bottom: 25px;
+        }
+
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+        }
+
+        .style-option {
+            height: 50px;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .style-option:hover {
+            transform: scale(1.05);
+        }
+
+        .style-option.active {
+            border-color: #333;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .btn-secondary:hover {
+            background: #eee;
+        }
+
+        .result {
+            display: none;
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .lucky-card {
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .lucky-card::before {
+            content: '🍀';
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 40px;
+        }
+
+        .lucky-number {
+            font-size: 72px;
+            font-weight: 800;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            margin: 20px 0;
+        }
+
+        .lucky-label {
+            font-size: 18px;
+            color: white;
+            opacity: 0.9;
+        }
+
+        .lucky-name {
+            font-size: 20px;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .lucky-meaning {
+            font-size: 14px;
+            color: white;
+            opacity: 0.85;
+            line-height: 1.6;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.3);
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btns .btn {
+            flex: 1;
+            padding: 12px;
+            font-size: 15px;
+        }
+
+        .history {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .history h3 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: #f5f5f5;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .lucky-gems {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .gem {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍀 幸运数字生成器</h1>
+        <p class="subtitle">测一测今日你的幸运数字是什么</p>
+
+        <div class="input-group">
+            <label>你的昵称（可选）</label>
+            <input type="text" id="nickname" placeholder="输入昵称，让幸运专属你">
+        </div>
+
+        <div class="options">
+            <div class="option-row">
+                <select id="numberCount">
+                    <option value="1">1个幸运数字</option>
+                    <option value="3" selected>3个幸运数字</option>
+                    <option value="5">5个幸运数字</option>
+                    <option value="7">7个幸运数字</option>
+                </select>
+                <select id="numberRange">
+                    <option value="10">1-10</option>
+                    <option value="100" selected>1-100</option>
+                    <option value="1000">1-1000</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="style-selector">
+            <label>选择背景风格</label>
+            <div class="style-grid">
+                <div class="style-option active" data-style="0" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);"></div>
+                <div class="style-option" data-style="1" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);"></div>
+                <div class="style-option" data-style="2" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);"></div>
+                <div class="style-option" data-style="3" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);"></div>
+                <div class="style-option" data-style="4" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);"></div>
+                <div class="style-option" data-style="5" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);"></div>
+                <div class="style-option" data-style="6" style="background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);"></div>
+                <div class="style-option" data-style="7" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);"></div>
+            </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="generateLucky()">✨ 生成幸运数字</button>
+
+        <div class="result" id="result">
+            <div class="lucky-card" id="luckyCard">
+                <div class="lucky-name" id="cardName"></div>
+                <div class="lucky-label">今日幸运数字</div>
+                <div class="lucky-number" id="luckyNumbers"></div>
+                <div class="lucky-gems" id="gems"></div>
+                <div class="lucky-meaning" id="luckyMeaning"></div>
+            </div>
+            <div class="action-btns">
+                <button class="btn btn-secondary" onclick="downloadCard()">📥 下载图片</button>
+                <button class="btn btn-secondary" onclick="copyCard()">📋 复制</button>
+            </div>
+        </div>
+
+        <div class="history" id="history" style="display: none;">
+            <h3>历史记录</h3>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <script>
+        const styles = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%)'
+        ];
+
+        const meanings = [
+            '今天是你的幸运日！做任何决定都会顺利~',
+            '宇宙在告诉你：今天适合尝试新事物！',
+            '幸运之神已经注意到你了，准备好迎接惊喜吧！',
+            '今日宜：勇敢、果断、相信直觉！',
+            '你的能量场正在上升，幸运值拉满！',
+            '今天会遇到好事发生，期待一下吧~',
+            'Lucky Day ！让幸运伴随你一整天！',
+            '今日运势爆棚，做什么都能成功！',
+            '宇宙能量汇聚于此，你就是最幸运的崽！',
+            '今天是你的幸运日，好运连连不断！'
+        ];
+
+        const gemEmojis = ['💎', '⭐', '🌟', '✨', '🍀', '🔮', '💫', '🌈'];
+
+        let currentStyle = 0;
+        let currentResult = null;
+
+        // Style selector
+        document.querySelectorAll('.style-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.style-option').forEach(o => o.classList.remove('active'));
+                this.classList.add('active');
+                currentStyle = parseInt(this.dataset.style);
+            });
+        });
+
+        function generateLucky() {
+            const nickname = document.getElementById('nickname').value || '小伙伴';
+            const count = parseInt(document.getElementById('numberCount').value);
+            const maxNum = parseInt(document.getElementById('numberRange').value);
+
+            // Generate unique random numbers
+            const numbers = [];
+            while (numbers.length < count) {
+                const num = Math.floor(Math.random() * maxNum) + 1;
+                if (!numbers.includes(num)) {
+                    numbers.push(num);
+                }
+            }
+
+            // Generate result
+            const meaning = meanings[Math.floor(Math.random() * meanings.length)];
+            const gems = gemEmojis.slice(0, count).map(e => `<span class="gem">${e}</span>`).join('');
+
+            currentResult = {
+                nickname,
+                numbers,
+                meaning,
+                style: currentStyle,
+                date: new Date().toLocaleDateString()
+            };
+
+            // Update UI
+            document.getElementById('cardName').textContent = nickname + '的幸运时刻';
+            document.getElementById('luckyNumbers').textContent = numbers.join('  ');
+            document.getElementById('luckyMeaning').textContent = meaning;
+            document.getElementById('gems').innerHTML = gems;
+            document.getElementById('luckyCard').style.background = styles[currentStyle];
+
+            // Show result
+            document.getElementById('result').classList.add('show');
+
+            // Save to history
+            saveHistory(currentResult);
+        }
+
+        function saveHistory(result) {
+            let history = JSON.parse(localStorage.getItem('luckyHistory') || '[]');
+            history.unshift(result);
+            history = history.slice(0, 10);
+            localStorage.setItem('luckyHistory', JSON.stringify(history));
+
+            // Update history display
+            const historyDiv = document.getElementById('history');
+            const historyList = document.getElementById('historyList');
+            historyDiv.style.display = 'block';
+
+            historyList.innerHTML = history.map(item => `
+                <div class="history-item">
+                    ${item.nickname}: ${item.numbers.join(', ')}
+                </div>
+            `).join('');
+        }
+
+        async function downloadCard() {
+            const card = document.getElementById('luckyCard');
+
+            // Use html2canvas-like approach with canvas
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 600;
+            canvas.height = 500;
+
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 600, 500);
+            const style = styles[currentStyle];
+
+            // Parse gradient colors
+            const colorStops = style.match(/#[a-fA-F0-9]{6}/g);
+            if (colorStops && colorStops.length >= 2) {
+                gradient.addColorStop(0, colorStops[0]);
+                gradient.addColorStop(1, colorStops[1]);
+            } else {
+                gradient.addColorStop(0, '#667eea');
+                gradient.addColorStop(1, '#764ba2');
+            }
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 600, 500);
+
+            // Draw clover
+            ctx.font = '48px Arial';
+            ctx.fillText('🍀', 520, 60);
+
+            // Draw name
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentResult.nickname + '的幸运时刻', 300, 60);
+
+            // Draw label
+            ctx.font = '18px Arial';
+            ctx.fillText('今日幸运数字', 300, 100);
+
+            // Draw numbers
+            ctx.font = 'bold 64px Arial';
+            ctx.fillText(currentResult.numbers.join('  '), 300, 200);
+
+            // Draw gems
+            ctx.font = '32px Arial';
+            const gemStr = gemEmojis.slice(0, currentResult.numbers.length).join('  ');
+            ctx.fillText(gemStr, 300, 260);
+
+            // Draw meaning
+            ctx.font = '16px Arial';
+            const meaning = currentResult.meaning;
+            ctx.fillText(meaning, 300, 340);
+
+            // Draw footer
+            ctx.font = '14px Arial';
+            ctx.fillText('幸运数字生成器', 300, 420);
+
+            // Download
+            const link = document.createElement('a');
+            link.download = 'lucky-number.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+        async function copyCard() {
+            // Copy text to clipboard
+            const text = `🍀 ${currentResult.nickname}的幸运数字\n\n✨ 今日幸运数字: ${currentResult.numbers.join('  ')}\n\n💫 ${currentResult.meaning}\n\n——来自幸运数字生成器`;
+
+            try {
+                await navigator.clipboard.writeText(text);
+                alert('已复制到剪贴板！');
+            } catch (e) {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('已复制到剪贴板！');
+            }
+        }
+
+        // Load history on page load
+        window.addEventListener('load', function() {
+            const history = JSON.parse(localStorage.getItem('luckyHistory') || '[]');
+            if (history.length > 0) {
+                const historyDiv = document.getElementById('history');
+                const historyList = document.getElementById('historyList');
+                historyDiv.style.display = 'block';
+
+                historyList.innerHTML = history.map(item => `
+                    <div class="history-item">
+                        ${item.nickname}: ${item.numbers.join(', ')}
+                    </div>
+                `).join('');
+            }
+        });
+    </script>
+</body>
+</html>

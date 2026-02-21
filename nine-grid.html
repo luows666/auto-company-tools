@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>朋友圈九宫格生成器 - Auto Tools</title>
+    <meta name="description" content="一键生成朋友圈九宫格图片，支持自定义文字和背景，朋友圈分享必备工具">
+    <meta name="keywords" content="九宫格,朋友圈,图片生成,微信九宫格,社交媒体">
+    <meta property="og:title" content="朋友圈九宫格生成器">
+    <meta property="og:description" content="一键生成精美的朋友圈九宫格图片">
+    <link rel="canonical" href="https://luows666.github.io/auto-tools/nine-grid.html">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Noto Sans SC', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .grid-preview {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            width: 100%;
+            max-width: 360px;
+            aspect-ratio: 1;
+        }
+        .grid-item {
+            aspect-ratio: 1;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        .grid-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .grid-item.text-mode {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+            padding: 8px;
+            word-break: break-all;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .style-btn.selected {
+            ring: 3px solid #667eea;
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen gradient-bg">
+    <div class="container mx-auto px-4 py-8 max-w-4xl">
+        <!-- Header -->
+        <div class="text-center text-white mb-8">
+            <h1 class="text-4xl font-bold mb-2">朋友圈九宫格生成器</h1>
+            <p class="text-lg opacity-90">一键生成精美的朋友圈九宫格图片</p>
+        </div>
+
+        <!-- Main Content -->
+        <div class="bg-white rounded-2xl shadow-2xl p-6 mb-6">
+            <!-- Mode Tabs -->
+            <div class="flex gap-2 mb-6">
+                <button onclick="setMode('upload')" id="tab-upload" class="tab-btn active px-4 py-2 rounded-lg font-medium transition-all">
+                    📷 图片模式
+                </button>
+                <button onclick="setMode('text')" id="tab-text" class="tab-btn px-4 py-2 rounded-lg font-medium bg-gray-100 transition-all">
+                    ✨ 文字模式
+                </button>
+            </div>
+
+            <!-- Upload Mode -->
+            <div id="mode-upload" class="space-y-6">
+                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-purple-500 transition-colors" onclick="document.getElementById('imageInput').click()">
+                    <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="handleImageUpload(event)">
+                    <div id="uploadPrompt">
+                        <div class="text-5xl mb-4">🖼️</div>
+                        <p class="text-gray-600 font-medium">点击上传图片</p>
+                        <p class="text-gray-400 text-sm mt-1">支持 JPG、PNG、GIF</p>
+                    </div>
+                    <img id="previewImage" class="hidden max-w-full max-h-64 mx-auto rounded-lg">
+                </div>
+            </div>
+
+            <!-- Text Mode -->
+            <div id="mode-text" class="hidden space-y-6">
+                <div>
+                    <label class="block text-gray-700 font-medium mb-2">输入文字（每格一个）</label>
+                    <textarea id="textInputs" rows="3" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent" placeholder="每行一个文字，最多9个字符
+例如：
+今
+天
+要
+开
+心
+呀"></textarea>
+                    <p class="text-gray-400 text-sm mt-1">每行一个文字，自动填充到9个格子</p>
+                </div>
+            </div>
+
+            <!-- Style Selection -->
+            <div class="mt-6">
+                <label class="block text-gray-700 font-medium mb-3">选择样式</label>
+                <div class="grid grid-cols-4 gap-3">
+                    <button onclick="setStyle(0)" class="style-btn selected p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="0">
+                        <div class="h-12 rounded bg-gradient-to-br from-pink-500 to-rose-500"></div>
+                        <span class="text-xs text-gray-500">粉红玫瑰</span>
+                    </button>
+                    <button onclick="setStyle(1)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="1">
+                        <div class="h-12 rounded bg-gradient-to-br from-blue-500 to-cyan-500"></div>
+                        <span class="text-xs text-gray-500">海洋之心</span>
+                    </button>
+                    <button onclick="setStyle(2)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="2">
+                        <div class="h-12 rounded bg-gradient-to-br from-green-500 to-emerald-500"></div>
+                        <span class="text-xs text-gray-500">森系清新</span>
+                    </button>
+                    <button onclick="setStyle(3)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="3">
+                        <div class="h-12 rounded bg-gradient-to-br from-yellow-500 to-orange-500"></div>
+                        <span class="text-xs text-gray-500">阳光暖橙</span>
+                    </button>
+                    <button onclick="setStyle(4)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="4">
+                        <div class="h-12 rounded bg-gradient-to-br from-purple-500 to-indigo-500"></div>
+                        <span class="text-xs text-gray-500">梦幻紫罗兰</span>
+                    </button>
+                    <button onclick="setStyle(5)" class="style-btn p-2 rounded-lg border-2 border-lg-transparent hover:border-purple-500 transition-all" data-style="5">
+                        <div class="h-12 rounded bg-gradient-to-br from-red-500 to-pink-500"></div>
+                        <span class="text-xs text-gray-500">热情如火</span>
+                    </button>
+                    <button onclick="setStyle(6)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="6">
+                        <div class="h-12 rounded bg-gradient-to-br from-slate-700 to-slate-900"></div>
+                        <span class="text-xs text-gray-500">暗夜星空</span>
+                    </button>
+                    <button onclick="setStyle(7)" class="style-btn p-2 rounded-lg border-2 border-transparent hover:border-purple-500 transition-all" data-style="7">
+                        <div class="h-12 rounded bg-gradient-to-br from-amber-400 to-yellow-600"></div>
+                        <span class="text-xs text-gray-500">金色年华</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="mt-8 text-center">
+                <label class="block text-gray-700 font-medium mb-3">预览效果</label>
+                <div id="gridPreview" class="grid-preview mx-auto">
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="mt-8 flex flex-wrap gap-4 justify-center">
+                <button onclick="downloadImage()" class="btn-gradient text-white px-8 py-3 rounded-xl font-bold text-lg flex items-center gap-2">
+                    <span>📥</span> 下载九宫格
+                </button>
+                <button onclick="copyToClipboard()" class="bg-gray-800 text-white px-8 py-3 rounded-xl font-bold text-lg flex items-center gap-2 hover:bg-gray-900 transition-all">
+                    <span>📋</span> 复制到剪贴板
+                </button>
+            </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="bg-white/10 backdrop-blur rounded-2xl p-6 text-white">
+            <h3 class="font-bold text-lg mb-3">💡 使用提示</h3>
+            <ul class="space-y-2 text-sm opacity-90">
+                <li>• <strong>图片模式</strong>：上传一张图片，自动分割成9宫格</li>
+                <li>• <strong>文字模式</strong>：输入文字，每个字自动填充一个格子</li>
+                <li>• <strong>保存</strong>：下载后可发朋友圈或好友</li>
+                <li>• <strong>复制</strong>：复制到剪贴板可直接发送给好友</li>
+            </ul>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-white/60 text-sm mt-6">
+            <p>Auto Tools - 朋友圈九宫格生成器</p>
+        </div>
+    </div>
+
+    <script>
+        const gradients = [
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4facfe 0%, #00f2fe 100%)',
+            'linear-gradient(135deg, #43e97b 0%, #38f9d7 100%)',
+            'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
+            'linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%)',
+            'linear-gradient(135deg, #ff6b6b 0%, #feca57 100%)',
+            'linear-gradient(135deg, #2d3436 0%, #636e72 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)'
+        ];
+
+        let currentMode = 'upload';
+        let currentStyle = 0;
+        let uploadedImage = null;
+        let textContent = [];
+
+        function init() {
+            renderPreview();
+            loadHistory();
+        }
+
+        function setMode(mode) {
+            currentMode = mode;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`tab-${mode}`).classList.add('active');
+            document.getElementById('mode-upload').classList.toggle('hidden', mode !== 'upload');
+            document.getElementById('mode-text').classList.toggle('hidden', mode !== 'text');
+            renderPreview();
+        }
+
+        function setStyle(index) {
+            currentStyle = index;
+            document.querySelectorAll('.style-btn').forEach(btn => btn.classList.remove('selected', 'ring-2', 'ring-purple-500'));
+            document.querySelector(`[data-style="${index}"]`).classList.add('selected', 'ring-2', 'ring-purple-500');
+            renderPreview();
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadedImage = e.target.result;
+                document.getElementById('uploadPrompt').classList.add('hidden');
+                document.getElementById('previewImage').src = uploadedImage;
+                document.getElementById('previewImage').classList.remove('hidden');
+                renderPreview();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderPreview() {
+            const container = document.getElementById('gridPreview');
+            container.innerHTML = '';
+
+            for (let i = 0; i < 9; i++) {
+                const item = document.createElement('div');
+                item.className = 'grid-item';
+
+                if (currentMode === 'upload' && uploadedImage) {
+                    item.innerHTML = `<img src="${uploadedImage}" alt="格${i+1}">`;
+                } else if (currentMode === 'text') {
+                    const text = getTextForCell(i);
+                    item.classList.add('text-mode');
+                    item.textContent = text;
+                    item.style.background = gradients[currentStyle];
+                } else {
+                    item.style.background = gradients[currentStyle];
+                }
+
+                container.appendChild(item);
+            }
+        }
+
+        function getTextForCell(index) {
+            const textarea = document.getElementById('textInputs');
+            const lines = textarea.value.split('\n').filter(line => line.trim());
+
+            if (lines.length === 0) {
+                const defaultTexts = ['今', '天', '要', '开', '心', '呀', '😊', '💕', '❤️'];
+                return defaultTexts[index];
+            }
+
+            const repeatCount = Math.ceil(9 / lines.length);
+            const repeatedLines = [];
+            for (let i = 0; i < repeatCount; i++) {
+                repeatedLines.push(...lines);
+            }
+            return repeatedLines[index] || '';
+        }
+
+        document.getElementById('textInputs').addEventListener('input', renderPreview);
+
+        function generateFinalImage() {
+            return new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                const size = 1080;
+                canvas.width = size;
+                canvas.height = size;
+                const ctx = canvas.getContext('2d');
+
+                const gap = 10;
+                const cellSize = (size - gap * 4) / 3;
+
+                const drawCell = (index) => {
+                    return new Promise((res) => {
+                        const x = gap + (index % 3) * (cellSize + gap);
+                        const y = gap + Math.floor(index / 3) * (cellSize + gap);
+
+                        if (currentMode === 'upload' && uploadedImage) {
+                            const img = new Image();
+                            img.crossOrigin = 'anonymous';
+                            img.onload = () => {
+                                ctx.save();
+                                ctx.beginPath();
+                                ctx.roundRect(x, y, cellSize, cellSize, 16);
+                                ctx.clip();
+                                const scale = Math.max(cellSize / img.width, cellSize / img.height);
+                                const dx = (cellSize - img.width * scale) / 2;
+                                const dy = (cellSize - img.height * scale) / 2;
+                                ctx.drawImage(img, x + dx, y + dy, img.width * scale, img.height * scale);
+                                ctx.restore();
+                                res();
+                            };
+                            img.src = uploadedImage;
+                        } else {
+                            const gradient = ctx.createLinearGradient(x, y, x + cellSize, y + cellSize);
+                            const style = gradients[currentStyle];
+                            const colors = style.match(/from-(\S+)-(\d+)\s+to-(\S+)-(\d+)/);
+                            if (colors) {
+                                gradient.addColorStop(0, colors[1] + '-' + colors[2]);
+                                gradient.addColorStop(1, colors[3] + '-' + colors[4]);
+                            } else {
+                                gradient.addColorStop(0, '#f093fb');
+                                gradient.addColorStop(1, '#f5576c');
+                            }
+                            ctx.fillStyle = gradient;
+                            ctx.beginPath();
+                            ctx.roundRect(x, y, cellSize, cellSize, 16);
+                            ctx.fill();
+
+                            const text = getTextForCell(index);
+                            if (text) {
+                                ctx.fillStyle = 'white';
+                                ctx.font = 'bold 80px "Noto Sans SC"';
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+                                ctx.fillText(text, x + cellSize/2, y + cellSize/2);
+                            }
+                            res();
+                        }
+                    });
+                };
+
+                const promises = [];
+                for (let i = 0; i < 9; i++) {
+                    promises.push(drawCell(i));
+                }
+
+                Promise.all(promises).then(() => {
+                    resolve(canvas.toDataURL('image/png'));
+                });
+            });
+        }
+
+        async function downloadImage() {
+            const dataUrl = await generateFinalImage();
+            const link = document.createElement('a');
+            link.download = '九宫格图片.png';
+            link.href = dataUrl;
+            link.click();
+            saveHistory();
+        }
+
+        async function copyToClipboard() {
+            const dataUrl = await generateFinalImage();
+            try {
+                const blob = await fetch(dataUrl).then(r => r.blob());
+                await navigator.clipboard.write([
+                    new ClipboardItem({ 'image/png': blob })
+                ]);
+                alert('已复制到剪贴板！');
+                saveHistory();
+            } catch (err) {
+                alert('复制失败，请手动下载保存');
+            }
+        }
+
+        function saveHistory() {
+            const history = JSON.parse(localStorage.getItem('nineGridHistory') || '[]');
+            const record = {
+                mode: currentMode,
+                style: currentStyle,
+                time: new Date().toISOString()
+            };
+            history.unshift(record);
+            if (history.length > 20) history.pop();
+            localStorage.setItem('nineGridHistory', JSON.stringify(history));
+        }
+
+        function loadHistory() {
+            const history = JSON.parse(localStorage.getItem('nineGridHistory') || '[]');
+            if (history.length > 0) {
+                console.log('历史记录:', history.length, '条');
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
