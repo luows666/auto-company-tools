@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#10b981">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>收银记账 - 小商户记账神器</title>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        :root {
+            --primary: #10b981;
+            --primary-dark: #059669;
+            --income: #3b82f6;
+            --expense: #f97316;
+            --profit: #10b981;
+            --loss: #ef4444;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        /* Header */
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 50px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .header-title {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .date-display {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        /* Stats Cards */
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            padding: 20px;
+            margin-top: -40px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .stat-value.income { color: var(--income); }
+        .stat-value.expense { color: var(--expense); }
+        .stat-value.profit { color: var(--profit); }
+        .stat-value.loss { color: var(--loss); }
+
+        /* Action Buttons */
+        .action-container {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .action-btn {
+            background: var(--card);
+            border: none;
+            border-radius: 20px;
+            padding: 24px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+            box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+        }
+
+        .action-btn.income {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+        }
+
+        .action-btn.expense {
+            background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+            color: white;
+        }
+
+        .action-icon {
+            font-size: 32px;
+        }
+
+        /* Records List */
+        .records-section {
+            padding: 0 20px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--text-light);
+        }
+
+        .record-list {
+            background: var(--card);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+
+        .record-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .record-item:last-child {
+            border-bottom: none;
+        }
+
+        .record-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .record-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        .record-icon.income { background: #dbeafe; }
+        .record-icon.expense { background: #ffedd5; }
+
+        .record-details {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .record-type {
+            font-weight: 500;
+        }
+
+        .record-time {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .record-amount {
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .record-amount.income { color: var(--income); }
+        .record-amount.expense { color: var(--expense); }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: var(--text-light);
+        }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--card);
+            border-radius: 24px 24px 0 0;
+            width: 100%;
+            max-width: 500px;
+            padding: 24px;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Expense Categories */
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .category-btn {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 12px;
+            padding: 16px 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .category-btn.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .category-icon {
+            font-size: 24px;
+        }
+
+        /* Amount Input */
+        .amount-input-container {
+            margin-bottom: 24px;
+        }
+
+        .amount-label {
+            font-size: 14px;
+            color: var(--text-light);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .amount-input-wrapper {
+            display: flex;
+            align-items: center;
+            background: #f1f5f9;
+            border-radius: 12px;
+            padding: 16px;
+        }
+
+        .amount-prefix {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text-light);
+            margin-right: 8px;
+        }
+
+        .amount-input {
+            flex: 1;
+            border: none;
+            background: none;
+            font-size: 32px;
+            font-weight: 600;
+            outline: none;
+            width: 100%;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            width: 100%;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .submit-btn:active {
+            background: var(--primary-dark);
+        }
+
+        .submit-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-100px);
+            background: var(--text);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 14px;
+            z-index: 200;
+            transition: transform 0.3s ease;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .toast.success {
+            background: var(--primary);
+        }
+
+        /* Bottom Nav */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            border-top: 1px solid #e2e8f0;
+            display: flex;
+            justify-content: space-around;
+            padding: 12px 0;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            color: var(--text-light);
+            background: none;
+            border: none;
+            cursor: pointer;
+        }
+
+        .nav-item.active {
+            color: var(--primary);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+        }
+
+        /* Export Section */
+        .export-section {
+            padding: 20px;
+            text-align: center;
+        }
+
+        .export-btn {
+            background: #f1f5f9;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 24px;
+            font-size: 14px;
+            color: var(--text-light);
+            cursor: pointer;
+        }
+
+        /* Revenue Summary */
+        .revenue-summary {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            margin: 20px;
+            border-radius: 20px;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .revenue-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .revenue-value {
+            font-size: 36px;
+            font-weight: 700;
+        }
+
+        .revenue-sub {
+            font-size: 14px;
+            opacity: 0.8;
+            margin-top: 8px;
+        }
+
+        /* Sponsor Section */
+        .sponsor-section {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+            margin: 20px;
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sponsor-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .sponsor-desc {
+            font-size: 13px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+        }
+
+        .sponsor-btns {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .sponsor-btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: transform 0.2s;
+        }
+
+        .sponsor-btn:active {
+            transform: scale(0.95);
+        }
+
+        .sponsor-btn.alipay {
+            background: #1677ff;
+            color: white;
+        }
+
+        .sponsor-btn.wechat {
+            background: #07c160;
+            color: white;
+        }
+
+        .sponsor-btn.paypal {
+            background: #003087;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-title">今日营业概况</div>
+        <div class="date-display" id="currentDate"></div>
+    </header>
+
+    <div class="stats-container">
+        <div class="stat-card">
+            <div class="stat-label">收入</div>
+            <div class="stat-value income" id="todayIncome">¥0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">支出</div>
+            <div class="stat-value expense" id="todayExpense">¥0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">利润</div>
+            <div class="stat-value profit" id="todayProfit">¥0</div>
+        </div>
+    </div>
+
+    <div class="revenue-summary">
+        <div class="revenue-label">今日净利润</div>
+        <div class="revenue-value" id="netProfit">¥0</div>
+        <div class="revenue-sub" id="profitRate">利润率 0%</div>
+    </div>
+
+    <div class="action-container">
+        <button class="action-btn income" onclick="showIncomeModal()">
+            <span class="action-icon">💰</span>
+            记收入
+        </button>
+        <button class="action-btn expense" onclick="showExpenseModal()">
+            <span class="action-icon">💸</span>
+            记支出
+        </button>
+    </div>
+
+    <div class="records-section">
+        <div class="section-title">今日记录</div>
+        <div class="record-list" id="recordList">
+            <div class="empty-state">暂无记录，点击上方按钮开始记账</div>
+        </div>
+    </div>
+
+    <div class="export-section">
+        <button class="export-btn" onclick="exportData()">📤 导出数据</button>
+    </div>
+
+    <!-- Sponsor Section -->
+    <div class="sponsor-section">
+        <div class="sponsor-title">☕ 支持我们</div>
+        <div class="sponsor-desc">你的支持是我们持续开发的最大动力</div>
+        <div class="sponsor-btns">
+            <a href="https://qr.alipay.com/fk0941829sglvdprm8wgv0e" target="_blank" class="sponsor-btn alipay">支付宝</a>
+            <a href="weixin://wxpay/bizpayurl?pr=placeholder" class="sponsor-btn wechat">微信</a>
+            <a href="https://paypal.me/autocompany" target="_blank" class="sponsor-btn paypal">PayPal</a>
+        </div>
+    </div>
+
+    <!-- Income Modal -->
+    <div class="modal-overlay" id="incomeModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">记收入</div>
+                <button class="modal-close" onclick="closeModals()">&times;</button>
+            </div>
+            <div class="amount-input-container">
+                <label class="amount-label">收入金额</label>
+                <div class="amount-input-wrapper">
+                    <span class="amount-prefix">¥</span>
+                    <input type="number" class="amount-input" id="incomeAmount" placeholder="0" inputmode="decimal">
+                </div>
+            </div>
+            <div class="category-grid" id="incomeCategories">
+                <button class="category-btn selected" data-category="sales" onclick="selectCategory(this, 'income')">
+                    <span class="category-icon">🛒</span>
+                    <span>销售</span>
+                </button>
+                <button class="category-btn" data-category="other" onclick="selectCategory(this, 'income')">
+                    <span class="category-icon">💵</span>
+                    <span>其他</span>
+                </button>
+            </div>
+            <button class="submit-btn" onclick="submitIncome()">确认收款</button>
+        </div>
+    </div>
+
+    <!-- Expense Modal -->
+    <div class="modal-overlay" id="expenseModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">记支出</div>
+                <button class="modal-close" onclick="closeModals()">&times;</button>
+            </div>
+            <div class="amount-input-container">
+                <label class="amount-label">支出金额</label>
+                <div class="amount-input-wrapper">
+                    <span class="amount-prefix">¥</span>
+                    <input type="number" class="amount-input" id="expenseAmount" placeholder="0" inputmode="decimal">
+                </div>
+            </div>
+            <div class="category-grid" id="expenseCategories">
+                <button class="category-btn selected" data-category="materials" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">🥬</span>
+                    <span>原料</span>
+                </button>
+                <button class="category-btn" data-category="rent" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">🏠</span>
+                    <span>房租</span>
+                </button>
+                <button class="category-btn" data-category="staff" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">👨‍🍳</span>
+                    <span>工资</span>
+                </button>
+                <button class="category-btn" data-category="utilities" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">💡</span>
+                    <span>水电</span>
+                </button>
+                <button class="category-btn" data-category="supplies" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">📦</span>
+                    <span>物料</span>
+                </button>
+                <button class="category-btn" data-category="other" onclick="selectCategory(this, 'expense')">
+                    <span class="category-icon">💸</span>
+                    <span>其他</span>
+                </button>
+            </div>
+            <button class="submit-btn" onclick="submitExpense()">确认支出</button>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // App State
+        let records = JSON.parse(localStorage.getItem('cashRegisterRecords') || '[]');
+        let selectedIncomeCategory = 'sales';
+        let selectedExpenseCategory = 'materials';
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateDateDisplay();
+            renderRecords();
+            updateStats();
+            setupPWA();
+        });
+
+        function updateDateDisplay() {
+            const now = new Date();
+            const options = { month: 'long', day: 'numeric', weekday: 'long' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('zh-CN', options);
+        }
+
+        function getTodayRecords() {
+            const today = new Date().toDateString();
+            return records.filter(r => new Date(r.timestamp).toDateString() === today);
+        }
+
+        function updateStats() {
+            const todayRecords = getTodayRecords();
+            const income = todayRecords.filter(r => r.type === 'income').reduce((sum, r) => sum + r.amount, 0);
+            const expense = todayRecords.filter(r => r.type === 'expense').reduce((sum, r) => sum + r.amount, 0);
+            const profit = income - expense;
+
+            document.getElementById('todayIncome').textContent = `¥${income}`;
+            document.getElementById('todayExpense').textContent = `¥${expense}`;
+            document.getElementById('todayProfit').textContent = `¥${profit}`;
+            document.getElementById('todayProfit').className = `stat-value ${profit >= 0 ? 'profit' : 'loss'}`;
+
+            document.getElementById('netProfit').textContent = `¥${profit}`;
+            document.getElementById('netProfit').style.color = profit >= 0 ? 'white' : '#fee2e2';
+
+            const rate = income > 0 ? Math.round(profit / income * 100) : 0;
+            document.getElementById('profitRate').textContent = `利润率 ${rate}%`;
+        }
+
+        function renderRecords() {
+            const todayRecords = getTodayRecords().sort((a, b) => b.timestamp - a.timestamp);
+            const container = document.getElementById('recordList');
+
+            if (todayRecords.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无记录，点击上方按钮开始记账</div>';
+                return;
+            }
+
+            container.innerHTML = todayRecords.map(record => {
+                const time = new Date(record.timestamp).toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
+                const categoryNames = {
+                    'sales': '销售收入',
+                    'materials': '原料采购',
+                    'rent': '房租',
+                    'staff': '员工工资',
+                    'utilities': '水电费',
+                    'supplies': '物料采购',
+                    'other': '其他'
+                };
+
+                return `
+                    <div class="record-item">
+                        <div class="record-info">
+                            <div class="record-icon ${record.type}">${record.type === 'income' ? '💰' : '💸'}</div>
+                            <div class="record-details">
+                                <div class="record-type">${categoryNames[record.category] || record.category}</div>
+                                <div class="record-time">${time}</div>
+                            </div>
+                        </div>
+                        <div class="record-amount ${record.type}">${record.type === 'income' ? '+' : '-'}¥${record.amount}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showIncomeModal() {
+            document.getElementById('incomeModal').classList.add('show');
+            document.getElementById('incomeAmount').focus();
+        }
+
+        function showExpenseModal() {
+            document.getElementById('expenseModal').classList.add('show');
+            document.getElementById('expenseAmount').focus();
+        }
+
+        function closeModals() {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('show'));
+            document.getElementById('incomeAmount').value = '';
+            document.getElementById('expenseAmount').value = '';
+        }
+
+        function selectCategory(btn, type) {
+            const container = type === 'income' ? document.getElementById('incomeCategories') : document.getElementById('expenseCategories');
+            container.querySelectorAll('.category-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+
+            if (type === 'income') {
+                selectedIncomeCategory = btn.dataset.category;
+            } else {
+                selectedExpenseCategory = btn.dataset.category;
+            }
+        }
+
+        function submitIncome() {
+            const amount = parseFloat(document.getElementById('incomeAmount').value);
+            if (!amount || amount <= 0) {
+                showToast('请输入有效金额', 'error');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                type: 'income',
+                category: selectedIncomeCategory,
+                amount: amount,
+                timestamp: new Date().toISOString()
+            };
+
+            records.push(record);
+            saveRecords();
+            closeModals();
+            renderRecords();
+            updateStats();
+            showToast('收入记录成功！', 'success');
+
+            // Speak feedback
+            speak(`收款 ${amount} 元`);
+        }
+
+        function submitExpense() {
+            const amount = parseFloat(document.getElementById('expenseAmount').value);
+            if (!amount || amount <= 0) {
+                showToast('请输入有效金额', 'error');
+                return;
+            }
+
+            const record = {
+                id: Date.now(),
+                type: 'expense',
+                category: selectedExpenseCategory,
+                amount: amount,
+                timestamp: new Date().toISOString()
+            };
+
+            records.push(record);
+            saveRecords();
+            closeModals();
+            renderRecords();
+            updateStats();
+            showToast('支出记录成功！', 'success');
+
+            speak(`支出 ${amount} 元`);
+        }
+
+        function saveRecords() {
+            localStorage.setItem('cashRegisterRecords', JSON.stringify(records));
+        }
+
+        function showToast(message, type = '') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast' + (type ? ` ${type}` : '');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+
+        function speak(text) {
+            if ('speechSynthesis' in window) {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'zh-CN';
+                speechSynthesis.speak(utterance);
+            }
+        }
+
+        function exportData() {
+            const data = {
+                exportDate: new Date().toISOString(),
+                records: records
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `收银记账_${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showToast('数据导出成功！', 'success');
+        }
+
+        // PWA Setup
+        function setupPWA() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js').catch(() => {});
+            }
+        }
+
+        // Close modal on outside click
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) closeModals();
+            });
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeModals();
+        });
+    </script>
+</body>
+</html>
