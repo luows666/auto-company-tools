@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>测一测你是哪种动物 - 性格动物测试</title>
+    <meta name="description" content="输入你的名字，测一测你是什么动物！基于性格分析的动物人格测试，朋友圈分享神器。">
+    <meta property="og:title" content="测一测你是哪种动物">
+    <meta property="og:description" content="我的测试结果是「老虎」，你也来测测吧！">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --primary: #ff6b6b;
+            --primary-dark: #ee5a5a;
+            --bg: #fff5f5;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            width: 100%;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(255, 107, 107, 0.15);
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 14px 18px;
+            border: 2px solid #ffe0e0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 107, 107, 0.3);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .result {
+            display: none;
+            text-align: center;
+        }
+
+        .result.show {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animal-emoji {
+            font-size: 5rem;
+            margin-bottom: 10px;
+            animation: bounce 1s ease infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animal-name {
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .animal-desc {
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #fff9f9;
+            border-radius: 12px;
+        }
+
+        .traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+
+        .trait {
+            background: linear-gradient(135deg, #ffe0e0 0%, #ffcce0 100%);
+            color: var(--primary);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+        }
+
+        .match-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px dashed #ffe0e0;
+        }
+
+        .match-title {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .match-animals {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .match-animal {
+            text-align: center;
+        }
+
+        .match-emoji {
+            font-size: 2rem;
+        }
+
+        .match-name {
+            font-size: 0.8rem;
+            color: #666;
+        }
+
+        .match-score {
+            color: var(--primary);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: white;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .history {
+            margin-top: 20px;
+        }
+
+        .history-title {
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-item {
+            background: white;
+            padding: 10px 15px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .history-emoji {
+            font-size: 1.5rem;
+        }
+
+        .history-name {
+            flex: 1;
+            color: #333;
+        }
+
+        .history-date {
+            color: #999;
+            font-size: 0.75rem;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .loading.show {
+            display: block;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #ffe0e0;
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .sponsor-float {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .sponsor-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a5a 100%);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.4);
+            transition: all 0.3s;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .sponsor-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.5);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🦁 测一测你是哪种动物</h1>
+            <p class="subtitle">输入名字，发现你的动物人格</p>
+        </header>
+
+        <div class="card" id="inputCard">
+            <div class="input-group">
+                <label>你的名字</label>
+                <input type="text" id="nameInput" placeholder="输入你的名字" maxlength="20">
+            </div>
+            <button class="btn" id="testBtn" onclick="startTest()">开始测试</button>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>正在分析你的性格...</p>
+        </div>
+
+        <div class="card result" id="resultCard">
+            <div class="animal-emoji" id="animalEmoji">🐯</div>
+            <div class="animal-name" id="animalName">老虎</div>
+            <div class="traits" id="traits"></div>
+            <div class="animal-desc" id="animalDesc"></div>
+            <div class="match-section">
+                <div class="match-title">最配的动物CP</div>
+                <div class="match-animals" id="matchAnimals"></div>
+            </div>
+            <div class="actions">
+                <button class="btn-secondary" onclick="downloadCard()">📥 下载图片</button>
+                <button class="btn-secondary" onclick="copyToClipboard()">📋 复制结果</button>
+            </div>
+        </div>
+
+        <div class="history" id="historySection" style="display: none;">
+            <div class="history-title">测试记录</div>
+            <div class="history-list" id="historyList"></div>
+        </div>
+    </div>
+
+    <div class="sponsor-float">
+        <a href="sponsor.html" class="sponsor-btn" target="_blank">☕ 赞助支持</a>
+    </div>
+
+    <script>
+        const animals = [
+            {
+                emoji: '🐯',
+                name: '老虎',
+                traits: ['领袖气质', '勇敢自信', '独立自强', '执行力强'],
+                desc: '你是天生的领袖！老虎代表着力量和勇气，你总是敢于挑战困难，有很强的领导能力。喜欢独立思考，行动力超强，是朋友中的主心骨！',
+                matches: [
+                    { emoji: '🦁', name: '狮子', score: 95 },
+                    { emoji: '🐯', name: '老虎', score: 85 },
+                    { emoji: '🐺', name: '狼', score: 80 }
+                ]
+            },
+            {
+                emoji: '🦁',
+                name: '狮子',
+                traits: ['自信满满', '热情大方', '慷慨仗义', '保护欲强'],
+                desc: '你是人群中的焦点！狮子是万兽之王，你有着与生俱来的魅力和自信。喜欢照顾朋友，为人仗义，是朋友圈里的大哥/大姐大！',
+                matches: [
+                    { emoji: '🐯', name: '老虎', score: 95 },
+                    { emoji: '🦊', name: '狐狸', score: 88 },
+                    { emoji: '🐻', name: '熊', score: 82 }
+                ]
+            },
+            {
+                emoji: '🐻',
+                name: '熊',
+                traits: ['稳重可靠', '温柔体贴', '务实踏实', '安全感'],
+                desc: '你是最可靠的朋友！熊代表着稳定和力量，你做事稳重踏实，让人很有安全感。外表可能有点严肃，但内心其实很温柔哦！',
+                matches: [
+                    { emoji: '🐰', name: '兔子', score: 92 },
+                    { emoji: '🦁', name: '狮子', score: 82 },
+                    { emoji: '🐼', name: '熊猫', score: 90 }
+                ]
+            },
+            {
+                emoji: '🐺',
+                name: '狼',
+                traits: ['忠诚护群', '智慧敏锐', '适应力强', '团队协作'],
+                desc: '你是真正的团队玩家！狼是群居动物，你非常重视友情和家庭。头脑聪明，适应能力超强，在团队中总是能发挥重要作用！',
+                matches: [
+                    { emoji: '🦊', name: '狐狸', score: 88 },
+                    { emoji: '🐯', name: '老虎', score: 80 },
+                    { emoji: '🐺', name: '狼', score: 85 }
+                ]
+            },
+            {
+                emoji: '🦊',
+                name: '狐狸',
+                traits: ['聪明机智', '灵活多变', '幽默风趣', '洞察力强'],
+                desc: '你是最聪明的那一个！狐狸代表着智慧和灵活，你头脑灵活，反应快，总是能在困境中找到出路。幽默感十足，是朋友圈的开心果！',
+                matches: [
+                    { emoji: '🐰', name: '兔子', score: 90 },
+                    { emoji: '🐺', name: '狼', score: 88 },
+                    { emoji: '🦁', name: '狮子', score: 88 }
+                ]
+            },
+            {
+                emoji: '🐰',
+                name: '兔子',
+                traits: ['温柔可爱', '善良纯真', '敏感细腻', '善解人意'],
+                desc: '你是最温暖的存在！兔子代表着善良和纯真，你温柔体贴，善解人意，总是能注意到朋友的小情绪。外表可爱，内心坚强！',
+                matches: [
+                    { emoji: '🐻', name: '熊', score: 92 },
+                    { emoji: '🦊', name: '狐狸', score: 90 },
+                    { emoji: '🐼', name: '熊猫', score: 88 }
+                ]
+            },
+            {
+                emoji: '🐼',
+                name: '熊猫',
+                traits: ['呆萌可爱', '与世无争', '悠然自得', '佛系生活'],
+                desc: '你是最萌的国宝！熊猫代表着peace and love，你性格温和，与世无争，活得轻松自在。虽然看起来呆萌，其实很有内涵！',
+                matches: [
+                    { emoji: '🐻', name: '熊', score: 90 },
+                    { emoji: '🐰', name: '兔子', score: 88 },
+                    { emoji: '🐨', name: '考拉', score: 92 }
+                ]
+            },
+            {
+                emoji: '🐨',
+                name: '考拉',
+                traits: ['慢生活', '重感情', '温柔悠闲', '知足常乐'],
+                desc: '你是最懂得生活的人！考拉代表着悠闲和知足，你不喜欢争抢，享受当下的美好。性格温柔，和你在一起很舒服！',
+                matches: [
+                    { emoji: '🐼', name: '熊猫', score: 92 },
+                    { emoji: '🐰', name: '兔子', score: 85 },
+                    { emoji: '🦥', name: '树懒', score: 90 }
+                ]
+            },
+            {
+                emoji: '🦄',
+                name: '独角兽',
+                traits: ['梦幻浪漫', '独特魅力', '想象力丰富', '追求理想'],
+                desc: '你是最特别的存在！独角兽代表着梦想和独特，你有着丰富的想象力，总是对生活充满期待。相信奇迹，永远保持少女心！',
+                matches: [
+                    { emoji: '🦋', name: '蝴蝶', score: 95 },
+                    { emoji: '🦄', name: '独角兽', score: 90 },
+                    { emoji: '🌈', name: '彩虹', score: 88 }
+                ]
+            },
+            {
+                emoji: '🦋',
+                name: '蝴蝶',
+                traits: ['自由美丽', '追求变化', '魅力四射', '破茧成蝶'],
+                desc: '你是最美的风景！蝴蝶代表着自由和美丽，你喜欢变化，追求自我突破。经历了蜕变会更加美丽，你的人生正在绽放！',
+                matches: [
+                    { emoji: '🦄', name: '独角兽', score: 95 },
+                    { emoji: '🐝', name: '蜜蜂', score: 85 },
+                    { emoji: '🌸', name: '樱花', score: 88 }
+                ]
+            },
+            {
+                emoji: '🐝',
+                name: '蜜蜂',
+                traits: ['勤劳认真', '团队意识', "一丝不苟", '默默付出'],
+                desc: '你是最勤劳的小蜜蜂！蜜蜂代表着勤奋和奉献，你做事认真负责，非常重视团队合作。默默努力，终将收获甜蜜的果实！',
+                matches: [
+                    { emoji: '🐻', name: '熊', score: 85 },
+                    { emoji: '🐝', name: '蜜蜂', score: 90 },
+                    { emoji: '🐜', name: '蚂蚁', score: 88 }
+                ]
+            },
+            {
+                emoji: '🐢',
+                name: '乌龟',
+                traits: ['稳扎稳打', '长寿智慧', '坚持不懈', '淡泊名利'],
+                desc: '你是最深藏不露的智者！乌龟代表着长寿和智慧，你不追求速度，而是注重质量和积累。慢工出细活，你的人生厚重而精彩！',
+                matches: [
+                    { emoji: '🐰', name: '兔子', score: 82 },
+                    { emoji: '🐼', name: '熊猫', score: 85 },
+                    { emoji: '🦎', name: '蜥蜴', score: 80 }
+                ]
+            }
+        ];
+
+        let currentResult = null;
+
+        function getAnimalByName(name) {
+            let hash = 0;
+            for (let i = 0; i < name.length; i++) {
+                hash = name.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            const index = Math.abs(hash) % animals.length;
+            return animals[index];
+        }
+
+        function getTodayKey(name) {
+            const today = new Date().toISOString().split('T')[0];
+            return `animal_${name}_${today}`;
+        }
+
+        function startTest() {
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) {
+                alert('请输入你的名字！');
+                return;
+            }
+
+            const btn = document.getElementById('testBtn');
+            btn.disabled = true;
+            btn.textContent = '测试中...';
+
+            // Check if already tested today
+            const todayKey = getTodayKey(name);
+            const savedResult = localStorage.getItem(todayKey);
+
+            setTimeout(() => {
+                let result;
+                if (savedResult) {
+                    result = JSON.parse(savedResult);
+                } else {
+                    result = getAnimalByName(name);
+                    localStorage.setItem(todayKey, JSON.stringify(result));
+
+                    // Save to history
+                    const history = JSON.parse(localStorage.getItem('animalHistory') || '[]');
+                    const historyKey = `animal_${name}_${Date.now()}`;
+                    history.unshift({ name, result, date: new Date().toISOString(), key: historyKey });
+                    if (history.length > 10) history.pop();
+                    localStorage.setItem('animalHistory', JSON.stringify(history));
+                }
+
+                showResult(result);
+                btn.disabled = false;
+                btn.textContent = '开始测试';
+            }, 1500);
+        }
+
+        function showResult(result) {
+            currentResult = result;
+
+            document.getElementById('inputCard').style.display = 'none';
+            document.getElementById('loading').classList.remove('show');
+            document.getElementById('resultCard').classList.add('show');
+
+            document.getElementById('animalEmoji').textContent = result.emoji;
+            document.getElementById('animalName').textContent = result.name;
+            document.getElementById('animalDesc').textContent = result.desc;
+
+            // Traits
+            const traitsHtml = result.traits.map(t => `<span class="trait">${t}</span>`).join('');
+            document.getElementById('traits').innerHTML = traitsHtml;
+
+            // Matches
+            const matchesHtml = result.matches.map(m => `
+                <div class="match-animal">
+                    <div class="match-emoji">${m.emoji}</div>
+                    <div class="match-name">${m.name}</div>
+                    <div class="match-score">${m.score}%</div>
+                </div>
+            `).join('');
+            document.getElementById('matchAnimals').innerHTML = matchesHtml;
+
+            // Show history
+            showHistory();
+        }
+
+        function showHistory() {
+            const history = JSON.parse(localStorage.getItem('animalHistory') || '[]');
+            if (history.length === 0) return;
+
+            document.getElementById('historySection').style.display = 'block';
+
+            const historyHtml = history.map(h => `
+                <div class="history-item" onclick="document.getElementById('nameInput').value='${h.name}';startTest();">
+                    <span class="history-emoji">${h.result.emoji}</span>
+                    <span class="history-name">${h.name}</span>
+                    <span class="history-date">${new Date(h.date).toLocaleDateString()}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('historyList').innerHTML = historyHtml;
+        }
+
+        function downloadCard() {
+            alert('图片下载功能开发中敬请期待！');
+        }
+
+        function copyToClipboard() {
+            if (!currentResult) return;
+
+            const text = `🦁 测一测我是哪种动物\n我的结果是：${currentResult.emoji} ${currentResult.name}\n${currentResult.desc}\n快来测试你的动物人格吧！`;
+
+            navigator.clipboard.writeText(text).then(() => {
+                alert('已复制到剪贴板！');
+            }).catch(() => {
+                alert('复制失败，请手动复制');
+            });
+        }
+
+        // Enter key support
+        document.getElementById('nameInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                startTest();
+            }
+        });
+    </script>
+</body>
+</html>

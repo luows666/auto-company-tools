@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>意见反馈 - 帮助我们做得更好</title>
+    <meta name="description" content="提交您的宝贵意见和建议，帮助我们改进产品">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            padding: 24px 20px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(124, 58, 237, 0.3);
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: var(--text);
+        }
+
+        .form-group label span {
+            color: #ef4444;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+            background: #fafafa;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            background: white;
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: #6d28d9;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        /* Survey Section */
+        .survey-option {
+            display: block;
+            padding: 14px 16px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .survey-option:hover {
+            border-color: var(--primary-light);
+            background: #faf5ff;
+        }
+
+        .survey-option.selected {
+            border-color: var(--primary);
+            background: #f5f3ff;
+        }
+
+        .survey-option input {
+            display: none;
+        }
+
+        .survey-option .checkmark {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            margin-right: 12px;
+            vertical-align: middle;
+            position: relative;
+        }
+
+        .survey-option.selected .checkmark {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .survey-option.selected .checkmark::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+        }
+
+        .survey-option .label {
+            font-weight: 500;
+        }
+
+        .survey-option .desc {
+            display: block;
+            font-size: 0.8rem;
+            color: var(--text-light);
+            margin-top: 4px;
+            margin-left: 32px;
+        }
+
+        /* Rating Stars */
+        .rating {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .rating .star {
+            font-size: 2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #e2e8f0;
+        }
+
+        .rating .star.active {
+            color: #fbbf24;
+        }
+
+        .rating .star:hover {
+            transform: scale(1.2);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-message .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .success-message h3 {
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .success-message p {
+            color: var(--text-light);
+        }
+
+        /* History */
+        .history-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-item .date {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .history-item .content {
+            margin-top: 4px;
+        }
+
+        .history-item .status {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            background: #e0f2fe;
+            color: #0284c7;
+            margin-top: 6px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px;
+            color: var(--text-light);
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: #f1f5f9;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .tab.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Sponsor Section */
+        .sponsor-hint {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+
+        .sponsor-hint .icon {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        .sponsor-hint a {
+            color: #b45309;
+            font-weight: 600;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>💬 意见反馈</h1>
+        <p>您的意见对我们非常重要</p>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+
+        <!-- Survey Stats -->
+        <div class="card" id="surveyStats" style="display: none;">
+            <h2>📈 调查统计</h2>
+            <div id="statsContent"></div>
+            <button class="btn btn-secondary" style="margin-top: 12px; width: 100%;" onclick="clearSurveyData()">清除我的调查记录</button>
+        </div>
+
+        <!-- Survey Section -->
+        <div class="card">
+            <h2>📊 付费意愿调查 (匿名)</h2>
+            <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                帮助我们了解您对以下功能付费的意愿程度：
+            </p>
+
+            <div class="form-group">
+                <label>如果您喜欢的工具需要付费，您愿意支付吗？</label>
+                <label class="survey-option" onclick="selectOption(this, 'pay-willing', 'free')">
+                    <input type="radio" name="payWilling" value="free">
+                    <span class="checkmark"></span>
+                    <span class="label">💰 免费就够了</span>
+                    <span class="desc">我只使用免费功能，付费不考虑</span>
+                </label>
+                <label class="survey-option" onclick="selectOption(this, 'pay-willing', 'small')">
+                    <input type="radio" name="payWilling" value="small">
+                    <span class="checkmark"></span>
+                    <span class="label">☕ 少量付费</span>
+                    <span class="desc">1-10元/月的付费功能可以考虑</span>
+                </label>
+                <label class="survey-option" onclick="selectOption(this, 'pay-willing', 'medium')">
+                    <input type="radio" name="payWilling" value="medium">
+                    <span class="checkmark"></span>
+                    <span class="label">💎 中等付费</span>
+                    <span class="desc">10-50元/月的高级功能愿意付费</span>
+                </label>
+                <label class="survey-option" onclick="selectOption(this, 'pay-willing', 'premium')">
+                    <input type="radio" name="payWilling" value="premium">
+                    <span class="checkmark"></span>
+                    <span class="label">🌟 高级付费</span>
+                    <span class="desc">愿意为高级功能和广告去除付费50元+/月</span>
+                </label>
+            </div>
+
+            <div class="form-group">
+                <label>您最希望哪些功能？（可多选）</label>
+                <label class="survey-option" onclick="toggleCheckbox(this, 'feature', 'unlimited')">
+                    <input type="checkbox" name="features" value="unlimited">
+                    <span class="checkmark"></span>
+                    <span class="label">�无限使用</span>
+                    <span class="desc">无限制生成次数</span>
+                </label>
+                <label class="survey-option" onclick="toggleCheckbox(this, 'feature', 'noads')">
+                    <input type="checkbox" name="features" value="noads">
+                    <span class="checkmark"></span>
+                    <span class="label">🚫 去广告</span>
+                    <span class="desc">清爽无广告体验</span>
+                </label>
+                <label class="survey-option" onclick="toggleCheckbox(this, 'feature', 'custom')">
+                    <input type="checkbox" name="features" value="custom">
+                    <span class="checkmark"></span>
+                    <span class="label">🎨 自定义</span>
+                    <span class="desc">更多模板和自定义选项</span>
+                </label>
+                <label class="survey-option" onclick="toggleCheckbox(this, 'feature', 'export')">
+                    <input type="checkbox" name="features" value="export">
+                    <span class="checkmark"></span>
+                    <span class="label">📤 批量导出</span>
+                    <span class="desc">支持批量导出和高级格式</span>
+                </label>
+                <label class="survey-option" onclick="toggleCheckbox(this, 'feature', 'cloud')">
+                    <input type="checkbox" name="features" value="cloud">
+                    <span class="checkmark"></span>
+                    <span class="label">☁️ 云端同步</span>
+                    <span class="desc">数据跨设备同步</span>
+                </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="submitSurvey()">提交调查结果</button>
+        </div>
+
+        <!-- Feedback Form -->
+        <div class="card">
+            <h2>📝 意见建议</h2>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('submit')">提交反馈</button>
+                <button class="tab" onclick="switchTab('history')">我的反馈</button>
+            </div>
+
+            <div class="tab-content active" id="submit-tab">
+                <div class="form-group">
+                    <label>昵称（可选）</label>
+                    <input type="text" id="nickname" placeholder="方便我们回复您">
+                </div>
+
+                <div class="form-group">
+                    <label>联系方式（可选）</label>
+                    <input type="email" id="contact" placeholder="邮箱或微信">
+                </div>
+
+                <div class="form-group">
+                    <label>反馈类型 <span>*</span></label>
+                    <select id="feedbackType" required>
+                        <option value="">请选择反馈类型</option>
+                        <option value="bug">🐛 Bug 反馈</option>
+                        <option value="feature">💡 功能建议</option>
+                        <option value="improve">✨ 体验改进</option>
+                        <option value="other">📌 其他</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>反馈内容 <span>*</span></label>
+                    <textarea id="feedbackContent" placeholder="请详细描述您的问题或建议..."></textarea>
+                </div>
+
+                <button class="btn btn-primary" onclick="submitFeedback()">提交反馈</button>
+            </div>
+
+            <div class="tab-content" id="history-tab">
+                <div id="feedbackHistory">
+                    <div class="empty-state">暂无反馈记录</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Success Message -->
+        <div class="card success-message" id="successMessage">
+            <div class="icon">🎉</div>
+            <h3>提交成功！</h3>
+            <p>感谢您的宝贵意见，我们会认真考虑</p>
+            <button class="btn btn-secondary" style="margin-top: 16px;" onclick="resetForm()">提交更多反馈</button>
+        </div>
+
+        <!-- Sponsor Hint -->
+        <div class="sponsor-hint">
+            <div class="icon">☕</div>
+            <p>喜欢我们的工具？</p>
+            <a href="sponsor.html" target="_blank">请我们喝杯咖啡吧！</a>
+        </div>
+    </div>
+
+    <script>
+        const SURVEY_KEY = 'auto-tools-survey';
+        const FEEDBACK_KEY = 'auto-tools-feedback';
+
+        let surveyData = {
+            payWilling: '',
+            features: []
+        };
+
+        // Option selection (radio)
+        function selectOption(element, category, value) {
+            // Clear previous selection in same group
+            const parent = element.parentElement;
+            parent.querySelectorAll('.survey-option').forEach(opt => {
+                opt.classList.remove('selected');
+                opt.querySelector('input').checked = false;
+            });
+
+            // Select new option
+            element.classList.add('selected');
+            element.querySelector('input').checked = true;
+
+            if (category === 'pay-willing') {
+                surveyData.payWilling = value;
+            }
+        }
+
+        // Checkbox toggle
+        function toggleCheckbox(element, category, value) {
+            const checkbox = element.querySelector('input');
+            checkbox.checked = !checkbox.checked;
+
+            if (checkbox.checked) {
+                element.classList.add('selected');
+                if (!surveyData.features.includes(value)) {
+                    surveyData.features.push(value);
+                }
+            } else {
+                element.classList.remove('selected');
+                surveyData.features = surveyData.features.filter(f => f !== value);
+            }
+        }
+
+        // Submit survey
+        function submitSurvey() {
+            const existing = localStorage.getItem(SURVEY_KEY);
+            const surveys = existing ? JSON.parse(existing) : [];
+
+            surveys.push({
+                ...surveyData,
+                timestamp: new Date().toISOString()
+            });
+
+            localStorage.setItem(SURVEY_KEY, JSON.stringify(surveys));
+
+            alert('调查已提交！感谢您的参与～');
+        }
+
+        // Tab switching
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+
+            if (tab === 'submit') {
+                document.querySelector('.tab:first-child').classList.add('active');
+                document.getElementById('submit-tab').classList.add('active');
+            } else {
+                document.querySelector('.tab:last-child').classList.add('active');
+                document.getElementById('history-tab').classList.add('active');
+                loadFeedbackHistory();
+            }
+        }
+
+        // Submit feedback
+        function submitFeedback() {
+            const type = document.getElementById('feedbackType').value;
+            const content = document.getElementById('feedbackContent').value;
+            const nickname = document.getElementById('nickname').value;
+            const contact = document.getElementById('contact').value;
+
+            if (!type || !content) {
+                alert('请填写反馈类型和内容');
+                return;
+            }
+
+            const feedback = {
+                id: Date.now(),
+                type,
+                content,
+                nickname: nickname || '匿名用户',
+                contact,
+                status: '待处理',
+                timestamp: new Date().toISOString()
+            };
+
+            const existing = localStorage.getItem(FEEDBACK_KEY);
+            const feedbacks = existing ? JSON.parse(existing) : [];
+            feedbacks.unshift(feedback);
+            localStorage.setItem(FEEDBACK_KEY, JSON.stringify(feedbacks));
+
+            // Show success
+            document.getElementById('submit-tab').style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
+        }
+
+        // Load feedback history
+        function loadFeedbackHistory() {
+            const existing = localStorage.getItem(FEEDBACK_KEY);
+            const feedbacks = existing ? JSON.parse(existing) : [];
+            const container = document.getElementById('feedbackHistory');
+
+            if (feedbacks.length === 0) {
+                container.innerHTML = '<div class="empty-state">暂无反馈记录</div>';
+                return;
+            }
+
+            const typeLabels = {
+                bug: '🐛 Bug',
+                feature: '💡 建议',
+                improve: '✨ 改进',
+                other: '📌 其他'
+            };
+
+            container.innerHTML = feedbacks.slice(0, 10).map(f => `
+                <div class="history-item">
+                    <div class="date">${new Date(f.timestamp).toLocaleString('zh-CN')}</div>
+                    <div class="content">${f.content}</div>
+                    <span class="status">${typeLabels[f.type] || f.type} · ${f.status}</span>
+                </div>
+            `).join('');
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('feedbackType').value = '';
+            document.getElementById('feedbackContent').value = '';
+            document.getElementById('nickname').value = '';
+            document.getElementById('contact').value = '';
+
+            document.getElementById('successMessage').classList.remove('show');
+            document.getElementById('submit-tab').style.display = 'block';
+        }
+
+        // Display survey statistics
+        function showSurveyStats() {
+            const existing = localStorage.getItem(SURVEY_KEY);
+            const surveys = existing ? JSON.parse(existing) : [];
+
+            if (surveys.length === 0) return;
+
+            const statsDiv = document.getElementById('surveyStats');
+            const contentDiv = document.getElementById('statsContent');
+
+            // Calculate stats
+            const payWillingCounts = { free: 0, small: 0, medium: 0, premium: 0 };
+            const featureCounts = { unlimited: 0, noads: 0, custom: 0, export: 0, cloud: 0 };
+
+            surveys.forEach(s => {
+                if (s.payWilling) payWillingCounts[s.payWilling]++;
+                if (s.features) {
+                    s.features.forEach(f => {
+                        if (featureCounts[f] !== undefined) featureCounts[f]++;
+                    });
+                }
+            });
+
+            const total = surveys.length;
+
+            // Build stats HTML
+            let html = `
+                <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 12px;">
+                    已收集 ${total} 份调查（当前设备）
+                </p>
+                <div style="margin-bottom: 16px;">
+                    <strong style="font-size: 0.9rem;">💰 付费意愿：</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                        <span style="background: #fee2e2; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">免费: ${payWillingCounts.free}人</span>
+                        <span style="background: #fef3c7; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">少量: ${payWillingCounts.small}人</span>
+                        <span style="background: #dbeafe; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">中等: ${payWillingCounts.medium}人</span>
+                        <span style="background: #d1fae5; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">高级: ${payWillingCounts.premium}人</span>
+                    </div>
+                </div>
+                <div>
+                    <strong style="font-size: 0.9rem;">🎯 期望功能：</strong>
+                    <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px;">
+                        <span style="background: #f3e8ff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">无限: ${featureCounts.unlimited}</span>
+                        <span style="background: #f3e8ff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">去广告: ${featureCounts.noads}</span>
+                        <span style="background: #f3e8ff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">自定义: ${featureCounts.custom}</span>
+                        <span style="background: #f3e8ff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">导出: ${featureCounts.export}</span>
+                        <span style="background: #f3e8ff; padding: 4px 10px; border-radius: 12px; font-size: 0.75rem;">云同步: ${featureCounts.cloud}</span>
+                    </div>
+                </div>
+            `;
+
+            contentDiv.innerHTML = html;
+            statsDiv.style.display = 'block';
+        }
+
+        // Clear survey data
+        function clearSurveyData() {
+            if (confirm('确定要清除调查记录吗？')) {
+                localStorage.removeItem(SURVEY_KEY);
+                location.reload();
+            }
+        }
+
+        // Load saved survey if exists
+        (function() {
+            showSurveyStats();
+            const existing = localStorage.getItem(SURVEY_KEY);
+            if (existing) {
+                const surveys = JSON.parse(existing);
+                if (surveys.length > 0) {
+                    const last = surveys[surveys.length - 1];
+                    if (last.payWilling) {
+                        document.querySelectorAll('input[name="payWilling"]').forEach(input => {
+                            if (input.value === last.payWilling) {
+                                input.checked = true;
+                                input.closest('.survey-option').classList.add('selected');
+                            }
+                        });
+                        surveyData.payWilling = last.payWilling;
+                    }
+                    if (last.features && last.features.length > 0) {
+                        surveyData.features = last.features;
+                        document.querySelectorAll('input[name="features"]').forEach(input => {
+                            if (last.features.includes(input.value)) {
+                                input.checked = true;
+                                input.closest('.survey-option').classList.add('selected');
+                            }
+                        });
+                    }
+                }
+            }
+        })();
+    </script>
+</body>
+</html>

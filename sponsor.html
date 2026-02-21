@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>支持我们 - 感谢您的支持</title>
+    <meta name="description" content="感谢您喜欢我们的工具，您的支持是我们持续更新的动力！">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #7c3aed;
+            --primary-light: #a78bfa;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --border: #e2e8f0;
+            --success: #10b981;
+            --alipay: #1677ff;
+            --wechat: #07c160;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%);
+            color: white;
+            padding: 40px 20px;
+            border-radius: 0 0 32px 32px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.3);
+        }
+
+        header .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        header h1 {
+            font-size: 1.75rem;
+            margin-bottom: 8px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 16px;
+        }
+
+        .hero-card {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: none;
+            text-align: center;
+        }
+
+        .hero-card h2 {
+            color: #92400e;
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+        }
+
+        .hero-card p {
+            color: #b45309;
+            line-height: 1.6;
+        }
+
+        .tier-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .tier {
+            background: white;
+            border-radius: 12px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .tier:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .tier .icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .tier .name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-bottom: 4px;
+        }
+
+        .tier .price {
+            color: #b45309;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+
+        .tier.basic { border: 2px solid #fca5a5; }
+        .tier.basic .name { color: #dc2626; }
+
+        .tier.premium { border: 2px solid #93c5fd; }
+        .tier.premium .name { color: #2563eb; }
+
+        .tier.super { border: 2px solid #fcd34d; }
+        .tier.super .name { color: #d97706; }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .payment-options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .payment-btn {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px 20px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .payment-btn:hover {
+            border-color: var(--primary);
+            box-shadow: 0 4px 12px rgba(124, 58, 237, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .payment-btn .icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+
+        .payment-btn .info {
+            flex: 1;
+        }
+
+        .payment-btn .info .label {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .payment-btn .info .hint {
+            font-size: 0.8rem;
+            color: var(--text-light);
+        }
+
+        .payment-btn .arrow {
+            color: var(--text-light);
+            font-size: 1.25rem;
+        }
+
+        .payment-btn.alipay .icon { background: #e6f2ff; }
+        .payment-btn.wechat .icon { background: #e6fff5; }
+        .payment-btn.external .icon { background: #fef3c7; }
+
+        .qr-section {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .qr-section p {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .qr-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        .qr-item {
+            text-align: center;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 12px;
+        }
+
+        .qr-item .label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .qr-placeholder {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border: 2px dashed var(--border);
+            border-radius: 8px;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-light);
+            font-size: 0.8rem;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .qr-placeholder.active {
+            border-style: solid;
+            border-color: var(--success);
+        }
+
+        .qr-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 6px;
+        }
+
+        .qr-item .hint {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.875rem;
+            margin-bottom: 16px;
+        }
+
+        .back-link:hover {
+            color: var(--primary);
+        }
+
+        .thanks-message {
+            text-align: center;
+            padding: 40px 20px;
+            display: none;
+        }
+
+        .thanks-message.show {
+            display: block;
+        }
+
+        .thanks-message .icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+        }
+
+        .thanks-message h3 {
+            color: var(--success);
+            margin-bottom: 8px;
+        }
+
+        .thanks-message p {
+            color: var(--text-light);
+        }
+
+        @media (max-width: 480px) {
+            .tier-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="icon">☕</div>
+        <h1>支持我们</h1>
+        <p>感谢您喜欢我们的工具，您的支持是我们持续更新的动力！</p>
+    </header>
+
+    <div class="container">
+        <a href="index.html" class="back-link">← 返回工具箱</a>
+
+        <!-- Hero Section -->
+        <div class="card hero-card">
+            <h2>💝 感谢您的支持</h2>
+            <p>
+                我们一直致力于为您提供免费、好用、有趣的工具。<br>
+                您的每一份支持，都是我们前进的动力！<br>
+                无论金额大小，都让我们感受到您的认可～
+            </p>
+        </div>
+
+        <!-- Sponsor Tiers -->
+        <div class="card">
+            <div class="section-title">🎁 赞助等级</div>
+            <div class="tier-grid">
+                <div class="tier basic">
+                    <div class="icon">🧋</div>
+                    <div class="name">小赞助</div>
+                    <div class="price">1-5元</div>
+                </div>
+                <div class="tier premium">
+                    <div class="icon">🍱</div>
+                    <div class="name">大支持</div>
+                    <div class="price">10-20元</div>
+                </div>
+                <div class="tier super">
+                    <div class="icon">👑</div>
+                    <div class="name">超级支持</div>
+                    <div class="price">50元+</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Options -->
+        <div class="card">
+            <div class="section-title">💳 选择支付方式</div>
+            <div class="payment-options">
+                <div class="payment-btn external" onclick="openExternalPayment()">
+                    <div class="icon">☕</div>
+                    <div class="info">
+                        <div class="label">Buy Me a Coffee</div>
+                        <div class="hint">国际支付平台，支持信用卡</div>
+                    </div>
+                    <div class="arrow">→</div>
+                </div>
+                <div class="payment-btn external" onclick="openKoFi()">
+                    <div class="icon">🎁</div>
+                    <div class="info">
+                        <div class="label">Ko-fi</div>
+                        <div class="hint">国际支付平台，支持订阅</div>
+                    </div>
+                    <div class="arrow">→</div>
+                </div>
+                <div class="payment-btn" onclick="showQRCode('alipay')">
+                    <div class="icon alipay">💙</div>
+                    <div class="info">
+                        <div class="label">支付宝</div>
+                        <div class="hint">打开支付宝扫一扫</div>
+                    </div>
+                    <div class="arrow">→</div>
+                </div>
+                <div class="payment-btn" onclick="showQRCode('wechat')">
+                    <div class="icon wechat">💚</div>
+                    <div class="info">
+                        <div class="label">微信支付</div>
+                        <div class="hint">打开微信扫一扫</div>
+                    </div>
+                    <div class="arrow">→</div>
+                </div>
+            </div>
+
+            <!-- QR Code Display -->
+            <div class="qr-section" id="qrSection" style="display: none;">
+                <p id="qrHint">扫码支付任意金额</p>
+                <div class="qr-grid">
+                    <div class="qr-item">
+                        <div class="label">
+                            <span id="qrLabel">支付宝</span>
+                        </div>
+                        <div class="qr-placeholder active" id="qrDisplay">
+                            <span>暂无二维码</span>
+                        </div>
+                        <div class="hint">请添加您的收款码到 payment-qr.html</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features -->
+        <div class="card">
+            <div class="section-title">✨ 支持后您将获得</div>
+            <ul style="list-style: none; display: flex; flex-direction: column; gap: 12px;">
+                <li style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: var(--success);">✓</span>
+                    <span>持续使用所有免费工具</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: var(--success);">✓</span>
+                    <span>帮助我们更快地更新和优化工具</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: var(--success);">✓</span>
+                    <span>获得心理满足感（哈哈）</span>
+                </li>
+                <li style="display: flex; align-items: flex-start; gap: 10px;">
+                    <span style="color: var(--success);">✓</span>
+                    <span>我们的衷心感谢！</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Contact -->
+        <div class="card" style="text-align: center;">
+            <p style="color: var(--text-light); font-size: 0.9rem; margin-bottom: 12px;">
+                有其他问题或合作意向？
+            </p>
+            <a href="mailto:feedback@autocompany.dev" style="color: var(--primary); text-decoration: none; font-weight: 500;">
+                联系我们 →
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Payment QR data storage
+        const SPONSOR_KEY = 'sponsor-qr-data';
+
+        let sponsorData = {
+            alipay: null,
+            wechat: null
+        };
+
+        // Load saved QR codes
+        (function() {
+            const saved = localStorage.getItem(SPONSOR_KEY);
+            if (saved) {
+                sponsorData = JSON.parse(saved);
+            }
+        })();
+
+        function openExternalPayment() {
+            alert('如果您想通过 Buy Me a Coffee 或 Ko-fi 支持我们，请发送邮件至 feedback@autocompany.dev 获取链接。\n\n感谢您的支持！');
+        }
+
+        function openKoFi() {
+            alert('Ko-fi 赞助通道正在建设中...\n\n如有兴趣支持，请联系我们：feedback@autocompany.dev');
+        }
+
+        function showQRCode(type) {
+            const qrSection = document.getElementById('qrSection');
+            const qrLabel = document.getElementById('qrLabel');
+            const qrDisplay = document.getElementById('qrDisplay');
+            const qrHint = document.getElementById('qrHint');
+
+            if (type === 'alipay') {
+                qrLabel.textContent = '支付宝';
+                qrHint.textContent = '打开支付宝APP扫一扫支付';
+            } else if (type === 'wechat') {
+                qrLabel.textContent = '微信支付';
+                qrHint.textContent = '打开微信APP扫一扫支付';
+            }
+
+            // Show stored QR if exists
+            if (sponsorData[type]) {
+                qrDisplay.innerHTML = `<img src="${sponsorData[type]}" alt="${type}">`;
+            } else {
+                qrDisplay.innerHTML = '<span>暂无二维码</span>';
+            }
+
+            qrSection.style.display = 'block';
+            qrSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Visitor counter
+        (async function() {
+            const namespace = 'sponsor-page';
+            const key = 'sponsor-visits';
+
+            try {
+                const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    console.log('Sponsor page visits:', data.value);
+                }
+            } catch (e) {
+                // Fallback to local
+            }
+        })();
+    </script>
+</body>
+</html>
