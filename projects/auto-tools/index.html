@@ -401,6 +401,7 @@
             🔥 连续签到: <span id="streakDays">0</span> 天 | 积分: <span id="userPoints">0</span>
         </div>
         <button class="checkin-btn" id="checkinBtn" onclick="doCheckin(event)">📅 每日签到</button>
+        <div id="achievements" style="margin-top: 10px; display: flex; flex-wrap: wrap; gap: 4px; justify-content: center;"></div>
     </header>
 
     <div class="tabs">
@@ -758,7 +759,20 @@
             saveCheckinData(data);
             updateCheckinUI();
 
-            alert(`签到成功！+${pointsEarned} 积分\n连续签到 ${data.streak} 天 🎉`);
+            // Check for new achievements
+            const earned = getAchievements();
+            const beforeCount = earned.length;
+            showAchievements();
+            const afterEarned = getAchievements();
+            const newCount = afterEarned.length;
+
+            let achievementMsg = '';
+            if (newCount > beforeCount) {
+                const newBadges = achievementDefs.filter(d => afterEarned.includes(d.id) && !earned.includes(d.id));
+                achievementMsg = '\n\n🎉 新成就解锁: ' + newBadges.map(b => `${b.icon} ${b.name}`).join(', ');
+            }
+
+            alert(`签到成功！+${pointsEarned} 积分\n连续签到 ${data.streak} 天 🎉${achievementMsg}`);
         }
 
         function showCheckin() {
@@ -814,6 +828,76 @@
                 .slice(0, 5);
         }
 
+        // Achievement System
+        const ACHIEVEMENTS_KEY = 'auto-tools-achievements';
+
+        const achievementDefs = [
+            { id: 'first_checkin', name: '新人签到', icon: '🌟', desc: '完成首次签到', check: (d, u) => d.lastDate },
+            { id: 'streak_3', name: '连续3天', icon: '🔥', desc: '连续签到3天', check: (d, u) => d.streak >= 3 },
+            { id: 'streak_7', name: '连续7天', icon: '💪', desc: '连续签到7天', check: (d, u) => d.streak >= 7 },
+            { id: 'streak_30', name: '坚持不懈', icon: '🏆', desc: '连续签到30天', check: (d, u) => d.streak >= 30 },
+            { id: 'tools_5', name: '工具达人', icon: '🛠️', desc: '使用5种不同工具', check: (d, u) => Object.keys(u).length >= 5 },
+            { id: 'tools_10', name: '工具大师', icon: '🎯', desc: '使用10种不同工具', check: (d, u) => Object.keys(u).length >= 10 },
+            { id: 'points_50', name: '积分达人', icon: '💎', desc: '累计50积分', check: (d, u) => d.points >= 50 },
+            { id: 'points_100', name: '积分大师', icon: '⭐', desc: '累计100积分', check: (d, u) => d.points >= 100 },
+        ];
+
+        function getAchievements() {
+            return JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY) || '[]');
+        }
+
+        function saveAchievements(list) {
+            localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(list));
+        }
+
+        function checkAchievements() {
+            const checkinData = getCheckinData();
+            const toolUsage = JSON.parse(localStorage.getItem(TOOL_USAGE_KEY) || '{}');
+            const earned = getAchievements();
+            const newBadges = [];
+
+            achievementDefs.forEach(def => {
+                if (!earned.includes(def.id) && def.check(checkinData, toolUsage)) {
+                    earned.push(def.id);
+                    newBadges.push(def);
+                }
+            });
+
+            if (newBadges.length > 0) {
+                saveAchievements(earned);
+                const names = newBadges.map(b => `${b.icon} ${b.name}`).join(', ');
+                // Show notification but don't spam
+                console.log(`🎉 获得新成就: ${names}`);
+            }
+
+            return earned;
+        }
+
+        function showAchievements() {
+            const earned = checkAchievements();
+            const container = document.getElementById('achievements');
+            if (!container) return;
+
+            container.innerHTML = achievementDefs.map(def => {
+                const isEarned = earned.includes(def.id);
+                return `<span title="${def.desc}" style="opacity: ${isEarned ? 1 : 0.3}; font-size: 1.2rem; cursor: help;">${def.icon}</span>`;
+            }).join('');
+        }
+
+        // Update achievements after check-in
+        const originalDoCheckin = doCheckin;
+        doCheckin = function(e) {
+            originalDoCheckin(e);
+            showAchievements();
+        };
+
+        // Update achievements after tool usage
+        const originalTrackToolUsage = trackToolUsage;
+        trackToolUsage = function(toolName) {
+            originalTrackToolUsage(toolName);
+            showAchievements();
+        };
+
         // Visitor Counter with global analytics
         (async function() {
             const namespace = 'auto-tools';
@@ -839,6 +923,7 @@
             // Initialize check-in UI
             updateCheckinUI();
             showPopularTools();
+            showAchievements();
         })();
 
         // Tab Navigation
