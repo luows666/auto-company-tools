@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>性格测试 - 你是哪种人格类型</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Noto Sans SC', sans-serif; min-height: 100vh; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        .title { font-size: 1.75rem; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 24px; font-size: 0.9rem; }
+        .question { margin-bottom: 24px; }
+        .question-text { font-weight: 600; margin-bottom: 12px; font-size: 1.1rem; }
+        .option {
+            padding: 14px 18px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+        }
+        .option:hover { border-color: #667eea; background: #f5f3ff; }
+        .option.selected { border-color: #667eea; background: #ede9fe; }
+        .btn-primary {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .btn-primary:hover { transform: scale(1.02); }
+        .btn-secondary {
+            padding: 12px 24px;
+            background: #f3f4f6;
+            color: #374151;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            margin: 4px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: #e5e7eb; }
+        .result-card {
+            text-align: center;
+            padding: 24px;
+        }
+        .result-type { font-size: 2rem; font-weight: 700; margin-bottom: 8px; }
+        .result-desc { color: #666; line-height: 1.8; margin-bottom: 20px; }
+        .progress-dots { display: flex; justify-content: center; gap: 8px; margin-bottom: 24px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #e5e7eb; }
+        .dot.active { background: #667eea; }
+        .dot.completed { background: #764ba2; }
+        .bg-style { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+        .history-item { padding: 12px; background: #f9fafb; border-radius: 8px; margin-bottom: 8px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+    <div class="gradient-bg">
+        <div class="bg-style" id="bgStyle"></div>
+        <div class="card" id="mainCard">
+            <!-- Start Screen -->
+            <div id="startScreen">
+                <div class="title">🧠 性格测试</div>
+                <div class="subtitle">探索你的人格类型，发现真实的自己</div>
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <span style="display: inline-block; padding: 8px 16px; background: #f3f4f6; border-radius: 20px; font-size: 0.85rem; color: #666;">
+                        📊 8道题 · 约2分钟完成
+                    </span>
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 500;">你的昵称</label>
+                    <input type="text" id="nickname" placeholder="输入昵称" style="width: 100%; padding: 14px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 1rem;">
+                </div>
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 12px; font-weight: 500;">选择背景风格</label>
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;">
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(0)">🌸 紫粉渐变</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(1)">🌊 蓝绿渐变</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(2)">🌅 橙红渐变</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(3)">🌙 暗夜紫</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(4)">🌿 清新绿</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(5)">🌺 玫瑰红</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(6)">💙 天空蓝</div>
+                        <div class="option" style="padding: 8px; text-align: center;" onclick="setBgStyle(7)">🖤 极夜黑</div>
+                    </div>
+                </div>
+                <button class="btn-primary" onclick="startTest()">开始测试</button>
+                <div style="margin-top: 20px;">
+                    <button class="btn-secondary" onclick="showHistory()">📜 测试历史</button>
+                </div>
+            </div>
+
+            <!-- Question Screen -->
+            <div id="questionScreen" style="display: none;">
+                <div class="progress-dots" id="progressDots"></div>
+                <div id="questionContainer"></div>
+                <button class="btn-primary" onclick="nextQuestion()" id="nextBtn" style="display: none;">下一题</button>
+            </div>
+
+            <!-- Result Screen -->
+            <div id="resultScreen" style="display: none;">
+                <div class="result-card" id="resultCard">
+                    <div style="font-size: 3rem; margin-bottom: 12px;" id="resultEmoji">🎯</div>
+                    <div class="result-type" id="resultType">加载中...</div>
+                    <div style="display: inline-block; padding: 6px 14px; background: #ede9fe; border-radius: 20px; font-size: 0.85rem; margin-bottom: 16px;" id="resultTag">
+                        人格类型
+                    </div>
+                    <div class="result-desc" id="resultDesc">...</div>
+                </div>
+                <div style="text-align: center;">
+                    <button class="btn-secondary" onclick="downloadImage()">📥 下载图片</button>
+                    <button class="btn-secondary" onclick="copyImage()">📋 复制图片</button>
+                    <button class="btn-secondary" onclick="restartTest()">🔄 重新测试</button>
+                </div>
+            </div>
+
+            <!-- History Screen -->
+            <div id="historyScreen" style="display: none;">
+                <div class="title" style="font-size: 1.25rem;">📜 测试历史</div>
+                <div id="historyList" style="margin-top: 16px; max-height: 300px; overflow-y: auto;"></div>
+                <button class="btn-secondary" onclick="goBack()" style="margin-top: 16px;">返回</button>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas" style="display: none;"></canvas>
+
+    <script>
+        const bgStyles = [
+            'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)',
+            'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
+            'linear-gradient(135deg, #4b134f 0%, #c94b4b 100%)',
+            'linear-gradient(135deg, #56ab2f 0%, #a8e063 100%)',
+            'linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%)',
+            'linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)',
+            'linear-gradient(135deg, #232526 0%, #414345 100%)'
+        ];
+
+        let currentBgStyle = 0;
+        let currentQuestion = 0;
+        let answers = [];
+        let userName = '';
+
+        const questions = [
+            {
+                text: "在社交场合中，你通常会？",
+                options: [
+                    { text: "主动结识新朋友，精力充沛", type: "E" },
+                    { text: "等待别人来搭话，比较安静", type: "I" }
+                ]
+            },
+            {
+                text: "面对问题时，你更倾向于？",
+                options: [
+                    { text: "凭直觉和感觉做决定", type: "N" },
+                    { text: "逻辑分析，理性思考", type: "S" }
+                ]
+            },
+            {
+                text: "做决定时，你更看重？",
+                options: [
+                    { text: "自己的价值观和感受", type: "F" },
+                    { text: "客观事实和对错", type: "T" }
+                ]
+            },
+            {
+                text: "你更喜欢的生活方式是？",
+                options: [
+                    { text: "灵活多变，喜欢新鲜感", type: "P" },
+                    { text: "有计划有组织，按部就班", type: "J" }
+                ]
+            },
+            {
+                text: "工作或学习时，你更擅长？",
+                options: [
+                    { text: "同时处理多个任务", type: "P" },
+                    { text: "专注完成一件事", type: "J" }
+                ]
+            },
+            {
+                text: "当你感到压力时，你会？",
+                options: [
+                    { text: "找朋友倾诉", type: "E" },
+                    { text: "独自思考冷静", type: "I" }
+                ]
+            },
+            {
+                text: "你更倾向于相信？",
+                options: [
+                    { text: "自己的直觉和灵感", type: "N" },
+                    { text: "实际经验和事实", type: "S" }
+                ]
+            },
+            {
+                text: "在与他人争论时，你更在乎？",
+                options: [
+                    { text: "双方感受，维护关系", type: "F" },
+                    { text: "真相和逻辑", type: "T" }
+                ]
+            }
+        ];
+
+        const personalities = {
+            "INTJ": { emoji: "🎯", name: "战略家", desc: "你是天生的战略家，具有出色的分析能力和远见。你善于制定长期计划，对目标和理想有坚定的追求。虽然有时显得冷漠和独立，但你内心有着强烈的个人愿景。", tag: "独立思考者" },
+            "INTP": { emoji: "🧩", name: "逻辑学家", desc: "你热爱知识和真理，善于深入思考复杂的问题。你具有强烈的好奇心和创造力，喜欢理论探讨胜过实际操作。你追求理解事物的本质，常常沉浸在自己的思考世界中。", tag: "理性探索者" },
+            "ENTJ": { emoji: "⚡", name: "指挥官", desc: "你是天生的领导者，具有强大的决策力和执行力。你善于分析问题、制定策略，并能够有效地组织和激励他人。你追求成功和效率，有时可能显得过于直接和苛刻。", tag: "天生领袖" },
+            "ENTP": { emoji: "💡", name: "辩论家", desc: "你思维敏捷，爱好辩论和探讨新想法。你善于发现机会和创新点，喜欢挑战传统观念。你具有强大的说服力和人际交往能力，但有时可能缺乏耐心和专注。", tag: "创意推手" },
+            "INFJ": { emoji: "🌟", name: "提倡者", desc: "你是理想主义者，有着深刻的洞察力和强烈的同理心。你善于理解他人的需求和情感，追求有意义的目标。你常常为了理想而奋斗，但有时可能过于自我牺牲。", tag: "理想主义者" },
+            "INFP": { emoji: "🦋", name: "调停者", desc: "你内心丰富、敏感细腻，重视个人价值观和情感体验。你富有创造力和同理心，常常追求意义和美好。你忠诚于自己的理想，但有时可能过于理想化。", tag: "梦想家" },
+            "ENFJ": { emoji: "🌈", name: "主人公", desc: "你是天生的领导者，具有强大的沟通能力和同理心。你善于激励和帮助他人，关注他人的成长和发展。你追求和谐的人际关系，常常成为团队中的精神领袖。", tag: "温暖领袖" },
+            "ENFP": { emoji: "🔥", name: "竞选者", desc: "你充满热情和创造力，善于发现可能性并激励他人。你热爱自由和创新，讨厌被规则束缚。你具有强大的感染力，但有时可能缺乏专注和坚持。", tag: "热情创新者" },
+            "ISTJ": { emoji: "📊", name: "物流师", desc: "你是可靠且务实的人，重视责任和组织。你善于分析数据，注重细节和实际效果。你遵守规则、勤奋努力，但有时可能过于保守和僵化。", tag: "可靠执行者" },
+            "ISFJ": { emoji: "🛡️", name: "守卫者", desc: "你忠诚、细心且富有牺牲精神。你善于照顾他人，重视传统和责任。你默默付出、不求回报，但有时可能忽视自己的需求。", tag: "温暖守护者" },
+            "ESTJ": { emoji: "🏆", name: "总经理", desc: "你是天生的管理者，具有强大的组织和执行能力。你重视规则和效率，善于领导团队达成目标。你果断直接，但有时可能显得过于强硬。", tag: "执行大师" },
+            "ESFJ": { emoji: "❤️", name: "执政官", desc: "你热情、友好且富有责任感。你善于照顾他人，重视社会和谐和人际关系。你乐于助人、讲究实际，但有时可能过于在意他人评价。", tag: "社交达人" },
+            "ISTP": { emoji: "🔧", name: "鉴赏家", desc: "你冷静、务实且善于动手操作。你善于分析和解决实际问题，享受当下的体验。你独立灵活，但有时可能显得冷漠和冲动。", tag: "实用主义者" },
+            "ISFP": { emoji: "🎨", name: "探险家", desc: "你敏感、细腻且富有艺术气质。你重视个人自由和审美体验，追求内心的平静与美好。你温柔友好，但有时可能过于被动和逃避冲突。", tag: "艺术灵魂" },
+            "ESTP": { emoji: "🎪", name: "企业家", desc: "你充满活力、善于社交，享受冒险和刺激。你善于把握机会、灵活变通，是行动派代表。你直率坦诚，但有时可能缺乏耐心和长远规划。", tag: "行动派" },
+            "ESFP": { emoji: "🎭", name: "表演者", desc: "你热情洋溢、充满活力，是人群中的开心果。你善于营造氛围、带动情绪，享受当下的快乐。你真诚友好，但有时可能过于冲动和缺乏规划。", tag: "活力因子" }
+        };
+
+        function setBgStyle(index) {
+            currentBgStyle = index;
+            document.querySelectorAll('.bg-style + .card ~ div .option').forEach(opt => opt.classList.remove('selected'));
+            event.target.closest('.option').classList.add('selected');
+            document.getElementById('bgStyle').style.background = bgStyles[index];
+        }
+
+        function startTest() {
+            userName = document.getElementById('nickname').value || '朋友';
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('questionScreen').style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const container = document.getElementById('questionContainer');
+            const q = questions[currentQuestion];
+
+            let html = `<div class="question">
+                <div class="question-text">${currentQuestion + 1}. ${q.text}</div>`;
+
+            q.options.forEach((opt, i) => {
+                html += `<div class="option" onclick="selectOption(${i})">${opt.text}</div>`;
+            });
+
+            html += '</div>';
+            container.innerHTML = html;
+
+            // Update progress dots
+            const dots = document.getElementById('progressDots');
+            dots.innerHTML = questions.map((_, i) =>
+                `<div class="dot ${i < currentQuestion ? 'completed' : i === currentQuestion ? 'active' : ''}"></div>`
+            ).join('');
+
+            document.getElementById('nextBtn').style.display = 'none';
+        }
+
+        function selectOption(index) {
+            const q = questions[currentQuestion];
+            answers.push(q.options[index].type);
+
+            document.querySelectorAll('.option').forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+
+            document.getElementById('nextBtn').style.display = 'block';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function calculateResult() {
+            const counts = { E: 0, I: 0, N: 0, S: 0, T: 0, F: 0, J: 0, P: 0 };
+            answers.forEach(a => counts[a]++);
+
+            let type = '';
+            type += counts.E > counts.I ? 'E' : 'I';
+            type += counts.N > counts.S ? 'N' : 'S';
+            type += counts.T > counts.F ? 'T' : 'F';
+            type += counts.J > counts.P ? 'J' : 'P';
+
+            return type;
+        }
+
+        function showResult() {
+            const type = calculateResult();
+            const p = personalities[type];
+
+            document.getElementById('questionScreen').style.display = 'none';
+            document.getElementById('resultScreen').style.display = 'block';
+
+            document.getElementById('resultEmoji').textContent = p.emoji;
+            document.getElementById('resultType').textContent = p.name;
+            document.getElementById('resultTag').textContent = p.tag;
+            document.getElementById('resultDesc').textContent = p.desc;
+
+            // Save to history
+            const history = JSON.parse(localStorage.getItem('personalityTestHistory') || '[]');
+            history.unshift({ type: p.name, date: new Date().toLocaleDateString() });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('personalityTestHistory', JSON.stringify(history));
+        }
+
+        function downloadImage() {
+            generateImage();
+        }
+
+        function copyImage() {
+            generateImage(true);
+        }
+
+        function generateImage(copy = false) {
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            const type = calculateResult();
+            const p = personalities[type];
+
+            canvas.width = 600;
+            canvas.height = 800;
+
+            // Draw gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 600, 800);
+            gradient.addColorStop(0, bgStyles[currentBgStyle].split(' ')[1].replace('0%', '').replace(',', ''));
+            gradient.addColorStop(1, bgStyles[currentBgStyle].split(' ')[2].replace('100%)', ''));
+
+            const colors = ['#667eea,#764ba2', '#11998e,#38ef7d', '#f093fb,#f5576c', '#4b134f,#c94b4b', '#56ab2f,#a8e063', '#ff9a9e,#fecfef', '#89f7fe,#66a6ff', '#232526,#414345'];
+            const [c1, c2] = colors[currentBgStyle].split(',');
+            const grad = ctx.createLinearGradient(0, 0, 600, 800);
+            grad.addColorStop(0, c1);
+            grad.addColorStop(1, c2);
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 600, 800);
+
+            // White card
+            ctx.fillStyle = 'white';
+            ctx.roundRect(30, 30, 540, 740, 24);
+            ctx.fill();
+
+            // Emoji
+            ctx.font = '80px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(p.emoji, 300, 120);
+
+            // Title
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 36px Noto Sans SC';
+            ctx.fillText(p.name, 300, 190);
+
+            // Tag
+            ctx.fillStyle = '#ede9fe';
+            ctx.font = '18px Noto Sans SC';
+            const tagWidth = ctx.measureText(p.tag).width;
+            ctx.roundRect(300 - tagWidth/2 - 20, 220, tagWidth + 40, 32, 16);
+            ctx.fill();
+            ctx.fillStyle = '#667eea';
+            ctx.fillText(p.tag, 300, 242);
+
+            // Description
+            ctx.fillStyle = '#6b7280';
+            ctx.font = '18px Noto Sans SC';
+            const words = p.desc.split('');
+            let line = '';
+            let y = 300;
+            const maxWidth = 480;
+            const lineHeight = 28;
+
+            words.forEach(word => {
+                const testLine = line + word;
+                if (ctx.measureText(testLine).width > maxWidth) {
+                    ctx.fillText(line, 300, y);
+                    line = word;
+                    y += lineHeight;
+                } else {
+                    line = testLine;
+                }
+            });
+            ctx.fillText(line, 300, y);
+
+            // Name and date
+            ctx.fillStyle = '#9ca3af';
+            ctx.font = '16px Noto Sans SC';
+            ctx.fillText(`${userName} · ${new Date().toLocaleDateString()}`, 300, 700);
+
+            // Footer
+            ctx.font = '14px Noto Sans SC';
+            ctx.fillText('性格测试 · Auto Tools', 300, 740);
+
+            if (copy) {
+                canvas.toBlob(blob => {
+                    navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+                    alert('已复制到剪贴板！');
+                });
+            } else {
+                const link = document.createElement('a');
+                link.download = `性格测试-${p.name}.png`;
+                link.href = canvas.toDataURL();
+                link.click();
+            }
+        }
+
+        function restartTest() {
+            document.getElementById('resultScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+            document.getElementById('nickname').value = userName;
+        }
+
+        function showHistory() {
+            document.getElementById('startScreen').style.display = 'none';
+            document.getElementById('historyScreen').style.display = 'block';
+            const history = JSON.parse(localStorage.getItem('personalityTestHistory') || '[]');
+            const list = document.getElementById('historyList');
+
+            if (history.length === 0) {
+                list.innerHTML = '<div style="text-align: center; color: #999;">暂无测试记录</div>';
+            } else {
+                list.innerHTML = history.map(h => `
+                    <div class="history-item">
+                        <strong>${h.type}</strong> - ${h.date}
+                    </div>
+                `).join('');
+            }
+        }
+
+        function goBack() {
+            document.getElementById('historyScreen').style.display = 'none';
+            document.getElementById('startScreen').style.display = 'block';
+        }
+
+        // Initialize
+        document.getElementById('bgStyle').style.background = bgStyles[0];
+
+        // Add roundRect polyfill
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                if (w < 2 * r) r = w / 2;
+                if (h < 2 * r) r = h / 2;
+                this.beginPath();
+                this.moveTo(x + r, y);
+                this.arcTo(x + w, y, x + w, y + h, r);
+                this.arcTo(x + w, y + h, x, y + h, r);
+                this.arcTo(x, y + h, x, y, r);
+                this.arcTo(x, y, x + w, y, r);
+                this.closePath();
+                return this;
+            };
+        }
+    </script>
+</body>
+</html>
