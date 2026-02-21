@@ -40,7 +40,8 @@
             "文字转语音",
             "优惠计算器",
             "日期倒数日",
-            "字数统计"
+            "字数统计",
+            "习惯打卡"
         ],
         "browserRequirements": "Requires JavaScript"
     }
@@ -104,6 +105,21 @@
 
         .visitor-counter span {
             font-weight: 600;
+        }
+
+        .github-star {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(255,255,255,0.2);
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            transition: all 0.2s;
+        }
+
+        .github-star:hover {
+            background: rgba(255,255,255,0.3);
         }
 
         /* Tab Navigation */
@@ -398,6 +414,9 @@
         <p>离线工具套件 - 随时可用</p>
         <div class="visitor-counter">
             <span>👁</span> <span id="visitorCount">1</span> 次浏览
+            <a href="https://github.com/luows666/auto-tools" target="_blank" class="github-star" style="margin-left: 10px; color: white; text-decoration: none;">
+                ⭐ Star
+            </a>
         </div>
     </header>
 
@@ -418,6 +437,7 @@
         <button class="tab" data-tab="discount">优惠计算</button>
         <button class="tab" data-tab="countdown">倒数日</button>
         <button class="tab" data-tab="wordcount">字数统计</button>
+        <button class="tab" data-tab="habits">习惯打卡</button>
     </div>
 
     <div class="content">
@@ -765,6 +785,20 @@
                 <button class="btn-primary" onclick="window.open('word-count.html', '_blank')">打开字数统计</button>
                 <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
                     支持总字符、中文、英文、单词、行数等统计
+                </p>
+            </div>
+        </div>
+
+        <!-- Habit Tracker -->
+        <div class="tool-section" id="habits">
+            <div class="card">
+                <h2>🎯 每日打卡</h2>
+                <p style="color: var(--text-light); font-size: 0.875rem; margin-bottom: 16px;">
+                    追踪每日习惯完成情况，培养好习惯
+                </p>
+                <button class="btn-primary" onclick="window.open('habit-tracker.html', '_blank')">打开习惯打卡</button>
+                <p style="color: var(--text-light); font-size: 0.75rem; margin-top: 12px;">
+                    支持连续打卡统计、数据导出、本地存储
                 </p>
             </div>
         </div>

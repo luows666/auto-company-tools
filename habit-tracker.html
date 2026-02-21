@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日打卡 - 习惯追踪</title>
+    <meta name="description" content="追踪每日习惯完成情况，培养好习惯。支持数据导出，统计完成率。">
+    <meta name="keywords" content="每日打卡,习惯追踪,习惯养成,打卡工具">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --primary: #8b5cf6;
+            --primary-dark: #7c3aed;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text: #1e293b;
+            --text-light: #64748b;
+            --success: #10b981;
+            --border: #e2e8f0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            padding: 20px;
+            padding-top: 30px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.3);
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 4px;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.875rem;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 16px;
+        }
+
+        .card h2 {
+            font-size: 1.125rem;
+            margin-bottom: 16px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 12px;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: var(--text);
+        }
+
+        .date-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .date-nav h3 {
+            font-size: 1.25rem;
+        }
+
+        .nav-btn {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+        }
+
+        .habit-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .habit-checkbox {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            border: 2px solid var(--border);
+            margin-right: 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .habit-checkbox.checked {
+            background: var(--success);
+            border-color: var(--success);
+            color: white;
+        }
+
+        .habit-info {
+            flex: 1;
+        }
+
+        .habit-name {
+            font-weight: 500;
+            margin-bottom: 2px;
+        }
+
+        .habit-streak {
+            font-size: 0.75rem;
+            color: var(--text-light);
+        }
+
+        .habit-delete {
+            background: none;
+            border: none;
+            color: #ef4444;
+            font-size: 1.25rem;
+            cursor: pointer;
+            opacity: 0.5;
+            padding: 4px;
+        }
+
+        .habit-delete:hover {
+            opacity: 1;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 16px;
+            background: #f8fafc;
+            border-radius: 12px;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-light);
+            margin-top: 4px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+        }
+
+        .add-habit-form {
+            display: flex;
+            gap: 8px;
+        }
+
+        .add-habit-form input {
+            flex: 1;
+            margin-bottom: 0;
+        }
+
+        .add-habit-form button {
+            width: auto;
+            padding: 12px 20px;
+        }
+
+        .footer-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+
+        .footer-actions button {
+            flex: 1;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>每日打卡</h1>
+        <p>追踪习惯养成，记录每一天的进步</p>
+    </header>
+
+    <div class="container">
+        <div class="card">
+            <div class="date-nav">
+                <button class="nav-btn" onclick="changeDate(-1)">← 昨天</button>
+                <h3 id="currentDate">今天</h3>
+                <button class="nav-btn" onclick="changeDate(1)">明天 →</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📊 今日统计</h2>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-value" id="totalHabits">0</div>
+                    <div class="stat-label">习惯数</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completedCount">0</div>
+                    <div class="stat-label">已完成</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="completionRate">0%</div>
+                    <div class="stat-label">完成率</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>✅ 习惯列表</h2>
+            <div id="habitList">
+                <div class="empty-state">
+                    <p>暂无习惯，点击下方添加</p>
+                </div>
+            </div>
+
+            <div class="add-habit-form" style="margin-top: 16px;">
+                <input type="text" id="newHabit" placeholder="输入新习惯..." maxlength="30">
+                <button class="btn-primary" onclick="addHabit()" style="width: auto;">添加</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>🏆 连续打卡</h2>
+            <div id="streakList">
+                <div class="empty-state">
+                    <p>暂无数据</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-actions">
+            <button class="btn-secondary" onclick="exportData()">导出数据</button>
+            <button class="btn-secondary" onclick="importData()">导入数据</button>
+            <input type="file" id="importFile" style="display: none;" accept=".json" onchange="handleImport(event)">
+        </div>
+    </div>
+
+    <script>
+        // State
+        let habits = JSON.parse(localStorage.getItem('habits') || '[]');
+        let records = JSON.parse(localStorage.getItem('habitRecords') || '{}');
+        let currentDate = new Date();
+        currentDate.setHours(0, 0, 0, 0);
+
+        function getDateKey(date) {
+            return date.toISOString().split('T')[0];
+        }
+
+        function render() {
+            // Update date display
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dateKey = getDateKey(currentDate);
+            const todayKey = getDateKey(today);
+
+            if (dateKey === todayKey) {
+                document.getElementById('currentDate').textContent = '今天';
+            } else if (dateKey === getDateKey(new Date(today.getTime() - 86400000))) {
+                document.getElementById('currentDate').textContent = '昨天';
+            } else if (dateKey === getDateKey(new Date(today.getTime() + 86400000))) {
+                document.getElementById('currentDate').textContent = '明天';
+            } else {
+                document.getElementById('currentDate').textContent = dateKey;
+            }
+
+            // Update stats
+            const total = habits.length;
+            const dayRecords = records[dateKey] || {};
+            const completed = Object.values(dayRecords).filter(v => v).length;
+            const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+            document.getElementById('totalHabits').textContent = total;
+            document.getElementById('completedCount').textContent = completed;
+            document.getElementById('completionRate').textContent = rate + '%';
+
+            // Render habit list
+            const habitList = document.getElementById('habitList');
+            if (habits.length === 0) {
+                habitList.innerHTML = '<div class="empty-state"><p>暂无习惯，点击下方添加</p></div>';
+            } else {
+                habitList.innerHTML = habits.map((habit, index) => {
+                    const isChecked = dayRecords[habit.id] || false;
+                    const streak = calculateStreak(habit.id);
+                    return `
+                        <div class="habit-item">
+                            <div class="habit-checkbox ${isChecked ? 'checked' : ''}" onclick="toggleHabit('${habit.id}')">
+                                ${isChecked ? '✓' : ''}
+                            </div>
+                            <div class="habit-info">
+                                <div class="habit-name">${habit.name}</div>
+                                <div class="habit-streak">🔥 连续 ${streak} 天</div>
+                            </div>
+                            <button class="habit-delete" onclick="deleteHabit('${habit.id}')">×</button>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Render streak list
+            renderStreakList();
+        }
+
+        function calculateStreak(habitId) {
+            let streak = 0;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            for (let i = 0; i < 365; i++) {
+                const date = new Date(today.getTime() - i * 86400000);
+                const key = getDateKey(date);
+                if (records[key] && records[key][habitId]) {
+                    streak++;
+                } else if (i > 0) {
+                    break;
+                }
+            }
+            return streak;
+        }
+
+        function renderStreakList() {
+            const streakList = document.getElementById('streakList');
+            if (habits.length === 0) {
+                streakList.innerHTML = '<div class="empty-state"><p>暂无数据</p></div>';
+                return;
+            }
+
+            const streaks = habits.map(habit => ({
+                name: habit.name,
+                streak: calculateStreak(habit.id)
+            })).sort((a, b) => b.streak - a.streak);
+
+            streakList.innerHTML = streaks.map(s => `
+                <div class="habit-item">
+                    <div class="habit-info">
+                        <div class="habit-name">${s.name}</div>
+                        <div class="habit-streak">🔥 连续 ${s.streak} 天</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function toggleHabit(habitId) {
+            const dateKey = getDateKey(currentDate);
+            if (!records[dateKey]) {
+                records[dateKey] = {};
+            }
+            records[dateKey][habitId] = !records[dateKey][habitId];
+            localStorage.setItem('habitRecords', JSON.stringify(records));
+            render();
+        }
+
+        function addHabit() {
+            const name = document.getElementById('newHabit').value.trim();
+            if (!name) {
+                alert('请输入习惯名称');
+                return;
+            }
+
+            habits.push({
+                id: Date.now().toString(),
+                name: name,
+                createdAt: new Date().toISOString()
+            });
+
+            localStorage.setItem('habits', JSON.stringify(habits));
+            document.getElementById('newHabit').value = '';
+            render();
+        }
+
+        function deleteHabit(habitId) {
+            if (!confirm('确定删除这个习惯？')) return;
+            habits = habits.filter(h => h.id !== habitId);
+            localStorage.setItem('habits', JSON.stringify(habits));
+
+            // Clean up records
+            Object.keys(records).forEach(key => {
+                if (records[key][habitId]) {
+                    delete records[key][habitId];
+                }
+            });
+            localStorage.setItem('habitRecords', JSON.stringify(records));
+            render();
+        }
+
+        function changeDate(delta) {
+            currentDate = new Date(currentDate.getTime() + delta * 86400000);
+            render();
+        }
+
+        function exportData() {
+            const data = {
+                habits,
+                records,
+                exportedAt: new Date().toISOString()
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `habit-tracker-${getDateKey(new Date())}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            document.getElementById('importFile').click();
+        }
+
+        function handleImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    if (data.habits && data.records) {
+                        habits = data.habits;
+                        records = data.records;
+                        localStorage.setItem('habits', JSON.stringify(habits));
+                        localStorage.setItem('habitRecords', JSON.stringify(records));
+                        render();
+                        alert('导入成功！');
+                    } else {
+                        alert('文件格式不正确');
+                    }
+                } catch (err) {
+                    alert('导入失败：' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = '';
+        }
+
+        // Add habit on Enter key
+        document.getElementById('newHabit').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addHabit();
+            }
+        });
+
+        // Initial render
+        render();
+    </script>
+</body>
+</html>
