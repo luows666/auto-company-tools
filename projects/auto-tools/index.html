@@ -65,6 +65,39 @@
             background: rgba(255,255,255,0.2);
             padding: 4px 10px;
             border-radius: 12px;
+            cursor: pointer;
+        }
+
+        .checkin-btn {
+            margin-top: 8px;
+            background: rgba(255,255,255,0.25);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkin-btn:hover {
+            background: rgba(255,255,255,0.35);
+        }
+
+        .checkin-btn.checked {
+            background: #10b981;
+            border-color: #10b981;
+        }
+
+        .streak-info {
+            margin-top: 8px;
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .streak-info span {
+            font-weight: 600;
+            color: #fbbf24;
         }
 
         .visitor-counter span {
@@ -361,9 +394,13 @@
     <header>
         <h1>Auto Tools</h1>
         <p>离线工具套件 - 随时可用</p>
-        <div class="visitor-counter">
+        <div class="visitor-counter" onclick="showCheckin()">
             <span>👁</span> <span id="visitorCount">1</span> 次浏览
         </div>
+        <div class="streak-info">
+            🔥 连续签到: <span id="streakDays">0</span> 天 | 积分: <span id="userPoints">0</span>
+        </div>
+        <button class="checkin-btn" id="checkinBtn" onclick="doCheckin(event)">📅 每日签到</button>
     </header>
 
     <div class="tabs">
@@ -376,26 +413,35 @@
         <button class="tab" data-tab="hash">Hash</button>
         <button class="tab" data-tab="payment">收款码</button>
         <button class="tab" data-tab="wordcount">字数统计</button>
-        <button class="tab" data-tab="weight" onclick="window.open('weight-card.html', '_blank')">体重记录</button>
-        <button class="tab" data-tab="flag" onclick="window.open('flag-card.html', '_blank')">FLAG 卡片</button>
-        <button class="tab" data-tab="love" onclick="window.open('love-match.html', '_blank')">缘分配对</button>
-        <button class="tab" data-tab="lyric" onclick="window.open('lyric-poster.html', '_blank')">歌词海报</button>
-        <button class="tab" data-tab="energy" onclick="window.open('energy-card.html', '_blank')">能量卡</button>
-        <button class="tab" data-tab="truth" onclick="window.open('truth-or-dare.html', '_blank')">真心话</button>
-        <button class="tab" data-tab="spin" onclick="window.open('spin-wheel.html', '_blank')">抽奖转盘</button>
-        <button class="tab" data-tab="ninegrid" onclick="window.open('nine-grid.html', '_blank')">九宫格</button>
-        <button class="tab" data-tab="lucky" onclick="window.open('lucky-number.html', '_blank')">幸运数字</button>
-        <button class="tab" data-tab="chat" onclick="window.open('chat-screenshot.html', '_blank')">聊天记录</button>
-        <button class="tab" data-tab="progress" onclick="window.open('progress-card.html', '_blank')">时间进度</button>
-        <button class="tab" data-tab="year" onclick="window.open('year-review.html', '_blank')">年度回忆</button>
-        <button class="tab" data-tab="quote" onclick="window.open('quote-card.html', '_blank')">毒鸡汤</button>
-        <button class="tab" data-tab="fortune" onclick="window.open('fortune-card.html', '_blank')">今日运势</button>
-        <button class="tab" data-tab="birthday" onclick="window.open('birthday-countdown.html', '_blank')">生日倒计</button>
-        <button class="tab" data-tab="lovedays" onclick="window.open('love-days.html', '_blank')">恋爱天数</button>
-        <button class="tab" data-tab="morning" onclick="window.open('morning-card.html', '_blank')">早安卡片</button>
-        <button class="tab" data-tab="praise" onclick="window.open('praise-card.html', '_blank')">彩虹屁</button>
-        <button class="tab" data-tab="fish" onclick="window.open('fish-calendar.html', '_blank')">摸鱼日历</button>
-        <button class="tab" data-tab="food" onclick="window.open('food-picker.html', '_blank')">今天吃啥</button>
+        <button class="tab" data-tab="weight" onclick="trackToolUsage('体重记录');window.open('weight-card.html', '_blank')">体重记录</button>
+        <button class="tab" data-tab="flag" onclick="trackToolUsage('FLAG卡片');window.open('flag-card.html', '_blank')">FLAG 卡片</button>
+        <button class="tab" data-tab="love" onclick="trackToolUsage('缘分配对');window.open('love-match.html', '_blank')">缘分配对</button>
+        <button class="tab" data-tab="lyric" onclick="trackToolUsage('歌词海报');window.open('lyric-poster.html', '_blank')">歌词海报</button>
+        <button class="tab" data-tab="energy" onclick="trackToolUsage('能量卡');window.open('energy-card.html', '_blank')">能量卡</button>
+        <button class="tab" data-tab="truth" onclick="trackToolUsage('真心话大冒险');window.open('truth-or-dare.html', '_blank')">真心话</button>
+        <button class="tab" data-tab="spin" onclick="trackToolUsage('抽奖转盘');window.open('spin-wheel.html', '_blank')">抽奖转盘</button>
+        <button class="tab" data-tab="ninegrid" onclick="trackToolUsage('九宫格');window.open('nine-grid.html', '_blank')">九宫格</button>
+        <button class="tab" data-tab="lucky" onclick="trackToolUsage('幸运数字');window.open('lucky-number.html', '_blank')">幸运数字</button>
+        <button class="tab" data-tab="chat" onclick="trackToolUsage('聊天记录');window.open('chat-screenshot.html', '_blank')">聊天记录</button>
+        <button class="tab" data-tab="progress" onclick="trackToolUsage('时间进度');window.open('progress-card.html', '_blank')">时间进度</button>
+        <button class="tab" data-tab="year" onclick="trackToolUsage('年度回忆');window.open('year-review.html', '_blank')">年度回忆</button>
+        <button class="tab" data-tab="quote" onclick="trackToolUsage('毒鸡汤');window.open('quote-card.html', '_blank')">毒鸡汤</button>
+        <button class="tab" data-tab="fortune" onclick="trackToolUsage('今日运势');window.open('fortune-card.html', '_blank')">今日运势</button>
+        <button class="tab" data-tab="birthday" onclick="trackToolUsage('生日倒计日');window.open('birthday-countdown.html', '_blank')">生日倒计</button>
+        <button class="tab" data-tab="lovedays" onclick="trackToolUsage('恋爱天数');window.open('love-days.html', '_blank')">恋爱天数</button>
+        <button class="tab" data-tab="morning" onclick="trackToolUsage('早安卡片');window.open('morning-card.html', '_blank')">早安卡片</button>
+        <button class="tab" data-tab="praise" onclick="trackToolUsage('彩虹屁');window.open('praise-card.html', '_blank')">彩虹屁</button>
+        <button class="tab" data-tab="fish" onclick="trackToolUsage('摸鱼日历');window.open('fish-calendar.html', '_blank')">摸鱼日历</button>
+        <button class="tab" data-tab="food" onclick="trackToolUsage('今天吃啥');window.open('food-picker.html', '_blank')">今天吃啥</button>
+        <button class="tab" data-tab="personality" onclick="trackToolUsage('性格测试');window.open('personality-test.html', '_blank')">性格测试</button>
+    </div>
+
+    <!-- Popular Tools Section -->
+    <div id="popularTools" style="padding: 16px; max-width: 600px; margin: 0 auto; display: none;">
+        <div class="card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+            <h2 style="color: white;">🏆 热门工具 TOP 5</h2>
+            <div id="popularToolsList"></div>
+        </div>
     </div>
 
     <div class="content">
@@ -656,6 +702,118 @@
     </div>
 
     <script>
+        // Daily Check-in System
+        const CHECKIN_KEY = 'auto-tools-checkin';
+
+        function getCheckinData() {
+            const data = localStorage.getItem(CHECKIN_KEY);
+            return data ? JSON.parse(data) : { lastDate: null, streak: 0, points: 0 };
+        }
+
+        function saveCheckinData(data) {
+            localStorage.setItem(CHECKIN_KEY, JSON.stringify(data));
+        }
+
+        function updateCheckinUI() {
+            const data = getCheckinData();
+            const today = new Date().toDateString();
+            const btn = document.getElementById('checkinBtn');
+
+            document.getElementById('streakDays').textContent = data.streak;
+            document.getElementById('userPoints').textContent = data.points;
+
+            if (data.lastDate === today) {
+                btn.textContent = '✅ 已签到';
+                btn.classList.add('checked');
+                btn.disabled = true;
+            }
+        }
+
+        function doCheckin(e) {
+            e.stopPropagation();
+            const data = getCheckinData();
+            const today = new Date();
+            const todayStr = today.toDateString();
+
+            if (data.lastDate === todayStr) return;
+
+            // Calculate streak
+            if (data.lastDate) {
+                const lastDate = new Date(data.lastDate);
+                const diffDays = Math.floor((today - lastDate) / (1000 * 60 * 60 * 24));
+                if (diffDays === 1) {
+                    data.streak++;
+                } else if (diffDays > 1) {
+                    data.streak = 1;
+                }
+            } else {
+                data.streak = 1;
+            }
+
+            // Add points (more for longer streaks)
+            const pointsEarned = Math.min(10, 2 + data.streak);
+            data.points += pointsEarned;
+            data.lastDate = todayStr;
+
+            saveCheckinData(data);
+            updateCheckinUI();
+
+            alert(`签到成功！+${pointsEarned} 积分\n连续签到 ${data.streak} 天 🎉`);
+        }
+
+        function showCheckin() {
+            const data = getCheckinData();
+            const today = new Date().toDateString();
+            const lastCheckin = data.lastDate ? new Date(data.lastDate).toDateString() : '从未签到';
+
+            let msg = `上次签到: ${lastCheckin}\n连续签到: ${data.streak} 天\n当前积分: ${data.points}`;
+
+            if (data.lastDate !== today) {
+                msg += '\n\n点击"每日签到"按钮签到获得积分！';
+            }
+
+            // Simple alert for now
+            console.log(msg);
+        }
+
+        // Show popular tools
+        function showPopularTools() {
+            const topTools = getTopTools();
+            const container = document.getElementById('popularToolsList');
+            const wrapper = document.getElementById('popularTools');
+
+            if (topTools.length === 0) {
+                wrapper.style.display = 'none';
+                return;
+            }
+
+            wrapper.style.display = 'block';
+            const medals = ['🥇', '🥈', '🥉', '4️⃣', '5️⃣'];
+
+            container.innerHTML = topTools.map(([name, count], i) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.3);">
+                    <span>${medals[i]} ${name}</span>
+                    <span style="background: rgba(255,255,255,0.3); padding: 2px 8px; border-radius: 10px; font-size: 0.8rem;">${count}次</span>
+                </div>
+            `).join('');
+        }
+
+        // Tool Usage Tracking
+        const TOOL_USAGE_KEY = 'auto-tools-usage';
+
+        function trackToolUsage(toolName) {
+            const usage = JSON.parse(localStorage.getItem(TOOL_USAGE_KEY) || '{}');
+            usage[toolName] = (usage[toolName] || 0) + 1;
+            localStorage.setItem(TOOL_USAGE_KEY, JSON.stringify(usage));
+        }
+
+        function getTopTools() {
+            const usage = JSON.parse(localStorage.getItem(TOOL_USAGE_KEY) || '{}');
+            return Object.entries(usage)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 5);
+        }
+
         // Visitor Counter with global analytics
         (async function() {
             const namespace = 'auto-tools';
@@ -677,11 +835,25 @@
                 localStorage.setItem(key, count.toString());
                 document.getElementById('visitorCount').textContent = count.toLocaleString();
             }
+
+            // Initialize check-in UI
+            updateCheckinUI();
+            showPopularTools();
         })();
 
         // Tab Navigation
         document.querySelectorAll('.tab').forEach(tab => {
             tab.addEventListener('click', () => {
+                // Track tool usage for internal tools
+                const toolNames = {
+                    'json': 'JSON工具', 'budget': '记账', 'converter': '单位转换',
+                    'timer': '计时器', 'color': '颜色工具', 'hash': 'Hash工具',
+                    'payment': '收款码', 'wordcount': '字数统计', 'password': '密码生成器'
+                };
+                if (toolNames[tab.dataset.tab]) {
+                    trackToolUsage(toolNames[tab.dataset.tab]);
+                }
+
                 document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
                 document.querySelectorAll('.tool-section').forEach(s => s.classList.remove('active'));
                 tab.classList.add('active');
