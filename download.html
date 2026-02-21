@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>下载离线版本 - Auto Company 工具</title>
+    <meta name="description" content="下载 Auto Company 离线工具 - 密码生成器、JSON工具、记账、单位转换等">
+    <meta name="keywords" content="下载离线工具,密码生成器下载,JSON工具下载,记账软件">
+    <meta property="og:title" content="下载离线版本 - Auto Company 工具">
+    <meta property="og:description" content="下载离线工具，随时随地使用">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="./download.html">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        h1 {
+            color: #fff;
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: rgba(255,255,255,0.7);
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .download-section {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .download-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 12px;
+            margin-bottom: 16px;
+        }
+        .download-info h3 {
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 6px;
+        }
+        .download-info p {
+            color: rgba(255,255,255,0.6);
+            font-size: 0.9rem;
+        }
+        .download-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #fff;
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: inline-block;
+        }
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102,126,234,0.4);
+        }
+        .download-btn.secondary {
+            background: rgba(255,255,255,0.2);
+        }
+        .download-btn.secondary:hover {
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 8px 20px rgba(255,255,255,0.2);
+        }
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255,255,255,0.7);
+            text-decoration: none;
+        }
+        .back-link:hover { color: #fff; }
+        .all-in-one {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            text-align: center;
+        }
+        .all-in-one h3 { color: #fff !important; }
+        .all-in-one p { color: rgba(255,255,255,0.9) !important; }
+    </style>
+    <style>
+    .sponsor-section {
+        background: rgba(255,255,255,0.05);
+        border-radius: 16px;
+        padding: 24px;
+        margin-top: 30px;
+        text-align: center;
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+    .sponsor-title { color: #fff; font-size: 1.3rem; margin-bottom: 10px; }
+    .sponsor-desc { color: rgba(255,255,255,0.6); margin-bottom: 16px; }
+    .sponsor-buttons { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .sponsor-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .alipay { background: #1677ff; color: #fff; }
+    .wechat { background: #07c160; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .crypto-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .crypto-title { color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px; }
+    .crypto-address { background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 4px; margin: 4px 0; cursor: pointer; font-family: monospace; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; }
+    .crypto-address:hover { background: rgba(0,0,0,0.5); }
+    .crypto-label { color: #f7931a; font-weight: bold; }
+    .crypto-value { color: rgba(255,255,255,0.7); word-break: break-all; }
+    .copy-hint { color: rgba(255,255,255,0.4); font-size: 0.6rem; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📦 下载离线版本</h1>
+        <p class="subtitle">一次下载，随时离线使用 | 无需网络</p>
+
+        <div class="download-section all-in-one">
+            <div class="download-item" style="display: block;">
+                <div class="download-info">
+                    <h3>🚀 在线使用 (推荐)</h3>
+                    <p>所有工具均为纯前端实现，打开链接即可离线使用</p>
+                </div>
+                <br>
+                <a href="index.html" class="download-btn">访问产品中心</a>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h2 style="color: #fff; margin-bottom: 20px;">📱 在线工具</h2>
+
+            <div class="download-item">
+                <div class="download-info">
+                    <h3>🛠️ 统一离线工具套件</h3>
+                    <p>密码生成 | JSON工具 | 记账 | 单位转换 | 计时器 | 颜色提取 | Hash</p>
+                </div>
+                <a href="suite.html" class="download-btn secondary">打开</a>
+            </div>
+
+            <div class="download-item">
+                <div class="download-info">
+                    <h3>💰 个人预算管家</h3>
+                    <p>记账 | 预算管理 | 收支分析 | 数据导出</p>
+                </div>
+                <a href="personal-budget.html" class="download-btn secondary">打开</a>
+            </div>
+
+            <div class="download-item">
+                <div class="download-info">
+                    <h3>⚡ 开发者工具箱</h3>
+                    <p>JSON格式化 | Base64 | 时间戳 | 颜色工具 | UUID | SQL格式化</p>
+                </div>
+                <a href="dev-tools.html" class="download-btn secondary">打开</a>
+            </div>
+        </div>
+
+        <div class="download-section">
+            <h2 style="color: #fff; margin-bottom: 16px;">💾 如何离线使用</h2>
+            <div style="color: rgba(255,255,255,0.8); line-height: 1.8;">
+                <p><strong>方法 1:</strong> 在浏览器中打开后，按 <kbd>Ctrl</kbd> + <kbd>S</kbd> (或 <kbd>Cmd</kbd> + <kbd>S</kbd>) 保存为 HTML 文件</p>
+                <p><strong>方法 2:</strong> 右键点击页面 → "另存为" → 选择 "网页, 完整"</p>
+                <p><strong>方法 3:</strong> 打开链接后，断网即可离线使用所有功能</p>
+            </div>
+        </div>
+
+        <a href="./" class="back-link">← 返回产品中心</a>
+
+        <div class="sponsor-section">
+            <div class="sponsor-title">☕ 支持我们</div>
+            <div class="sponsor-desc">如果你喜欢我们的工具，欢迎赞助一杯咖啡！</div>
+            <div class="sponsor-buttons">
+                <a href="https://qr.alipay.com/fk0941829sglvdprm8wgv0e" target="_blank" class="sponsor-btn alipay">支付宝赞助</a>
+                <a href="weixin://wxpay/bizpayurl?pr=placeholder" class="sponsor-btn wechat">微信赞助</a>
+                <a href="https://paypal.me/autocompany" target="_blank" class="sponsor-btn paypal">PayPal</a>
+            </div>
+            <div class="crypto-section">
+                <p class="crypto-title">💎 加密货币</p>
+                <div class="crypto-address" onclick="copyAddress('btc', 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')">
+                    <span class="crypto-label">BTC:</span>
+                    <span class="crypto-value">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+                    <span class="copy-hint">点击复制</span>
+                </div>
+                <div class="crypto-address" onclick="copyAddress('eth', '0x1234567890abcdef1234567890abcdef12345678')">
+                    <span class="crypto-label">ETH/USDT:</span>
+                    <span class="crypto-value">0x1234567890abcdef1234567890abcdef12345678</span>
+                    <span class="copy-hint">点击复制</span>
+                </div>
+            </div>
+        </div>
+        <script>
+        function copyAddress(coin, addr) {
+            navigator.clipboard.writeText(addr).then(function() {
+                alert(coin.toUpperCase() + ' 地址已复制: ' + addr);
+            });
+        }
+        </script>
+    </div>
+</body>
+</html>

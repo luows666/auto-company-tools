@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>离线工具套件 - 7合1工具 | 密码生成|JSON|记账|单位转换</title>
+    <meta name="description" content="免费离线工具套件：密码生成器、JSON工具、记账、单位转换、计时器、颜色提取、Hash计算">
+    <meta name="keywords" content="离线工具,密码生成器,JSON工具,记账,单位转换,计时器,颜色提取,Hash">
+    <meta property="og:title" content="7合1离线工具套件">
+    <meta property="og:description" content="免费离线工具：密码生成、JSON格式化、记账、单位转换等">
+    <link rel="canonical" href="./suite.html">
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "离线工具套件",
+      "description": "免费离线工具套件：密码生成器、JSON工具、记账、单位转换、计时器、颜色提取、Hash计算",
+      "url": "https://luows666.github.io/auto-company-tools/suite.html",
+      "applicationCategory": "UtilitiesApplication",
+      "operatingSystem": "All",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "密码生成器",
+        "JSON工具",
+        "Base64编码解码",
+        "Hash计算",
+        "单位转换",
+        "计时器",
+        "记账"
+      ]
+    }
+    </script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #0a0a0f;
+            --card-bg: #12121a;
+            --text: #e5e5e5;
+            --text-secondary: #888;
+            --primary: #6366f1;
+            --primary-hover: #818cf8;
+            --accent: #22d3ee;
+            --success: #22c55e;
+            --border: #2a2a3a;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 3rem 1.5rem;
+            background: linear-gradient(180deg, #1a1a2e 0%, var(--bg) 100%);
+        }
+
+        .hero h1 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .offline-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 1rem;
+        }
+
+        .main {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .tool-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .tool-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .tool-icon {
+            font-size: 1.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .tool-card h3 {
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .tool-card p {
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+        }
+
+        .tool-badge {
+            display: inline-block;
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary);
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            margin-top: 0.75rem;
+        }
+
+        .category-title {
+            font-size: 1rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .info-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .info-section h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: var(--accent);
+        }
+
+        .info-section ul {
+            list-style: none;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .info-section li {
+            padding: 0.5rem 0;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        .info-section li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--success);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 3rem;
+        }
+
+        @media (max-width: 600px) {
+            .hero h1 { font-size: 1.5rem; }
+            .tools-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+    <style>
+    .sponsor-section {
+        background: rgba(255,255,255,0.05);
+        border-radius: 12px;
+        padding: 20px;
+        margin: 20px;
+        text-align: center;
+    }
+    .sponsor-title { color: #fff; font-size: 1.1rem; margin-bottom: 8px; }
+    .sponsor-desc { color: rgba(255,255,255,0.6); font-size: 0.85rem; margin-bottom: 12px; }
+    .sponsor-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .sponsor-btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    .alipay { background: #1677ff; color: #fff; }
+    .wechat { background: #07c160; color: #fff; }
+    .paypal { background: #003087; color: #fff; }
+    .crypto-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .crypto-title { color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-bottom: 10px; }
+    .crypto-address { background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 4px; margin: 4px 0; cursor: pointer; font-family: monospace; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; }
+    .crypto-address:hover { background: rgba(0,0,0,0.5); }
+    .crypto-label { color: #f7931a; font-weight: bold; }
+    .crypto-value { color: rgba(255,255,255,0.7); word-break: break-all; }
+    .copy-hint { color: rgba(255,255,255,0.4); font-size: 0.6rem; white-space: nowrap; }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <h1>Auto Company Suite</h1>
+        <p>离线工具套件 - 开发者、财务、营销工具合集</p>
+        <div class="offline-badge">
+            <span>✓</span> 完全离线可用 · 无需联网 · 隐私保护
+        </div>
+    </div>
+
+    <div class="main">
+        <div class="category-title">开发工具</div>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="openTool('dev-tools.html')">
+                <div class="tool-icon">🛠️</div>
+                <h3>开发者工具箱</h3>
+                <p>JSON格式化、Base64编码、URL编解码、颜色转换、时间戳转换、正则测试、Hash生成</p>
+                <span class="tool-badge">8+ 工具</span>
+            </div>
+        </div>
+
+        <div class="category-title">财务管理</div>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="openTool('personal-budget.html')">
+                <div class="tool-icon">💰</div>
+                <h3>个人预算管家</h3>
+                <p>收入支出追踪、预算目标、消费分析、本地存储保护隐私</p>
+                <span class="tool-badge">免费</span>
+            </div>
+        </div>
+
+        <div class="category-title">密码安全</div>
+        <div class="tools-grid">
+            <div class="tool-card" onclick="openTool('dev-tools.html')">
+                <div class="tool-icon">🔐</div>
+                <h3>密码生成器</h3>
+                <p>安全强密码生成，自定义长度和字符类型，实时密码强度检测</p>
+                <span class="tool-badge">免费</span>
+            </div>
+        </div>
+
+
+        <div class="info-section">
+            <h2>💡 使用说明</h2>
+            <ul>
+                <li>所有工具完全离线运行，无需联网</li>
+                <li>数据存储在您的本地设备，隐私安全</li>
+                <li>点击任意工具卡片即可打开使用</li>
+                <li>推荐将文件保存到桌面，方便随时访问</li>
+                <li>支持桌面和移动设备浏览器</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Auto Company Suite v1.0</p>
+        <p>Made with ⚡ by AI</p>
+    </div>
+
+    <script>
+        function openTool(path) {
+            // Try to open relative to current location
+            window.location.href = path;
+        }
+
+        // Show current file info
+        console.log('Auto Company Suite loaded');
+    </script>
+
+    <div class="sponsor-section">
+        <div class="sponsor-title">☕ 支持我们</div>
+        <div class="sponsor-desc">如果你喜欢这些工具，欢迎赞助一杯咖啡！</div>
+        <div class="sponsor-buttons">
+            <a href="https://qr.alipay.com/fk0941829sglvdprm8wgv0e" target="_blank" class="sponsor-btn alipay">支付宝</a>
+            <a href="weixin://wxpay/bizpayurl?pr=placeholder" class="sponsor-btn wechat">微信</a>
+            <a href="https://paypal.me/autocompany" target="_blank" class="sponsor-btn paypal">PayPal</a>
+        </div>
+        <div class="crypto-section">
+            <p class="crypto-title">💎 加密货币</p>
+            <div class="crypto-address" onclick="copyAddress('btc', 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')">
+                <span class="crypto-label">BTC:</span>
+                <span class="crypto-value">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+                <span class="copy-hint">点击复制</span>
+            </div>
+            <div class="crypto-address" onclick="copyAddress('eth', '0x1234567890abcdef1234567890abcdef12345678')">
+                <span class="crypto-label">ETH/USDT:</span>
+                <span class="crypto-value">0x1234567890abcdef1234567890abcdef12345678</span>
+                <span class="copy-hint">点击复制</span>
+            </div>
+        </div>
+    </div>
+    <script>
+    function copyAddress(coin, addr) {
+        navigator.clipboard.writeText(addr).then(function() {
+            alert(coin.toUpperCase() + ' 地址已复制: ' + addr);
+        });
+    }
+    </script>
+</body>
+</html>

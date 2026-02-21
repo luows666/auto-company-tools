@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>个人预算管家 - 简单记账 | 收入支出管理</title>
+  <meta name="description" content="免费个人记账工具，简单易用。记录收入、支出，自动计算余额，理财从记账开始">
+  <meta name="keywords" content="记账,个人预算,理财,收入支出,财务管理,记账软件">
+  <meta property="og:title" content="个人预算管家 - 免费记账工具">
+  <meta property="og:description" content="简单易用的个人记账工具，记录收入支出，管理财务">
+  <link rel="canonical" href="./personal-budget.html">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-dark: #4f46e5;
+      --income: #10b981;
+      --expense: #ef4444;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --text-light: #64748b;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .container { max-width: 480px; margin: 0 auto; }
+    h1 { font-size: 1.5rem; text-align: center; margin-bottom: 20px; }
+
+    .summary {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+    .summary-row:last-child { margin-bottom: 0; }
+    .label { color: var(--text-light); }
+    .income { color: var(--income); font-weight: 600; }
+    .expense { color: var(--expense); font-weight: 600; }
+    .balance { font-size: 1.5rem; font-weight: 700; }
+    .balance.positive { color: var(--income); }
+    .balance.negative { color: var(--expense); }
+
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .btn {
+      padding: 20px;
+      border: none;
+      border-radius: 16px;
+      font-size: 1.25rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.1s, opacity 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-income { background: var(--income); color: white; }
+    .btn-expense { background: var(--expense); color: white; }
+
+    .transactions {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .transactions h2 { font-size: 1rem; margin-bottom: 12px; }
+    .empty { text-align: center; color: var(--text-light); padding: 20px; }
+
+    .transaction {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .transaction:last-child { border-bottom: none; }
+    .tx-info { flex: 1; }
+    .tx-desc { font-weight: 500; }
+    .tx-date { font-size: 0.75rem; color: var(--text-light); }
+    .tx-amount { font-weight: 600; }
+    .tx-amount.income { color: var(--income); }
+    .tx-amount.expense { color: var(--expense); }
+    .tx-delete {
+      background: none;
+      border: none;
+      color: var(--text-light);
+      cursor: pointer;
+      padding: 4px 8px;
+      font-size: 1.25rem;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal.active { display: flex; }
+    .modal-content {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 24px;
+      width: 90%;
+      max-width: 360px;
+    }
+    .modal h2 { margin-bottom: 16px; }
+    .form-group { margin-bottom: 16px; }
+    .form-group label { display: block; margin-bottom: 6px; font-weight: 500; }
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+    .form-buttons { display: flex; gap: 12px; }
+    .form-buttons button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; }
+    .btn-cancel { background: #e2e8f0; color: var(--text); }
+    .btn-submit { background: var(--primary); color: white; }
+
+    .premium {
+      background: linear-gradient(135deg, #6366f1, #8b5cf6);
+      color: white;
+      border-radius: 16px;
+      padding: 16px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .premium h3 { margin-bottom: 8px; }
+    .premium p { font-size: 0.875rem; opacity: 0.9; margin-bottom: 12px; }
+    .premium button {
+      background: white;
+      color: var(--primary);
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --card: #1e293b;
+        --text: #f1f5f9;
+        --text-light: #94a3b8;
+      }
+    }
+    .sponsor-section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .sponsor-title { font-size: 1.1rem; margin-bottom: 8px; }
+    .sponsor-desc { color: var(--text-light); font-size: 0.85rem; margin-bottom: 12px; }
+    .sponsor-buttons { display: flex; gap: 10px; justify-content: center; }
+    .sponsor-btn {
+      padding: 8px 16px;
+      border-radius: 6px;
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+    }
+    .alipay { background: #1677ff; color: #fff; }
+    .wechat { background: #07c160; color: #fff; }
+    .crypto-section { margin-top: 15px; padding-top: 15px; border-top: 1px solid var(--border); }
+    .crypto-title { color: var(--text-light); font-size: 0.8rem; margin-bottom: 10px; }
+    .crypto-address { background: var(--bg); padding: 6px 10px; border-radius: 4px; margin: 4px 0; cursor: pointer; font-family: monospace; font-size: 0.7rem; display: flex; align-items: center; gap: 6px; }
+    .crypto-address:hover { background: var(--border); }
+    .crypto-label { color: #f7931a; font-weight: bold; }
+    .crypto-value { color: var(--text-light); word-break: break-all; }
+    .copy-hint { color: var(--text-light); opacity: 0.6; font-size: 0.6rem; white-space: nowrap; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>💰 个人预算管家</h1>
+
+    <div class="summary">
+      <div class="summary-row">
+        <span class="label">收入</span>
+        <span class="income">+¥<span id="totalIncome">0</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="label">支出</span>
+        <span class="expense">-¥<span id="totalExpense">0</span></span>
+      </div>
+      <div class="summary-row">
+        <span class="label">余额</span>
+        <span class="balance" id="balance">¥0</span>
+      </div>
+    </div>
+
+    <div class="buttons">
+      <button class="btn btn-income" onclick="openModal('income')">+ 记收入</button>
+      <button class="btn btn-expense" onclick="openModal('expense')">- 记支出</button>
+    </div>
+
+    <div class="transactions">
+      <h2>📝 最近的记录</h2>
+      <div id="transactionList">
+        <div class="empty">暂无记录，开始记账吧</div>
+      </div>
+    </div>
+
+    <div class="premium">
+      <h3>🚀 升级专业版</h3>
+      <p>导出数据、无限记录、云同步</p>
+      <button onclick="alert('感谢支持！¥9/月')">¥9/月</button>
+    </div>
+
+    <div style="text-align: center; margin-top: 16px;">
+      <a href="mailto:careservice2026@163.com?subject=个人预算管家反馈&body=您好，我对这个产品有以下反馈：" style="color: var(--text-light); text-decoration: none; font-size: 0.875rem;">
+        💬 发送反馈
+      </a>
+    </div>
+  </div>
+
+  <div class="modal" id="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">记一笔</h2>
+      <form id="transactionForm">
+        <div class="form-group">
+          <label>金额</label>
+          <input type="number" id="amount" placeholder="0.00" step="0.01" required autofocus>
+        </div>
+        <div class="form-group">
+          <label>说明</label>
+          <input type="text" id="description" placeholder="例如：工资奖金">
+        </div>
+        <div class="form-buttons">
+          <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn-submit">保存</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'personal_budget_data';
+    let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+    let currentType = 'income';
+
+    function save() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+      render();
+    }
+
+    function render() {
+      const totalIncome = transactions.filter(t => t.type === 'income').reduce((sum, t) => sum + t.amount, 0);
+      const totalExpense = transactions.filter(t => t.type === 'expense').reduce((sum, t) => sum + t.amount, 0);
+      const balance = totalIncome - totalExpense;
+
+      document.getElementById('totalIncome').textContent = totalIncome.toFixed(2);
+      document.getElementById('totalExpense').textContent = totalExpense.toFixed(2);
+      document.getElementById('balance').textContent = '¥' + balance.toFixed(2);
+      document.getElementById('balance').className = 'balance ' + (balance >= 0 ? 'positive' : 'negative');
+
+      const list = document.getElementById('transactionList');
+      if (transactions.length === 0) {
+        list.innerHTML = '<div class="empty">暂无记录，开始记账吧</div>';
+        return;
+      }
+
+      const sorted = [...transactions].sort((a, b) => b.date - a.date).slice(0, 20);
+      list.innerHTML = sorted.map((t, i) => `
+        <div class="transaction">
+          <div class="tx-info">
+            <div class="tx-desc">${t.desc || '无说明'}</div>
+            <div class="tx-date">${new Date(t.date).toLocaleDateString()}</div>
+          </div>
+          <div class="tx-amount ${t.type}">${t.type === 'income' ? '+' : '-'}¥${t.amount.toFixed(2)}</div>
+          <button class="tx-delete" onclick="deleteTx(${transactions.indexOf(t)})">×</button>
+        </div>
+      `).join('');
+    }
+
+    function openModal(type) {
+      currentType = type;
+      document.getElementById('modalTitle').textContent = type === 'income' ? '记收入' : '记支出';
+      document.getElementById('modal').classList.add('active');
+      document.getElementById('amount').focus();
+    }
+
+    function closeModal() {
+      document.getElementById('modal').classList.remove('active');
+      document.getElementById('transactionForm').reset();
+    }
+
+    function deleteTx(index) {
+      if (confirm('删除这条记录？')) {
+        transactions.splice(index, 1);
+        save();
+      }
+    }
+
+    document.getElementById('transactionForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const amount = parseFloat(document.getElementById('amount').value);
+      const desc = document.getElementById('description').value;
+      if (!amount || amount <= 0) return;
+
+      transactions.push({
+        type: currentType,
+        amount: amount,
+        desc: desc,
+        date: Date.now()
+      });
+      save();
+      closeModal();
+    });
+
+    document.getElementById('modal').addEventListener('click', e => {
+      if (e.target.id === 'modal') closeModal();
+    });
+
+    render();
+  </script>
+
+  <div class="sponsor-section">
+    <div class="sponsor-title">☕ 支持我们</div>
+    <div class="sponsor-desc">如果你喜欢这个工具，欢迎赞助一杯咖啡！</div>
+    <div class="sponsor-buttons">
+      <a href="https://qr.alipay.com/fk0941829sglvdprm8wgv0e" target="_blank" class="sponsor-btn alipay">支付宝</a>
+      <a href="weixin://wxpay/bizpayurl?pr=placeholder" class="sponsor-btn wechat">微信</a>
+    </div>
+    <div class="crypto-section">
+      <p class="crypto-title">💎 加密货币</p>
+      <div class="crypto-address" onclick="copyAddress('btc', 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')">
+        <span class="crypto-label">BTC:</span>
+        <span class="crypto-value">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+        <span class="copy-hint">点击复制</span>
+      </div>
+      <div class="crypto-address" onclick="copyAddress('eth', '0x1234567890abcdef1234567890abcdef12345678')">
+        <span class="crypto-label">ETH/USDT:</span>
+        <span class="crypto-value">0x1234567890abcdef1234567890abcdef12345678</span>
+        <span class="copy-hint">点击复制</span>
+      </div>
+    </div>
+  </div>
+  <script>
+  function copyAddress(coin, addr) {
+    navigator.clipboard.writeText(addr).then(function() {
+      alert(coin.toUpperCase() + ' 地址已复制: ' + addr);
+    });
+  }
+  </script>
+</body>
+</html>
